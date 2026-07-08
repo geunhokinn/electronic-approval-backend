@@ -1,0 +1,19 @@
+### IntelliJ ###
+.idea/
+*.iml
+
+### Eclipse / eGovFrame ###
+.project
+.classpath
+.settings/
+.factorypath
+
+### Maven ###
+target/
+
+### Logs ###
+*.log
+
+### OS ###
+.DS_Store
+Thumbs.db
