@@ -112,6 +112,37 @@ public class AdminMemberService {
         member.revokeApprover();
     }
 
+    /**
+     * 활성 회원을 비활성 상태로 변경한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void deactivateMember(Long memberId) {
+        Member member = findMember(memberId);
+
+        validateNotAdmin(member);
+        validateActive(member);
+        validateRevokedApproverRole(member);
+
+        member.deactivate();
+    }
+
+    /**
+     * 비활성 회원을 활성 상태로 변경한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void activateMember(Long memberId) {
+        Member member = findMember(memberId);
+
+        validateNotAdmin(member);
+        validateInactive(member);
+
+        member.activate();
+    }
+
 
     /**
      * private method
@@ -187,6 +218,30 @@ public class AdminMemberService {
         if (member.getRole() != MemberRole.ROLE_APPROVER) {
             throw new BusinessException(
                     MemberErrorCode.APPROVER_ROLE_NOT_GRANTED
+            );
+        }
+    }
+
+    /**
+     * 비활성 상태인지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateInactive(Member member) {
+        if (member.getStatus() != MemberStatus.INACTIVE) {
+            throw new BusinessException(MemberErrorCode.MEMBER_NOT_INACTIVE);
+        }
+    }
+
+    /**
+     * 회원의 결재 권한이 회수되었는지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateRevokedApproverRole(Member member) {
+        if (member.getRole() == MemberRole.ROLE_APPROVER) {
+            throw new BusinessException(
+                    MemberErrorCode.APPROVER_ROLE_MUST_BE_REVOKED
             );
         }
     }

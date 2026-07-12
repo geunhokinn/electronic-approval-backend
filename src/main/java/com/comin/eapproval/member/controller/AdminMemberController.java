@@ -131,4 +131,38 @@ public class AdminMemberController {
         );
     }
 
+    /**
+     * 회원을 비활성 상태로 변경한다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원 비활성화 결과
+     */
+    @PatchMapping("/{memberId}/deactivate")
+    public ResponseEntity<ApiResponse<Void>> deactivateMember(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.deactivateMember(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("회원을 비활성화했습니다.")
+        );
+    }
+
+    /**
+     * 비활성 회원을 다시 활성 상태로 변경한다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원 활성화 결과
+     */
+    @PatchMapping("/{memberId}/activate")
+    public ResponseEntity<ApiResponse<Void>> activateMember(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.activateMember(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("회원을 활성화했습니다.")
+        );
+    }
+
 }

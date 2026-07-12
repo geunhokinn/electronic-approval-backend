@@ -113,5 +113,18 @@ public class Member extends BaseEntity {
         this.role = MemberRole.ROLE_EMPLOYEE;
     }
 
+    /**
+     * 회원을 비활성 상태로 변경한다.
+     */
+    public void deactivate() {
+        this.status = MemberStatus.INACTIVE;
+    }
+
+    /**
+     * 비활성 회원을 활성 상태로 변경한다.
+     */
+    public void activate() {
+        this.status = MemberStatus.ACTIVE;
+    }
 }
 
