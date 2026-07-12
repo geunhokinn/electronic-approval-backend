@@ -10,6 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 회원 관련 API를 제공하는 컨트롤러.
+ *
+ * 회원가입, 로그인, 로그아웃, 내 정보 조회 등
+ * 일반 사용자의 기능을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -17,6 +23,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    /**
+     * 회원가입을 요청한다.
+     *
+     * @param request 회원가입 요청 정보
+     * @return 회원가입 결과
+     */
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<MemberSignupResponse>> signup(
             @Valid @RequestBody MemberSignupRequest request) {
