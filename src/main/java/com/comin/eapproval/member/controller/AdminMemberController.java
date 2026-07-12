@@ -62,5 +62,38 @@ public class AdminMemberController {
                 )
         );
     }
-    
+
+    /**
+     * 가입 대기 회원을 승인한다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원가입 승인 결과
+     */
+    @PatchMapping("/{memberId}/approve")
+    public ResponseEntity<ApiResponse<Void>> approveMember(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.approveMember(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("회원가입을 승인했습니다.")
+        );
+    }
+
+    /**
+     * 가입 대기 회원을 거절한다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원가입 거절 결과
+     */
+    @PatchMapping("/{memberId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectMember(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.rejectMember(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("회원가입을 거절했습니다.")
+        );
+    }
 }

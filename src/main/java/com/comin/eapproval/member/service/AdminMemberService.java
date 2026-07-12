@@ -54,5 +54,57 @@ public class AdminMemberService {
         return PageResponse.from(members);
     }
 
-    
+    /**
+     * 회원가입을 승인한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void approveMember(Long memberId) {
+        Member member = findMember(memberId);
+        validatePending(member);
+
+        member.approve();
+    }
+
+    /**
+     * 회원가입을 거절한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void rejectMember(Long memberId) {
+        Member member = findMember(memberId);
+        validatePending(member);
+
+        member.reject();
+    }
+
+    /**
+     * private method
+     */
+
+    /**
+     * 회원 ID로 회원을 조회한다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원
+     */
+    private Member findMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND)
+                );
+    }
+
+    /**
+     * 가입 대기 상태인지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validatePending(Member member) {
+        if (member.getStatus() != MemberStatus.PENDING) {
+            throw new BusinessException(MemberErrorCode.MEMBER_NOT_PENDING);
+        }
+    }
 }

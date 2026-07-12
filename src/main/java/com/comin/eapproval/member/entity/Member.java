@@ -85,19 +85,19 @@ public class Member extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 회원가입을 승인한다.
+     */
     public void approve() {
         this.status = MemberStatus.ACTIVE;
     }
 
+    /**
+     * 회원가입을 거절한다.
+     */
     public void reject() {
         this.status = MemberStatus.REJECTED;
     }
-
-    public void grantApprover() {
-        this.role = MemberRole.ROLE_APPROVER;
-    }
-
-    public void revokeApprover() {
-        this.role = MemberRole.ROLE_EMPLOYEE;
-    }
+    
 }
+
