@@ -98,6 +98,20 @@ public class Member extends BaseEntity {
     public void reject() {
         this.status = MemberStatus.REJECTED;
     }
-    
+
+    /**
+     * 결재 권한을 부여한다.
+     */
+    public void grantApprover() {
+        this.role = MemberRole.ROLE_APPROVER;
+    }
+
+    /**
+     * 결재 권한을 회수한다.
+     */
+    public void revokeApprover() {
+        this.role = MemberRole.ROLE_EMPLOYEE;
+    }
+
 }
 

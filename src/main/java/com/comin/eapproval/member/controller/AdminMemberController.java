@@ -96,4 +96,39 @@ public class AdminMemberController {
                 ApiResponse.success("회원가입을 거절했습니다.")
         );
     }
+
+    /**
+     * 사용자에게 결재 권한을 부여한다.
+     *
+     * @param memberId 회원 ID
+     * @return 권한 부여 결과
+     */
+    @PatchMapping("/{memberId}/grant")
+    public ResponseEntity<ApiResponse<Void>> grantApproverRole(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.grantApproverRole(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("결재 권한을 부여했습니다.")
+        );
+    }
+
+    /**
+     * 사용자의 결재 권한을 회수한다.
+     *
+     * @param memberId 회원 ID
+     * @return 권한 회수 결과
+     */
+    @PatchMapping("/{memberId}/revoke")
+    public ResponseEntity<ApiResponse<Void>> revokeApproverRole(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.revokeApproverRole(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("결재 권한을 회수했습니다.")
+        );
+    }
+
 }

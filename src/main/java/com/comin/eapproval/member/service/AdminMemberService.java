@@ -81,6 +81,39 @@ public class AdminMemberService {
     }
 
     /**
+     * 활성 사용자에게 결재 권한을 부여한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void grantApproverRole(Long memberId) {
+        Member member = findMember(memberId);
+
+        validateActive(member);
+        validateNotAdmin(member);
+        validateApproverRoleNotGranted(member);
+
+        member.grantApprover();
+    }
+
+    /**
+     * 활성 사용자의 결재 권한을 회수한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void revokeApproverRole(Long memberId) {
+        Member member = findMember(memberId);
+
+        validateActive(member);
+        validateNotAdmin(member);
+        validateApproverRoleGranted(member);
+
+        member.revokeApprover();
+    }
+
+
+    /**
      * private method
      */
 
@@ -107,4 +140,55 @@ public class AdminMemberService {
             throw new BusinessException(MemberErrorCode.MEMBER_NOT_PENDING);
         }
     }
+
+    /**
+     * 활성 상태인지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateActive(Member member) {
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new BusinessException(MemberErrorCode.MEMBER_NOT_ACTIVE);
+        }
+    }
+
+    /**
+     * 관리자 계정이 아닌지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateNotAdmin(Member member) {
+        if (member.getRole() == MemberRole.ROLE_ADMIN) {
+            throw new BusinessException(
+                    MemberErrorCode.ADMIN_MEMBER_CANNOT_BE_MODIFIED
+            );
+        }
+    }
+
+    /**
+     * 회원에게 결재 권한이 없는지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateApproverRoleNotGranted(Member member) {
+        if (member.getRole() == MemberRole.ROLE_APPROVER) {
+            throw new BusinessException(
+                    MemberErrorCode.APPROVER_ROLE_ALREADY_GRANTED
+            );
+        }
+    }
+
+    /**
+     * 회원에게 결재 권한이 있는지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateApproverRoleGranted(Member member) {
+        if (member.getRole() != MemberRole.ROLE_APPROVER) {
+            throw new BusinessException(
+                    MemberErrorCode.APPROVER_ROLE_NOT_GRANTED
+            );
+        }
+    }
+
 }
