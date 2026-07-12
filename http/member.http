@@ -1,6 +1,8 @@
+@host = http://localhost:8080
+
 ### 회원가입
 
-POST http://localhost:8080/members/signup
+POST {{host}}/members/signup
 Content-Type: application/json
 
 {
