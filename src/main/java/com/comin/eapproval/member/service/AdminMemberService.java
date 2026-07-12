@@ -143,6 +143,19 @@ public class AdminMemberService {
         member.activate();
     }
 
+    /**
+     * 가입 대기 또는 가입 거절 사용자를 영구 삭제한다.
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = findMember(memberId);
+        validateDeletable(member);
+
+        memberRepository.delete(member);
+    }
+
 
     /**
      * private method
@@ -246,4 +259,15 @@ public class AdminMemberService {
         }
     }
 
+    /**
+     * 영구 삭제가 가능한 상태인지 검증한다.
+     *
+     * @param member 검증 대상 회원
+     */
+    private void validateDeletable(Member member) {
+        if (member.getStatus() != MemberStatus.PENDING
+                && member.getStatus() != MemberStatus.REJECTED) {
+            throw new BusinessException(MemberErrorCode.MEMBER_CANNOT_BE_DELETED);
+        }
+    }
 }

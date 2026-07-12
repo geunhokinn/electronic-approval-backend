@@ -165,4 +165,20 @@ public class AdminMemberController {
         );
     }
 
+    /**
+     * 사용자를 영구 삭제한다.
+     *
+     * @param memberId 회원 ID
+     * @return 삭제 처리 결과
+     */
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMember(
+            @PathVariable Long memberId
+    ) {
+        adminMemberService.deleteMember(memberId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("사용자를 삭제했습니다.")
+        );
+    }
 }
