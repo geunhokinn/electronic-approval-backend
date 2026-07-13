@@ -5,8 +5,8 @@ POST {{host}}/members/signup
 Content-Type: application/json
 
 {
-  "username": "pending01",
-  "password": "Password123!",
+  "username": "user1",
+  "password": "user123!",
   "name": "홍길동",
   "headquarters": "개발본부",
   "team": "개발1팀",
@@ -14,6 +14,9 @@ Content-Type: application/json
 }
 
 ###
+
+### 회원가입 승인
+PATCH {{host}}/admin/members/1/approve
 
 ### 테스트 회원 2 가입
 POST {{host}}/members/signup
