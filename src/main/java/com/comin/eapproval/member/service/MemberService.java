@@ -7,6 +7,7 @@ import com.comin.eapproval.member.dto.response.MemberSignupResponse;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 회원가입을 수행한다.
@@ -31,13 +33,13 @@ public class MemberService {
      */
     @Transactional
     public MemberSignupResponse signup(MemberSignupRequest request) {
-        if (memberRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException(MemberErrorCode.DUPLICATE_USERNAME);
-        }
+        validateDuplicateUsername(request.getUsername());
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Member member = Member.createEmployee(
                 request.getUsername(),
-                request.getPassword(),
+                encodedPassword,
                 request.getName(),
                 request.getHeadquarters(),
                 request.getTeam(),
@@ -47,5 +49,18 @@ public class MemberService {
         Member savedMember = memberRepository.save(member);
 
         return MemberSignupResponse.of(savedMember.getId());
+    }
+
+    /**
+     * 아이디 중복 여부를 검증한다.
+     *
+     * @param username 로그인 아이디
+     */
+    private void validateDuplicateUsername(String username) {
+        if (memberRepository.existsByUsername(username)) {
+            throw new BusinessException(
+                    MemberErrorCode.DUPLICATE_USERNAME
+            );
+        }
     }
 }
