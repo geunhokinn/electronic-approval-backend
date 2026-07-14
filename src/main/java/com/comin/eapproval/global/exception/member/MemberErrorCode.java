@@ -2,9 +2,11 @@ package com.comin.eapproval.global.exception.member;
 
 import com.comin.eapproval.global.exception.ErrorCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@RequiredArgsConstructor
 public enum MemberErrorCode implements ErrorCode {
 
     DUPLICATE_USERNAME(
@@ -59,9 +61,4 @@ public enum MemberErrorCode implements ErrorCode {
 
     private final HttpStatus httpStatus;
     private final String message;
-
-    MemberErrorCode(HttpStatus httpStatus, String message) {
-        this.httpStatus = httpStatus;
-        this.message = message;
-    }
 }
