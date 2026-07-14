@@ -1,6 +1,7 @@
 package com.comin.eapproval.document.controller;
 
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
+import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
@@ -117,6 +118,31 @@ public class DocumentController {
                         "문서 상세 정보를 조회했습니다.",
                         document
                 )
+        );
+    }
+
+    /**
+     * 로그인 사용자가 작성한 문서를 수정한다.
+     *
+     * @param documentId 문서 ID
+     * @param userDetails 로그인 사용자 정보
+     * @param request 문서 수정 요청 정보
+     * @return 문서 수정 결과
+     */
+    @PatchMapping("/{documentId}")
+    public ResponseEntity<ApiResponse<Void>> updateDocument(
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody DocumentUpdateRequest request
+    ) {
+        documentService.updateDocument(
+                documentId,
+                userDetails.getMemberId(),
+                request
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("문서를 수정했습니다.")
         );
     }
 }
