@@ -11,6 +11,9 @@
 ### Maven ###
 target/
 
+# HTTP Client
+*.http
+
 ### Logs ###
 *.log
 
