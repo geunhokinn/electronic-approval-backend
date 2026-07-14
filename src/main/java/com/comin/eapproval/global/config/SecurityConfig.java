@@ -40,10 +40,11 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
+                                "/login",
+                                "/logout",
                                 "/members/signup",
                                 "/admin/**",
-                                "/login",
-                                "/logout"
+                                "/documents/**"
                         )
                 )
                 .authorizeHttpRequests(authorize -> authorize
