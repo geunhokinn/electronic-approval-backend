@@ -86,6 +86,37 @@ public class Member extends BaseEntity {
     }
 
     /**
+     * 관리자 회원을 생성한다.
+     *
+     * @param username 로그인 아이디
+     * @param password 암호화된 비밀번호
+     * @param name 이름
+     * @param headquarters 본부
+     * @param team 팀
+     * @param position 직급
+     * @return 관리자 회원
+     */
+    public static Member createAdmin(
+            String username,
+            String password,
+            String name,
+            String headquarters,
+            String team,
+            String position
+    ) {
+        return new Member(
+                username,
+                password,
+                name,
+                headquarters,
+                team,
+                position,
+                MemberStatus.ACTIVE,
+                MemberRole.ROLE_ADMIN
+        );
+    }
+
+    /**
      * 회원가입을 승인한다.
      */
     public void approve() {
