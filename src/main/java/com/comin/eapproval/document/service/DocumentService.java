@@ -136,6 +136,19 @@ public class DocumentService {
         );
     }
 
+    @Transactional
+    public void deleteDocument(
+            Long documentId,
+            Long memberId
+    ) {
+        Document document = findDocumentDetail(documentId);
+
+        validateDeletePermission(document, memberId);
+        validateDraft(document);
+
+        document.delete();
+    }
+
     /**
      *  private method.
      */
@@ -223,6 +236,17 @@ public class DocumentService {
         if (document.getStatus() != DocumentStatus.DRAFT) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_NOT_EDITABLE
+            );
+        }
+    }
+
+    private void validateDeletePermission(
+            Document document,
+            Long memberId
+    ) {
+        if (!document.getWriter().getId().equals(memberId)) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_DELETE_DENIED
             );
         }
     }
