@@ -2,11 +2,13 @@ package com.comin.eapproval.document.controller;
 
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
+import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.document.service.DocumentService;
 import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.global.response.PageResponse;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import com.comin.eapproval.member.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +89,33 @@ public class DocumentController {
                 ApiResponse.success(
                         "내 문서 목록을 조회했습니다.",
                         documents
+                )
+        );
+    }
+
+    /**
+     * 문서 상세 정보를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 문서 상세 조회 결과
+     */
+    @GetMapping("/{documentId}")
+    public ResponseEntity<ApiResponse<DocumentDetailResponse>> getDocumentDetail(
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        DocumentDetailResponse document =
+                documentService.getDocumentDetail(
+                        documentId,
+                        userDetails.getMemberId(),
+                        MemberRole.valueOf(userDetails.getRole())
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "문서 상세 정보를 조회했습니다.",
+                        document
                 )
         );
     }
