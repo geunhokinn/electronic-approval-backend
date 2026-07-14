@@ -24,9 +24,10 @@ public class SecurityConfig {
     }
 
     /**
-     * 애플리케이션의 요청별 접근 권한을 설정한다.
+     * 애플리케이션의 인증 및 로그아웃 정책을 설정한다.
      *
-     * 현재는 인증 기능 구현 전이므로 모든 요청을 임시로 허용한다.
+     * 현재는 로그인 기능 검증을 위해 업무 API 접근을 임시로 허용한다.
+     * 역할별 접근 제어는 로그인 검증 완료 후 적용한다.
      *
      * @param http HTTP 보안 설정 객체
      * @return 보안 필터 체인
@@ -37,10 +38,42 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(
+                                "/members/signup",
+                                "/admin/**",
+                                "/login",
+                                "/logout"
+                        )
                 )
-                .csrf(csrf -> csrf.disable());
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/login",
+                                "/members/signup",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
+
+                        .requestMatchers("/admin/**")
+                        .hasRole("ADMIN")
+                        .anyRequest()
+                        .authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                );
 
         return http.build();
     }
