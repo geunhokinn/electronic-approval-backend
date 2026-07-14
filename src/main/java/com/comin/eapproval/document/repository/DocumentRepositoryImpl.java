@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.comin.eapproval.document.entity.QDocument.document;
 
@@ -73,6 +74,33 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
                 total != null ? total : 0L
         );
     }
+
+    /**
+     * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
+     *
+     * 작성자와 결재자 정보를 함께 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 조회된 문서
+     */
+    @Override
+    public Optional<Document> findDetailById(Long documentId) {
+        Document result = queryFactory
+                .selectFrom(document)
+                .join(document.writer).fetchJoin()
+                .leftJoin(document.approver).fetchJoin()
+                .where(
+                        document.id.eq(documentId),
+                        notDeleted()
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+    /**
+     *  private method.
+     */
 
     /**
      * 작성자 회원 ID 검색 조건을 생성한다.
