@@ -1,6 +1,7 @@
 package com.comin.eapproval.document.service;
 
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
+import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
@@ -110,6 +111,32 @@ public class DocumentService {
     }
 
     /**
+     * 로그인 사용자가 작성한 문서를 수정한다.
+     *
+     * 작성자 본인의 임시저장 문서만 수정할 수 있다.
+     *
+     * @param documentId 문서 ID
+     * @param memberId 로그인 회원 ID
+     * @param request 문서 수정 요청 정보
+     */
+    @Transactional
+    public void updateDocument(
+            Long documentId,
+            Long memberId,
+            DocumentUpdateRequest request
+    ) {
+        Document document = findDocumentDetail(documentId);
+
+        validateWriter(document, memberId);
+        validateDraft(document);
+
+        document.update(
+                request.getTitle(),
+                request.getContent()
+        );
+    }
+
+    /**
      *  private method.
      */
 
@@ -166,6 +193,36 @@ public class DocumentService {
         if (!isWriter && !isAdmin) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_ACCESS_DENIED
+            );
+        }
+    }
+
+    /**
+     * 로그인 사용자가 문서 작성자인지 검증한다.
+     *
+     * @param document 문서
+     * @param memberId 로그인 회원 ID
+     */
+    private void validateWriter(
+            Document document,
+            Long memberId
+    ) {
+        if (!document.getWriter().getId().equals(memberId)) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_UPDATE_DENIED
+            );
+        }
+    }
+
+    /**
+     * 문서가 임시저장 상태인지 검증한다.
+     *
+     * @param document 문서
+     */
+    private void validateDraft(Document document) {
+        if (document.getStatus() != DocumentStatus.DRAFT) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_NOT_EDITABLE
             );
         }
     }
