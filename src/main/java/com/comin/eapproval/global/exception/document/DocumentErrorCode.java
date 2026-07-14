@@ -20,6 +20,16 @@ public enum DocumentErrorCode implements ErrorCode {
     DOCUMENT_ACCESS_DENIED(
             HttpStatus.FORBIDDEN,
             "해당 문서를 조회할 권한이 없습니다."
+    ),
+    
+    DOCUMENT_UPDATE_DENIED(
+            HttpStatus.FORBIDDEN,
+            "문서를 수정할 권한이 없습니다."
+    ),
+
+    DOCUMENT_NOT_EDITABLE(
+            HttpStatus.CONFLICT,
+            "임시저장 상태의 문서만 수정할 수 있습니다."
     );
 
     private final HttpStatus httpStatus;
