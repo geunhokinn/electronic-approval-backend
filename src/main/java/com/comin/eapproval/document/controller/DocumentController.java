@@ -145,4 +145,20 @@ public class DocumentController {
                 ApiResponse.success("문서를 수정했습니다.")
         );
     }
+
+    @DeleteMapping("/{documentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteDocument(
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        documentService.deleteDocument(
+                documentId,
+                userDetails.getMemberId()
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("문서를 삭제했습니다.")
+        );
+    }
 }
