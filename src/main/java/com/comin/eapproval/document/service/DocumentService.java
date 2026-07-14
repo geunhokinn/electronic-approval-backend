@@ -2,14 +2,17 @@ package com.comin.eapproval.document.service;
 
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
+import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
 import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.document.repository.DocumentRepository;
 import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.document.DocumentErrorCode;
 import com.comin.eapproval.global.exception.member.MemberErrorCode;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.member.entity.Member;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -81,6 +84,36 @@ public class DocumentService {
     }
 
     /**
+     * 문서 상세 정보를 조회한다.
+     *
+     * 작성자 또는 관리자만 문서를 조회할 수 있다.
+     *
+     * @param documentId 문서 ID
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 권한
+     * @return 문서 상세 정보
+     */
+    public DocumentDetailResponse getDocumentDetail(
+            Long documentId,
+            Long memberId,
+            MemberRole role
+    ) {
+        Document document = findDocumentDetail(documentId);
+
+        validateReadPermission(
+                document,
+                memberId,
+                role
+        );
+
+        return DocumentDetailResponse.from(document);
+    }
+
+    /**
+     *  private method.
+     */
+
+     /**
      * 회원 ID로 회원을 조회한다.
      *
      * @param memberId 회원 ID
@@ -93,5 +126,47 @@ public class DocumentService {
                                 MemberErrorCode.MEMBER_NOT_FOUND
                         )
                 );
+    }
+
+    /**
+     * 문서 ID로 삭제되지 않은 문서를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 조회된 문서
+     */
+    private Document findDocumentDetail(Long documentId) {
+        return documentRepository.findDetailById(documentId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                DocumentErrorCode.DOCUMENT_NOT_FOUND
+                        )
+                );
+    }
+
+    /**
+     * 문서 상세 조회 권한을 검증한다.
+     *
+     * 작성자 또는 관리자만 문서를 조회할 수 있다.
+     *
+     * @param document 문서
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 권한
+     */
+    private void validateReadPermission(
+            Document document,
+            Long memberId,
+            MemberRole role
+    ) {
+        boolean isWriter = document.getWriter()
+                .getId()
+                .equals(memberId);
+
+        boolean isAdmin = role == MemberRole.ROLE_ADMIN;
+
+        if (!isWriter && !isAdmin) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_ACCESS_DENIED
+            );
+        }
     }
 }
