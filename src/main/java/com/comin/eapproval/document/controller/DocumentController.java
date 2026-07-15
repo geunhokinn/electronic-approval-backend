@@ -146,6 +146,15 @@ public class DocumentController {
         );
     }
 
+    /**
+     * 로그인 사용자가 작성한 문서를 삭제한다.
+     *
+     * 작성자 본인의 임시저장 문서만 삭제할 수 있다.
+     *
+     * @param documentId 문서 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 문서 삭제 결과
+     */
     @DeleteMapping("/{documentId}")
     public ResponseEntity<ApiResponse<Void>> deleteDocument(
             @PathVariable Long documentId,

@@ -18,8 +18,6 @@ public class DocumentDetailResponse {
     private final DocumentStatus status;
     private final Long writerId;
     private final String writerName;
-    private final Long approverId;
-    private final String approverName;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -30,8 +28,6 @@ public class DocumentDetailResponse {
             DocumentStatus status,
             Long writerId,
             String writerName,
-            Long approverId,
-            String approverName,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -41,8 +37,6 @@ public class DocumentDetailResponse {
         this.status = status;
         this.writerId = writerId;
         this.writerName = writerName;
-        this.approverId = approverId;
-        this.approverName = approverName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -54,14 +48,6 @@ public class DocumentDetailResponse {
      * @return 문서 상세 응답
      */
     public static DocumentDetailResponse from(Document document) {
-        Long approverId = document.getApprover() == null
-                ? null
-                : document.getApprover().getId();
-
-        String approverName = document.getApprover() == null
-                ? null
-                : document.getApprover().getName();
-
         return new DocumentDetailResponse(
                 document.getId(),
                 document.getTitle(),
@@ -69,8 +55,6 @@ public class DocumentDetailResponse {
                 document.getStatus(),
                 document.getWriter().getId(),
                 document.getWriter().getName(),
-                approverId,
-                approverName,
                 document.getCreatedAt(),
                 document.getUpdatedAt()
         );

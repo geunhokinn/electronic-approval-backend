@@ -46,7 +46,7 @@ public class DocumentService {
 
         Member writer = findMember(memberId);
 
-        Document document = Document.createDraft(
+        Document document = Document.create(
                 request.getTitle(),
                 request.getContent(),
                 writer
@@ -128,7 +128,7 @@ public class DocumentService {
         Document document = findDocumentDetail(documentId);
 
         validateWriter(document, memberId);
-        validateDraft(document);
+        validateEditable(document);
 
         document.update(
                 request.getTitle(),
@@ -136,6 +136,14 @@ public class DocumentService {
         );
     }
 
+    /**
+     * 로그인 사용자가 작성한 문서를 삭제한다.
+     *
+     * 작성자 본인의 임시저장 문서만 삭제할 수 있다.
+     *
+     * @param documentId 문서 ID
+     * @param memberId 로그인 회원 ID
+     */
     @Transactional
     public void deleteDocument(
             Long documentId,
@@ -144,7 +152,7 @@ public class DocumentService {
         Document document = findDocumentDetail(documentId);
 
         validateDeletePermission(document, memberId);
-        validateDraft(document);
+        validateDeletable(document);
 
         document.delete();
     }
@@ -228,18 +236,38 @@ public class DocumentService {
     }
 
     /**
-     * 문서가 임시저장 상태인지 검증한다.
+     * 문서가 수정 가능한 상태인지 검증한다.
      *
      * @param document 문서
      */
-    private void validateDraft(Document document) {
-        if (document.getStatus() != DocumentStatus.DRAFT) {
+    private void validateEditable(Document document) {
+        if (document.getStatus() != DocumentStatus.DRAFT
+                && document.getStatus() != DocumentStatus.REJECTED) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_NOT_EDITABLE
             );
         }
     }
 
+    /**
+     * 문서가 삭제 가능한 상태인지 검증한다.
+     *
+     * @param document 문서
+     */
+    private void validateDeletable(Document document) {
+        if (document.getStatus() != DocumentStatus.DRAFT) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_NOT_DELETABLE
+            );
+        }
+    }
+
+    /**
+     * 로그인 사용자가 문서 작성자인지 검증한다.
+     *
+     * @param document 문서
+     * @param memberId 로그인 회원 ID
+     */
     private void validateDeletePermission(
             Document document,
             Long memberId

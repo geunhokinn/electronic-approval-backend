@@ -45,7 +45,6 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
 
         List<Document> content = queryFactory
                 .selectFrom(document)
-                .leftJoin(document.approver).fetchJoin()
                 .where(
                         writerIdEq(writerId),
                         statusEq(status),
@@ -78,7 +77,7 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
     /**
      * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
      *
-     * 작성자와 결재자 정보를 함께 조회한다.
+     * 작성자 정보를 함께 조회한다.
      *
      * @param documentId 문서 ID
      * @return 조회된 문서
@@ -88,7 +87,6 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
         Document result = queryFactory
                 .selectFrom(document)
                 .join(document.writer).fetchJoin()
-                .leftJoin(document.approver).fetchJoin()
                 .where(
                         document.id.eq(documentId),
                         notDeleted()

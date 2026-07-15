@@ -29,7 +29,12 @@ public enum DocumentErrorCode implements ErrorCode {
 
     DOCUMENT_NOT_EDITABLE(
             HttpStatus.CONFLICT,
-            "임시저장 상태의 문서만 수정할 수 있습니다."
+            "임시저장 상태 또는 반려 상태 문서만 수정할 수 있습니다."
+    ),
+
+    DOCUMENT_NOT_DELETABLE(
+            HttpStatus.CONFLICT,
+            "임시저장 상태 문서만 삭제할 수 있습니다."
     ),
 
     DOCUMENT_DELETE_DENIED(

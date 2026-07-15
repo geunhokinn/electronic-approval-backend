@@ -35,10 +35,6 @@ public class Document extends BaseEntity {
     @JoinColumn(name = "writer_id", nullable = false)
     private Member writer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approver_id")
-    private Member approver;
-
     // @Version
     private Long version;
 
@@ -49,17 +45,18 @@ public class Document extends BaseEntity {
             String title,
             String content,
             DocumentStatus status,
-            Member writer,
-            Member approver
+            Member writer
     ) {
         this.title = title;
         this.content = content;
         this.status = status;
         this.writer = writer;
-        this.approver = approver;
     }
 
-    public static Document createDraft(
+    /**
+     * 임시 저장 문서를 생성한다.
+     */
+    public static Document create(
             String title,
             String content,
             Member writer
@@ -72,28 +69,40 @@ public class Document extends BaseEntity {
                 .build();
     }
 
-    public void assignApprover(Member approver) {
-        this.approver = approver;
-    }
-
-    public void requestApproval() {
-        this.status = DocumentStatus.PENDING;
-    }
-
-    public void approve() {
-        this.status = DocumentStatus.APPROVED;
-    }
-
-    public void reject() {
-        this.status = DocumentStatus.REJECTED;
-    }
-
+    /**
+     * 문서 내용을 수정한다.
+     */
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
+    /**
+     * 문서를 삭제 처리한다.
+     */
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    /**
+     * 결재 요청한다.
+     */
+    public void requestApproval() {
+        this.status = DocumentStatus.PENDING;
+    }
+
+    /**
+     * 승인 처리한다.
+     */
+    public void approve() {
+        this.status = DocumentStatus.APPROVED;
+    }
+
+    /**
+     * 반려 처리한다.
+     */
+    public void reject() {
+        this.status = DocumentStatus.REJECTED;
+    }
+
 }
