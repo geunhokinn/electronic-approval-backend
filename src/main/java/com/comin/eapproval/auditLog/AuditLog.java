@@ -24,15 +24,13 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 대상 문서
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false)
     private Document document;
 
-    // 행위자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "actor_id", nullable = false)
+    private Member actor;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -49,25 +47,28 @@ public class AuditLog {
     @Builder
     private AuditLog(
             Document document,
-            Member member,
+            Member actor,
             AuditLogAction action,
             AuditLogResult result
     ) {
         this.document = document;
-        this.member = member;
+        this.actor = actor;
         this.action = action;
         this.result = result;
     }
 
+    /**
+     * 문서 또는 결재 작업의 감사 로그를 생성한다.
+     */
     public static AuditLog create(
             Document document,
-            Member member,
+            Member actor,
             AuditLogAction action,
             AuditLogResult result
     ) {
         return AuditLog.builder()
                 .document(document)
-                .member(member)
+                .actor(actor)
                 .action(action)
                 .result(result)
                 .build();
