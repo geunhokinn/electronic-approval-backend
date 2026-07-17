@@ -18,7 +18,7 @@ target/
 *.log
 
 ### Environment ###
-.env
+.env.*
 
 ### OS ###
 .DS_Store
