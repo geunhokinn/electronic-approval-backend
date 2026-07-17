@@ -1,0 +1,49 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: eapproval-mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWORD: ${PROD_DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${PROD_DB_NAME}
+      MARIADB_USER: ${PROD_DB_USERNAME}
+      MARIADB_PASSWORD: ${PROD_DB_PASSWORD}
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mariadb_prod_data:/var/lib/mysql
+
+  server:
+    build: .
+    container_name: eapproval-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prodEnv
+
+      PROD_DB_URL: ${PROD_DB_URL}
+      PROD_DB_USERNAME: ${PROD_DB_USERNAME}
+      PROD_DB_PASSWORD: ${PROD_DB_PASSWORD}
+
+      PROD_ADMIN_USERNAME: ${PROD_ADMIN_USERNAME}
+      PROD_ADMIN_PASSWORD: ${PROD_ADMIN_PASSWORD}
+      PROD_ADMIN_NAME: ${PROD_ADMIN_NAME}
+      PROD_ADMIN_HEADQUARTERS: ${PROD_ADMIN_HEADQUARTERS}
+      PROD_ADMIN_TEAM: ${PROD_ADMIN_TEAM}
+      PROD_ADMIN_POSITION: ${PROD_ADMIN_POSITION}
+
+    depends_on:
+      - mariadb
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  mariadb_prod_data:
