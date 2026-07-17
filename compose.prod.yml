@@ -10,8 +10,9 @@ services:
       MARIADB_USER: ${PROD_DB_USERNAME}
       MARIADB_PASSWORD: ${PROD_DB_PASSWORD}
 
-    ports:
-      - "3306:3306"
+# 컨테이너끼리는 ports 없이도 통신할 수 있다.
+#    ports:
+#      - "3306:3306"
 
     volumes:
       - mariadb_prod_data:/var/lib/mysql
