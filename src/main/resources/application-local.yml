@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${LOCAL_DB_URL}
+    username: ${LOCAL_DB_USERNAME}
+    password: ${LOCAL_DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+
+admin:
+  username: ${LOCAL_ADMIN_USERNAME}
+  password: ${LOCAL_ADMIN_PASSWORD}
+  name: ${LOCAL_ADMIN_NAME}
+  headquarters: ${LOCAL_ADMIN_HEADQUARTERS}
+  team: ${LOCAL_ADMIN_TEAM}
+  position: ${LOCAL_ADMIN_POSITION}

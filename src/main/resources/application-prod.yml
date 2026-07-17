@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${PROD_DB_URL}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+
+logging:
+  level:
+    root: INFO
+    com.comin.eapproval: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+
+admin:
+  username: ${PROD_ADMIN_USERNAME}
+  password: ${PROD_ADMIN_PASSWORD}
+  name: ${PROD_ADMIN_NAME}
+  headquarters: ${PROD_ADMIN_HEADQUARTERS}
+  team: ${PROD_ADMIN_TEAM}
+  position: ${PROD_ADMIN_POSITION}
