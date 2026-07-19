@@ -20,8 +20,15 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Maven Wrapper 실행 권한 부여
-        run: chmod +x mvnw
-
       - name: Maven 빌드
         run: ./mvnw clean package -DskipTests
+
+      - name: AWS 자격 증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
+
+      - name: Amazon ECR 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
