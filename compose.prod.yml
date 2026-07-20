@@ -18,7 +18,7 @@ services:
       - mariadb_prod_data:/var/lib/mysql
 
   server:
-    build: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE}
     container_name: eapproval-server
     restart: unless-stopped
     ports:
