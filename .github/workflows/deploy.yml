@@ -57,3 +57,18 @@ jobs:
           IMAGE_TAG: latest
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: EC2에 배포
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/electronic-approval-system
+  
+            docker compose -f compose.prod.yml pull
+            
+            docker compose -f compose.prod.yml up -d
+            
+            docker image prune -f
