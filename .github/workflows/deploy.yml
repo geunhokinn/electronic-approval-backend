@@ -67,8 +67,8 @@ jobs:
           script: |
             cd /home/ubuntu/electronic-approval-system
   
-            docker compose -f compose.prod.yml pull
+            docker compose --env-file .env.prod -f compose.prod.yml pull
             
-            docker compose -f compose.prod.yml up -d
+            docker compose --env-file .env.prod -f compose.prod.yml up -d
             
             docker image prune -f
