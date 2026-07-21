@@ -3,6 +3,7 @@ package com.comin.eapproval.document.repository;
 import com.comin.eapproval.approval.entity.QApproval;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.entity.Document;
+import com.comin.eapproval.document.entity.QDocument;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.QMember;
 import com.querydsl.core.types.Projections;
@@ -18,14 +19,17 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
-import static com.comin.eapproval.document.entity.QDocument.document;
-
 /**
  * QueryDSL을 이용한 문서 동적 조회 기능을 구현하는 Repository.
  */
 @Repository
 @RequiredArgsConstructor
 public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
+
+    private static final QDocument document = QDocument.document;
+    private static final QApproval approval = QApproval.approval;
+    private static final QMember writer = new QMember("writer");
+    private static final QMember approver = new QMember("approver");
 
     private final JPAQueryFactory queryFactory;
 
@@ -90,9 +94,6 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
     public Optional<DocumentDetailResponse> findDocumentDetailById(
             Long documentId
     ) {
-        QApproval approval = QApproval.approval;
-        QMember writer = new QMember("writer");
-        QMember approver = new QMember("approver");
 
         DocumentDetailResponse result = queryFactory
                 .select(Projections.constructor(
