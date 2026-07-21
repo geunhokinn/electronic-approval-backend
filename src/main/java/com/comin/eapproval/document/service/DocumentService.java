@@ -1,5 +1,8 @@
 package com.comin.eapproval.document.service;
 
+import com.comin.eapproval.approval.entity.Approval;
+import com.comin.eapproval.approval.repository.ApprovalRepository;
+import com.comin.eapproval.document.dto.request.DocumentApprovalRequest;
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
 import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
@@ -31,6 +34,7 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
+    private final ApprovalRepository approvalRepository;
 
     /**
      * 로그인한 사용자의 문서를 임시저장한다.
@@ -156,6 +160,33 @@ public class DocumentService {
         validateDeletable(document);
 
         document.delete();
+    }
+
+    /**
+     * 문서의 결재를 요청한다.
+     *
+     * @param memberId 요청 회원 ID
+     * @param documentId 문서 ID
+     * @param request 결재 요청 정보
+     */
+    @Transactional
+    public void requestApproval(
+            Long memberId,
+            Long documentId,
+            DocumentApprovalRequest request
+    ) {
+        Document document = findDocument(documentId);
+        Member approver = findMember(request.getApproverId());
+
+        validateWriter(document, memberId);
+        validateRequestable(document);
+        validateSelfApproval(memberId, approver.getId());
+        validateApproverRole(approver);
+
+        Approval approval = Approval.create(document, approver);
+
+        document.changeToPending();
+        approvalRepository.save(approval);
     }
 
     /**
@@ -290,6 +321,49 @@ public class DocumentService {
         if (!document.getWriter().getId().equals(memberId)) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_DELETE_DENIED
+            );
+        }
+    }
+
+    /**
+     * 문서가 결재 요청 가능한 상태인지 검증한다.
+     *
+     * @param document 문서
+     */
+    private void validateRequestable(Document document) {
+        if (document.getStatus() != DocumentStatus.DRAFT) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_NOT_REQUESTABLE
+            );
+        }
+    }
+
+    /**
+     * 작성자가 본인을 결재자로 지정했는지 검증한다.
+     *
+     * @param writerId 작성자 ID
+     * @param approverId 결재자 ID
+     */
+    private void validateSelfApproval(
+            Long writerId,
+            Long approverId
+    ) {
+        if (writerId.equals(approverId)) {
+            throw new BusinessException(
+                    DocumentErrorCode.SELF_APPROVAL_NOT_ALLOWED
+            );
+        }
+    }
+
+    /**
+     * 결재자가 결재 권한을 가지고 있는지 검증한다.
+     *
+     * @param approver 결재자
+     */
+    private void validateApproverRole(Member approver) {
+        if (approver.getRole() != MemberRole.ROLE_APPROVER) {
+            throw new BusinessException(
+                    DocumentErrorCode.INVALID_APPROVER
             );
         }
     }
