@@ -34,6 +34,7 @@ public class DocumentDetailResponse {
 
     private LocalDateTime updatedAt;
 
+    private Long previousDocumentId;
 }
 //
 //import com.comin.eapproval.document.entity.Document;

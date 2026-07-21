@@ -109,7 +109,8 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
                         approval.comment,
                         approval.processedAt,
                         document.createdAt,
-                        document.updatedAt
+                        document.updatedAt,
+                        document.previousDocument.id
                 ))
                 .from(document)
                 .join(document.writer, writer)
