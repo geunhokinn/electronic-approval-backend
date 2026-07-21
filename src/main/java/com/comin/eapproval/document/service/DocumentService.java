@@ -91,7 +91,8 @@ public class DocumentService {
     /**
      * 문서 상세 정보를 조회한다.
      *
-     * 작성자 또는 관리자만 문서를 조회할 수 있다.
+     * 임시저장 문서는 작성자와 관리자만 조회할 수 있으며,
+     * 결재 요청 이후의 문서는 작성자, 결재자, 관리자만 조회할 수 있다.
      *
      * @param documentId 문서 ID
      * @param memberId 로그인 회원 ID
@@ -241,7 +242,8 @@ public class DocumentService {
     /**
      * 문서 상세 조회 권한을 검증한다.
      *
-     * 작성자 또는 관리자만 문서를 조회할 수 있다.
+     * 임시저장 문서는 작성자와 관리자만 조회할 수 있으며,
+     * 결재 요청 이후의 문서는 작성자, 결재자, 관리자만 조회할 수 있다.
      *
      * @param document 문서
      * @param memberId 로그인 회원 ID
@@ -258,7 +260,22 @@ public class DocumentService {
 
         boolean isAdmin = role == MemberRole.ROLE_ADMIN;
 
-        if (!isWriter && !isAdmin) {
+        if (document.getStatus() == DocumentStatus.DRAFT) {
+            if (!isWriter && !isAdmin) {
+                throw new BusinessException(
+                        DocumentErrorCode.DOCUMENT_ACCESS_DENIED
+                );
+            }
+            return;
+        }
+
+        boolean isApprover =
+                approvalRepository.existsByDocumentIdAndApproverId(
+                        document.getId(),
+                        memberId
+                );
+
+        if (!isWriter && !isApprover && !isAdmin) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_ACCESS_DENIED
             );
