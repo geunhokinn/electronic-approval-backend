@@ -8,6 +8,7 @@ import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
+import com.comin.eapproval.document.dto.response.DocumentResubmitResponse;
 import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.document.repository.DocumentRepository;
@@ -50,10 +51,21 @@ public class DocumentService {
 
         Member writer = findMember(memberId);
 
+        Document previousDocument = null;
+
+        if (request.getPreviousDocumentId() != null) {
+            previousDocument = findDocument(request.getPreviousDocumentId());
+
+            validateWriter(previousDocument, memberId);
+            validateResubmittable(previousDocument);
+            validateNotAlreadyResubmitted(previousDocument);
+        }
+
         Document document = Document.createDraft(
                 request.getTitle(),
                 request.getContent(),
-                writer
+                writer,
+                previousDocument
         );
 
         Document savedDocument = documentRepository.save(document);
@@ -114,6 +126,26 @@ public class DocumentService {
 
         return findDocumentDetailResponse(documentId);
 //        return DocumentDetailResponse.from(document);
+    }
+
+    /**
+     * 재상신할 문서 정보를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @param memberId 로그인 회원 ID
+     * @return 재상신 문서 정보
+     */
+    public DocumentResubmitResponse getResubmitDocument(
+            Long documentId,
+            Long memberId
+    ) {
+        Document document = findDocument(documentId);
+
+        validateWriter(document, memberId);
+        validateResubmittable(document);
+        validateNotAlreadyResubmitted(document);
+
+        return DocumentResubmitResponse.from(document);
     }
 
     /**
@@ -194,7 +226,7 @@ public class DocumentService {
      *  private method.
      */
 
-     /**
+    /**
      * 회원 ID로 회원을 조회한다.
      *
      * @param memberId 회원 ID
@@ -207,6 +239,38 @@ public class DocumentService {
                                 MemberErrorCode.MEMBER_NOT_FOUND
                         )
                 );
+    }
+
+    /**
+     * 문서가 재상신 가능한 상태인지 검증한다.
+     *
+     * @param document 문서
+     */
+    private void validateResubmittable(Document document) {
+        if (document.getStatus() != DocumentStatus.REJECTED) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_NOT_RESUBMITTABLE
+            );
+        }
+    }
+
+    /**
+     * 이미 재상신된 문서인지 검증한다.
+     *
+     * @param document 이전 반려 문서
+     */
+    private void validateNotAlreadyResubmitted(Document document) {
+        boolean alreadyResubmitted =
+                documentRepository
+                        .existsByPreviousDocumentIdAndDeletedAtIsNull(
+                                document.getId()
+                        );
+
+        if (alreadyResubmitted) {
+            throw new BusinessException(
+                    DocumentErrorCode.DOCUMENT_ALREADY_RESUBMITTED
+            );
+        }
     }
 
     /**
