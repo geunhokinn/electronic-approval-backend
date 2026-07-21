@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "/logout",
                                 "/members/signup",
                                 "/admin/**",
-                                "/documents/**"
+                                "/documents/**",
+                                "/approvals/**"
                         )
                 )
                 .authorizeHttpRequests(authorize -> authorize
