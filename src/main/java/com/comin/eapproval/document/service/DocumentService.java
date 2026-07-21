@@ -99,7 +99,7 @@ public class DocumentService {
             Long memberId,
             MemberRole role
     ) {
-        Document document = findDocumentDetail(documentId);
+        Document document = findDocument(documentId);
 
         validateReadPermission(
                 document,
@@ -126,7 +126,7 @@ public class DocumentService {
             Long memberId,
             DocumentUpdateRequest request
     ) {
-        Document document = findDocumentDetail(documentId);
+        Document document = findDocument(documentId);
 
         validateWriter(document, memberId);
         validateEditable(document);
@@ -150,7 +150,7 @@ public class DocumentService {
             Long documentId,
             Long memberId
     ) {
-        Document document = findDocumentDetail(documentId);
+        Document document = findDocument(documentId);
 
         validateDeletePermission(document, memberId);
         validateDeletable(document);
@@ -183,7 +183,7 @@ public class DocumentService {
      * @param documentId 문서 ID
      * @return 조회된 문서
      */
-    private Document findDocumentDetail(Long documentId) {
+    private Document findDocument(Long documentId) {
         return documentRepository.findByIdAndDeletedAtIsNull(documentId)
                 .orElseThrow(() ->
                         new BusinessException(
