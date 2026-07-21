@@ -1,7 +1,11 @@
 package com.comin.eapproval.document.repository;
 
+import com.comin.eapproval.approval.entity.QApproval;
+import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
+import com.comin.eapproval.member.entity.QMember;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -77,16 +81,40 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
     /**
      * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
      *
-     * 작성자 정보를 함께 조회한다.
+     * 작성자와 결재 정보를 함께 조회한다.
      *
      * @param documentId 문서 ID
-     * @return 조회된 문서
+     * @return 문서 상세 정보
      */
     @Override
-    public Optional<Document> findDetailById(Long documentId) {
-        Document result = queryFactory
-                .selectFrom(document)
-                .join(document.writer).fetchJoin()
+    public Optional<DocumentDetailResponse> findDocumentDetailById(
+            Long documentId
+    ) {
+        QApproval approval = QApproval.approval;
+        QMember writer = new QMember("writer");
+        QMember approver = new QMember("approver");
+
+        DocumentDetailResponse result = queryFactory
+                .select(Projections.constructor(
+                        DocumentDetailResponse.class,
+                        document.id,
+                        document.title,
+                        document.content,
+                        document.status,
+                        writer.id,
+                        writer.name,
+                        approver.id,
+                        approver.name,
+                        approval.comment,
+                        approval.processedAt,
+                        document.createdAt,
+                        document.updatedAt
+                ))
+                .from(document)
+                .join(document.writer, writer)
+                .leftJoin(approval)
+                .on(approval.document.eq(document))
+                .leftJoin(approval.approver, approver)
                 .where(
                         document.id.eq(documentId),
                         notDeleted()
@@ -95,6 +123,28 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
 
         return Optional.ofNullable(result);
     }
+
+//    /**
+//     * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
+//     *
+//     * 작성자 정보를 함께 조회한다.
+//     *
+//     * @param documentId 문서 ID
+//     * @return 조회된 문서
+//     */
+//    @Override
+//    public Optional<Document> findDetailById(Long documentId) {
+//        Document result = queryFactory
+//                .selectFrom(document)
+//                .join(document.writer).fetchJoin()
+//                .where(
+//                        document.id.eq(documentId),
+//                        notDeleted()
+//                )
+//                .fetchOne();
+//
+//        return Optional.ofNullable(result);
+//    }
 
     /**
      *  private method.

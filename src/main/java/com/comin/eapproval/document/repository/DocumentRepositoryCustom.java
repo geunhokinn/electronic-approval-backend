@@ -1,5 +1,6 @@
 package com.comin.eapproval.document.repository;
 
+import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import org.springframework.data.domain.Page;
@@ -8,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 /**
- * QueryDSL을 이용한 문서 동적 조회 기능을 정의하는 Repository.
+ * QueryDSL을 이용한 문서 조회 기능을 정의하는 Repository.
  */
 public interface DocumentRepositoryCustom {
 
@@ -28,11 +29,23 @@ public interface DocumentRepositoryCustom {
             Pageable pageable
     );
 
+//    /**
+//     * 문서 ID로 삭제되지 않은 문서를 조회한다.
+//     *
+//     * @param documentId 문서 ID
+//     * @return 조회된 문서
+//     */
+//    Optional<Document> findDetailById(Long documentId);
+
     /**
      * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
      *
+     * 작성자와 결재 정보를 함께 조회한다.
+     *
      * @param documentId 문서 ID
-     * @return 조회된 문서
+     * @return 문서 상세 정보
      */
-    Optional<Document> findDetailById(Long documentId);
+    Optional<DocumentDetailResponse> findDocumentDetailById(
+            Long documentId
+    );
 }

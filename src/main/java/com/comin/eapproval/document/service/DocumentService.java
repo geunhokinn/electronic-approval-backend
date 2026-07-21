@@ -46,7 +46,7 @@ public class DocumentService {
 
         Member writer = findMember(memberId);
 
-        Document document = Document.create(
+        Document document = Document.createDraft(
                 request.getTitle(),
                 request.getContent(),
                 writer
@@ -107,7 +107,8 @@ public class DocumentService {
                 role
         );
 
-        return DocumentDetailResponse.from(document);
+        return findDocumentDetailResponse(documentId);
+//        return DocumentDetailResponse.from(document);
     }
 
     /**
@@ -183,7 +184,22 @@ public class DocumentService {
      * @return 조회된 문서
      */
     private Document findDocumentDetail(Long documentId) {
-        return documentRepository.findDetailById(documentId)
+        return documentRepository.findByIdAndDeletedAtIsNull(documentId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                DocumentErrorCode.DOCUMENT_NOT_FOUND
+                        )
+                );
+    }
+
+    /**
+     * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 조회된 문서 상세 정보
+     */
+    private DocumentDetailResponse findDocumentDetailResponse(Long documentId) {
+        return documentRepository.findDocumentDetailById(documentId)
                 .orElseThrow(() ->
                         new BusinessException(
                                 DocumentErrorCode.DOCUMENT_NOT_FOUND
@@ -241,8 +257,7 @@ public class DocumentService {
      * @param document 문서
      */
     private void validateEditable(Document document) {
-        if (document.getStatus() != DocumentStatus.DRAFT
-                && document.getStatus() != DocumentStatus.REJECTED) {
+        if (document.getStatus() != DocumentStatus.DRAFT) {
             throw new BusinessException(
                     DocumentErrorCode.DOCUMENT_NOT_EDITABLE
             );
