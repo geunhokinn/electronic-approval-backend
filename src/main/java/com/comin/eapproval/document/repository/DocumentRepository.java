@@ -17,4 +17,14 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, Docum
      * @return 조회된 문서
      */
     Optional<Document> findByIdAndDeletedAtIsNull(Long documentId);
+
+    /**
+     * 특정 이전 문서를 참조하는 삭제되지 않은 문서가 존재하는지 확인한다.
+     *
+     * @param previousDocumentId 이전 문서 ID
+     * @return 참조 문서 존재 여부
+     */
+    boolean existsByPreviousDocumentIdAndDeletedAtIsNull(
+            Long previousDocumentId
+    );
 }
