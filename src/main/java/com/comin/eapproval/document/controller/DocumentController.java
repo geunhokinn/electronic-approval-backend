@@ -1,5 +1,6 @@
 package com.comin.eapproval.document.controller;
 
+import com.comin.eapproval.document.dto.request.DocumentApprovalRequest;
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
 import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
@@ -168,6 +169,31 @@ public class DocumentController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("문서를 삭제했습니다.")
+        );
+    }
+
+    /**
+     * 문서의 결재를 요청한다.
+     *
+     * @param member 로그인 회원
+     * @param documentId 문서 ID
+     * @param request 결재 요청 정보
+     * @return 성공 응답
+     */
+    @PostMapping("/{documentId}/request")
+    public ResponseEntity<ApiResponse<Void>> requestApproval(
+            @AuthenticationPrincipal CustomUserDetails member,
+            @PathVariable Long documentId,
+            @Valid @RequestBody DocumentApprovalRequest request
+    ) {
+        documentService.requestApproval(
+                member.getMemberId(),
+                documentId,
+                request
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("결재 요청이 완료되었습니다.")
         );
     }
 }
