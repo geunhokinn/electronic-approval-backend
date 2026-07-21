@@ -88,10 +88,7 @@ public class DocumentController {
                 );
 
         return ResponseEntity.ok(
-                ApiResponse.success(
-                        "내 문서 목록을 조회했습니다.",
-                        documents
-                )
+                ApiResponse.success(documents)
         );
     }
 
@@ -115,10 +112,7 @@ public class DocumentController {
                 );
 
         return ResponseEntity.ok(
-                ApiResponse.success(
-                        "문서 상세 정보를 조회했습니다.",
-                        document
-                )
+                ApiResponse.success(document)
         );
     }
 
