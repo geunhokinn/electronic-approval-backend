@@ -6,6 +6,7 @@ import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
 import com.comin.eapproval.document.dto.response.DocumentCreateResponse;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
+import com.comin.eapproval.document.dto.response.DocumentResubmitResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.document.service.DocumentService;
 import com.comin.eapproval.global.response.ApiResponse;
@@ -113,6 +114,28 @@ public class DocumentController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(document)
+        );
+    }
+
+    /**
+     * 재상신할 문서 정보를 조회한다.
+     *
+     * 로그인 사용자가 작성한 반려 문서의 제목과 내용을 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @param userDetails 로그인 회원 정보
+     * @return 재상신 문서 정보
+     */
+    @GetMapping("/{documentId}/resubmit")
+    public ApiResponse<DocumentResubmitResponse> getResubmitDocument(
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.success(
+                documentService.getResubmitDocument(
+                        documentId,
+                        userDetails.getMemberId()
+                )
         );
     }
 
