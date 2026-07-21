@@ -7,9 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ApprovalRepository extends JpaRepository<Approval, Long> {
-
-    /**
-     * 문서의 결재 이력을 생성 순으로 조회
-     */
-    List<Approval> findByDocumentOrderByCreatedAtAsc(Document document);
 }
