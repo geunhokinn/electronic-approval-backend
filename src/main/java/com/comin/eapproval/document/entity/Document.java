@@ -35,6 +35,10 @@ public class Document extends BaseEntity {
     @JoinColumn(name = "writer_id", nullable = false)
     private Member writer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "previous_document_id")
+    private Document previousDocument;
+
     // @Version
     private Long version;
 
@@ -45,18 +49,20 @@ public class Document extends BaseEntity {
             String title,
             String content,
             DocumentStatus status,
-            Member writer
+            Member writer,
+            Document previousDocument
     ) {
         this.title = title;
         this.content = content;
         this.status = status;
         this.writer = writer;
+        this.previousDocument = previousDocument;
     }
 
     /**
      * 임시 저장 문서를 생성한다.
      */
-    public static Document create(
+    public static Document createDraft(
             String title,
             String content,
             Member writer
@@ -85,24 +91,23 @@ public class Document extends BaseEntity {
     }
 
     /**
-     * 결재 요청한다.
+     * 문서를 결재 대기 상태로 변경한다.
      */
-    public void requestApproval() {
+    public void changeToPending() {
         this.status = DocumentStatus.PENDING;
     }
 
     /**
-     * 승인 처리한다.
+     * 문서를 승인 상태로 변경한다.
      */
-    public void approve() {
+    public void changeToApproved() {
         this.status = DocumentStatus.APPROVED;
     }
 
     /**
-     * 반려 처리한다.
+     * 문서를 반려 상태로 변경한다.
      */
-    public void reject() {
+    public void changeToRejected() {
         this.status = DocumentStatus.REJECTED;
     }
-
 }

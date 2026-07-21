@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -28,6 +29,8 @@ public class Approval extends BaseEntity {
 
     @Column(length = 500)
     private String comment;
+
+    private LocalDateTime processedAt;
 
     @Builder
     private Approval(
@@ -53,18 +56,21 @@ public class Approval extends BaseEntity {
                 .build();
     }
 
+
     /**
-     * 반려 의견을 저장한다.
+     * 승인 처리한다.
      */
-    public void reject(String comment) {
-        this.comment = comment;
+    public void approve() {
+        this.processedAt = LocalDateTime.now();
     }
 
     /**
-     * 재상신을 위해 결재 정보를 초기화한다.
+     * 반려 처리한다.
+     *
+     * @param comment 반려 의견
      */
-    public void resubmit(Member approver) {
-        this.approver = approver;
-        this.comment = null;
+    public void reject(String comment) {
+        this.comment = comment;
+        this.processedAt = LocalDateTime.now();
     }
 }
