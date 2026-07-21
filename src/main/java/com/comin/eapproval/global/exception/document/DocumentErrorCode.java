@@ -55,6 +55,16 @@ public enum DocumentErrorCode implements ErrorCode {
     INVALID_APPROVER(
             HttpStatus.BAD_REQUEST,
             "결재 권한이 있는 회원만 결재자로 지정할 수 있습니다."
+    ),
+
+    DOCUMENT_NOT_RESUBMITTABLE(
+            HttpStatus.BAD_REQUEST,
+            "반려된 문서만 재상신할 수 있습니다."
+    ),
+
+    DOCUMENT_ALREADY_RESUBMITTED(
+            HttpStatus.CONFLICT,
+            "이미 재상신된 문서입니다."
     );
 
     private final HttpStatus httpStatus;
