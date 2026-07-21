@@ -65,13 +65,15 @@ public class Document extends BaseEntity {
     public static Document createDraft(
             String title,
             String content,
-            Member writer
+            Member writer,
+            Document previousDocument
     ) {
         return Document.builder()
                 .title(title)
                 .content(content)
                 .status(DocumentStatus.DRAFT)
                 .writer(writer)
+                .previousDocument(previousDocument)
                 .build();
     }
 
