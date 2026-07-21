@@ -40,6 +40,21 @@ public enum DocumentErrorCode implements ErrorCode {
     DOCUMENT_DELETE_DENIED(
             HttpStatus.FORBIDDEN,
             "문서를 삭제할 권한이 없습니다."
+    ),
+
+    DOCUMENT_NOT_REQUESTABLE(
+            HttpStatus.CONFLICT,
+            "임시저장 상태의 문서만 결재를 요청할 수 있습니다."
+    ),
+
+    SELF_APPROVAL_NOT_ALLOWED(
+            HttpStatus.BAD_REQUEST,
+            "본인을 결재자로 지정할 수 없습니다."
+    ),
+
+    INVALID_APPROVER(
+            HttpStatus.BAD_REQUEST,
+            "결재 권한이 있는 회원만 결재자로 지정할 수 있습니다."
     );
 
     private final HttpStatus httpStatus;
