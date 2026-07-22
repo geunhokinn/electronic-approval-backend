@@ -1,7 +1,7 @@
 package com.comin.eapproval.document.dto.response;
 
-import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -15,36 +15,27 @@ public class DocumentListResponse {
     private final Long documentId;
     private final String title;
     private final DocumentStatus status;
+    private final Long approverId;
+    private final String approverName;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    private DocumentListResponse(
+    @QueryProjection
+    public DocumentListResponse(
             Long documentId,
             String title,
             DocumentStatus status,
+            Long approverId,
+            String approverName,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
         this.documentId = documentId;
         this.title = title;
         this.status = status;
+        this.approverId = approverId;
+        this.approverName = approverName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-    }
-
-    /**
-     * Document 엔티티를 문서 목록 응답으로 변환한다.
-     *
-     * @param document 문서 엔티티
-     * @return 문서 목록 응답
-     */
-    public static DocumentListResponse from(Document document) {
-        return new DocumentListResponse(
-                document.getId(),
-                document.getTitle(),
-                document.getStatus(),
-                document.getCreatedAt(),
-                document.getUpdatedAt()
-        );
     }
 }
