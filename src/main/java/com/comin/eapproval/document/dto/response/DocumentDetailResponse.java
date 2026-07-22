@@ -28,6 +28,8 @@ public class DocumentDetailResponse {
 
     private String comment;
 
+    private LocalDateTime requestedAt;
+
     private LocalDateTime processedAt;
 
     private LocalDateTime createdAt;
