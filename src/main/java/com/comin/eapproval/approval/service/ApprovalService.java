@@ -39,6 +39,7 @@ public class ApprovalService {
     public PageResponse<ApprovalListResponse> getApprovals(
             Long memberId,
             DocumentStatus status,
+            String keyword,
             Pageable pageable
     ) {
 
@@ -48,6 +49,7 @@ public class ApprovalService {
                 approvalRepository.findApprovals(
                         memberId,
                         status,
+                        keyword,
                         pageable
                 );
 
