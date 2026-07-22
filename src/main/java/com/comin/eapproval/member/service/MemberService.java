@@ -3,6 +3,7 @@ package com.comin.eapproval.member.service;
 import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.global.exception.member.MemberErrorCode;
 import com.comin.eapproval.member.dto.request.MemberSignupRequest;
+import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
 import com.comin.eapproval.member.dto.response.MemberSignupResponse;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
@@ -49,6 +50,22 @@ public class MemberService {
         Member savedMember = memberRepository.save(member);
 
         return MemberSignupResponse.of(savedMember.getId());
+    }
+
+    /**
+     * 현재 로그인한 회원 정보를 조회한다.
+     *
+     * @param memberId 로그인 회원 ID
+     * @return 현재 로그인 회원 정보
+     */
+    public CurrentMemberResponse getCurrentMember(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND)
+                );
+
+        return CurrentMemberResponse.from(member);
     }
 
     /**
