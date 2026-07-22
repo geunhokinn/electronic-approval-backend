@@ -30,11 +30,26 @@ jobs:
       - name: Maven 빌드
         run: ./mvnw clean package -DskipTests
 
-      - name: Debug GitHub Context
+      - name: GitHub OIDC Subject 확인
+        shell: bash
         run: |
-          echo "Repository = ${{ github.repository }}"
-          echo "Ref = ${{ github.ref }}"
-          echo "${{ secrets.ROLE_TO_ASSUME }}"
+          TOKEN_RESPONSE=$(curl -sS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
+
+          TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.value')
+          PAYLOAD=$(echo "$TOKEN" | cut -d '.' -f2)
+
+          # Base64 URL 형식을 일반 Base64 형식으로 보정
+          PAYLOAD="${PAYLOAD//-/+}"
+          PAYLOAD="${PAYLOAD//_/\/}"
+
+          case $((${#PAYLOAD} % 4)) in
+            2) PAYLOAD="${PAYLOAD}==" ;;
+            3) PAYLOAD="${PAYLOAD}=" ;;
+          esac
+
+          echo "$PAYLOAD" | base64 --decode | jq '{sub, aud, repository, repository_id, repository_owner_id}' 
 
       - name: AWS 자격 증명 설정
         uses: aws-actions/configure-aws-credentials@v4
