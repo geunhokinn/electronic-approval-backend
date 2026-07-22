@@ -1,7 +1,7 @@
 package com.comin.eapproval.document.repository;
 
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
-import com.comin.eapproval.document.entity.Document;
+import com.comin.eapproval.document.dto.response.DocumentListResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,7 @@ public interface DocumentRepositoryCustom {
      * @param pageable 페이징 정보
      * @return 조건에 맞는 문서 목록
      */
-    Page<Document> searchMyDocuments(
+    Page<DocumentListResponse> searchMyDocuments(
             Long writerId,
             DocumentStatus status,
             String keyword,
