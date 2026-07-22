@@ -221,10 +221,14 @@ public class DocumentService {
                 )
         );
 
-        Member approver = findMember(request.getApproverId());
-
         validateWriter(document, memberId);
         validateRequestable(document);
+
+        Member approver = resolveApprover(
+                document,
+                request.getApproverId()
+        );
+
         validateSelfApproval(memberId, approver.getId());
         validateApproverRole(approver);
 
@@ -476,5 +480,34 @@ public class DocumentService {
                     DocumentErrorCode.INVALID_APPROVER
             );
         }
+    }
+
+    /**
+     * 문서의 결재자를 결정한다.
+     *
+     * 일반 문서는 요청된 결재자를 사용하며,
+     * 재상신 문서는 이전 반려 문서의 결재자를 사용한다.
+     *
+     * @param document 결재 요청 문서
+     * @param requestedApproverId 요청된 결재자 ID
+     * @return 결재자
+     */
+    private Member resolveApprover(
+            Document document,
+            Long requestedApproverId
+    ) {
+        Document previousDocument = document.getPreviousDocument();
+
+        if (previousDocument == null) {
+            return findMember(requestedApproverId);
+        }
+
+        return approvalRepository
+                .findApproverByDocumentId(previousDocument.getId())
+                .orElseThrow(() ->
+                        new BusinessException(
+                                DocumentErrorCode.PREVIOUS_APPROVER_NOT_FOUND
+                        )
+                );
     }
 }
