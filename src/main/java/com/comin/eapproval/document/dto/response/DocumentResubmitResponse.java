@@ -1,6 +1,6 @@
 package com.comin.eapproval.document.dto.response;
 
-import com.comin.eapproval.document.entity.Document;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,11 +13,19 @@ public class DocumentResubmitResponse {
 
     private String title;
     private String content;
+    private final Long approverId;
+    private final String approverName;
 
-    public static DocumentResubmitResponse from(Document document) {
-        return DocumentResubmitResponse.builder()
-                .title(document.getTitle())
-                .content(document.getContent())
-                .build();
+    @QueryProjection
+    public DocumentResubmitResponse(
+            String title,
+            String content,
+            Long approverId,
+            String approverName
+    ) {
+        this.title = title;
+        this.content = content;
+        this.approverId = approverId;
+        this.approverName = approverName;
     }
 }
