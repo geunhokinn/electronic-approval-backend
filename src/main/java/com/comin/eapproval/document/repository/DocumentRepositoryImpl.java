@@ -1,9 +1,7 @@
 package com.comin.eapproval.document.repository;
 
 import com.comin.eapproval.approval.entity.QApproval;
-import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
-import com.comin.eapproval.document.dto.response.DocumentListResponse;
-import com.comin.eapproval.document.dto.response.QDocumentListResponse;
+import com.comin.eapproval.document.dto.response.*;
 import com.comin.eapproval.document.entity.QDocument;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.QMember;
@@ -160,6 +158,38 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
 //
 //        return Optional.ofNullable(result);
 //    }
+
+    /**
+     * 문서 ID로 재상신 화면에 필요한 문서 정보를 조회한다.
+     *
+     * 제목, 내용과 기존 결재자의 정보를 함께 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 재상신 문서 정보
+     */
+    @Override
+    public Optional<DocumentResubmitResponse> findResubmitDocument(
+            Long documentId
+    ) {
+        DocumentResubmitResponse response = queryFactory
+                .select(new QDocumentResubmitResponse(
+                        document.title,
+                        document.content,
+                        approver.id,
+                        approver.name
+                ))
+                .from(document)
+                .join(approval)
+                .on(approval.document.eq(document))
+                .join(approval.approver, approver)
+                .where(
+                        document.id.eq(documentId),
+                        document.deletedAt.isNull()
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(response);
+    }
 
     /**
      *  private method.

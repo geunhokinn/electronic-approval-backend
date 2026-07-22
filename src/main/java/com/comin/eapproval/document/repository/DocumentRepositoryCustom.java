@@ -2,6 +2,7 @@ package com.comin.eapproval.document.repository;
 
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentListResponse;
+import com.comin.eapproval.document.dto.response.DocumentResubmitResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,4 +49,14 @@ public interface DocumentRepositoryCustom {
     Optional<DocumentDetailResponse> findDocumentDetailById(
             Long documentId
     );
+
+    /**
+     * 문서 ID로 재상신 화면에 필요한 문서 정보를 조회한다.
+     *
+     * 기존 문서의 제목, 내용, 결재자 정보를 함께 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 재상신 문서 정보
+     */
+    Optional<DocumentResubmitResponse> findResubmitDocument(Long documentId);
 }
