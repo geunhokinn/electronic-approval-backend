@@ -1,9 +1,7 @@
-package com.comin.eapproval.auditLog;
+package com.comin.eapproval.auditLog.entity;
 
 import com.comin.eapproval.auditLog.entity.enums.AuditLogAction;
 import com.comin.eapproval.auditLog.entity.enums.AuditLogResult;
-import com.comin.eapproval.document.entity.Document;
-import com.comin.eapproval.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,13 +22,11 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
-    private Document document;
+    @Column(name = "document_id", nullable = false)
+    private Long documentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "actor_id", nullable = false)
-    private Member actor;
+    @Column(name = "actor_id", nullable = false)
+    private Long actorId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -40,37 +36,44 @@ public class AuditLog {
     @Column(nullable = false, length = 20)
     private AuditLogResult result;
 
+    @Column(length = 500)
+    private String reason;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
     private AuditLog(
-            Document document,
-            Member actor,
+            Long documentId,
+            Long actorId,
             AuditLogAction action,
-            AuditLogResult result
+            AuditLogResult result,
+            String reason
     ) {
-        this.document = document;
-        this.actor = actor;
+        this.documentId = documentId;
+        this.actorId = actorId;
         this.action = action;
         this.result = result;
+        this.reason = reason;
     }
 
     /**
-     * 문서 또는 결재 작업의 감사 로그를 생성한다.
+     * 결재 작업의 감사 로그를 생성한다.
      */
     public static AuditLog create(
-            Document document,
-            Member actor,
+            Long documentId,
+            Long actorId,
             AuditLogAction action,
-            AuditLogResult result
+            AuditLogResult result,
+            String reason
     ) {
         return AuditLog.builder()
-                .document(document)
-                .actor(actor)
+                .documentId(documentId)
+                .actorId(actorId)
                 .action(action)
                 .result(result)
+                .reason(reason)
                 .build();
     }
 }
