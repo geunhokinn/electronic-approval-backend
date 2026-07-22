@@ -34,6 +34,7 @@ jobs:
         run: |
           echo "Repository = ${{ github.repository }}"
           echo "Ref = ${{ github.ref }}"
+          echo "${{ secrets.ROLE_TO_ASSUME }}"
 
       - name: AWS 자격 증명 설정
         uses: aws-actions/configure-aws-credentials@v4
