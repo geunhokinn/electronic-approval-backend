@@ -2,8 +2,11 @@ package com.comin.eapproval.approval.repository;
 
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
+import com.comin.eapproval.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 /**
  * 결재 QueryDSL 조회 기능을 제공하는 커스텀 Repository
@@ -25,4 +28,12 @@ public interface ApprovalRepositoryCustom {
             String keyword,
             Pageable pageable
     );
+
+    /**
+     * 문서 ID로 결재자를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 조회된 결재자
+     */
+    Optional<Member> findApproverByDocumentId(Long documentId);
 }
