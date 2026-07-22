@@ -44,6 +44,7 @@ public class ApprovalController {
     public ResponseEntity<ApiResponse<PageResponse<ApprovalListResponse>>> getApprovals(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam DocumentStatus status,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(
                     size = 10,
                     sort = "createdAt",
@@ -55,6 +56,7 @@ public class ApprovalController {
                 approvalService.getApprovals(
                         userDetails.getMemberId(),
                         status,
+                        keyword,
                         pageable
                 );
 
