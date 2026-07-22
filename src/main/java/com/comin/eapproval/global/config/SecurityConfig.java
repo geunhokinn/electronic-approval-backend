@@ -1,5 +1,7 @@
 package com.comin.eapproval.global.config;
 
+import com.comin.eapproval.global.security.CustomAccessDeniedHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,7 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
  * Spring Security 인증 및 인가 설정을 관리하는 클래스.
  */
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     /**
      * 비밀번호 암호화를 위한 PasswordEncoder를 등록한다.
@@ -61,6 +66,9 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
