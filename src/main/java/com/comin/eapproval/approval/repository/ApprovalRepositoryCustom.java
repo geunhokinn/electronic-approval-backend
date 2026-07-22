@@ -15,12 +15,14 @@ public interface ApprovalRepositoryCustom {
      *
      * @param approverId 결재자 ID
      * @param status 조회할 문서 상태
+     * @param keyword 제목 검색어
      * @param pageable 페이징 정보
      * @return 상태별 결재 목록
      */
     Page<ApprovalListResponse> findApprovals(
             Long approverId,
             DocumentStatus status,
+            String keyword,
             Pageable pageable
     );
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
      *
      * @param approverId 결재자 회원 ID
      * @param status 문서 상태
+     * @param keyword 제목 검색어
      * @param pageable 페이징 정보
      * @return 조건에 맞는 결재 목록
      */
@@ -41,6 +43,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
     public Page<ApprovalListResponse> findApprovals(
             Long approverId,
             DocumentStatus status,
+            String keyword,
             Pageable pageable
     ) {
 
@@ -61,6 +64,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 .where(
                         approverIdEq(approverId),
                         statusEq(status),
+                        titleContains(keyword),
                         notDeleted()
                 )
                 .orderBy(approval.createdAt.desc())
@@ -75,6 +79,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 .where(
                         approverIdEq(approverId),
                         statusEq(status),
+                        titleContains(keyword),
                         notDeleted()
                 )
                 .fetchOne();
@@ -117,5 +122,19 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
      */
     private BooleanExpression notDeleted() {
         return document.deletedAt.isNull();
+    }
+
+    /**
+     * 문서 제목 검색 조건을 생성한다.
+     *
+     * @param keyword 검색어
+     * @return 문서 제목 검색 조건
+     */
+    private BooleanExpression titleContains(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+
+        return document.title.containsIgnoreCase(keyword.trim());
     }
 }
