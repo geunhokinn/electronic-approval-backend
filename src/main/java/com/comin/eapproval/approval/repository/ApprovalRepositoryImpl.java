@@ -4,6 +4,7 @@ import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.QApproval;
 import com.comin.eapproval.document.entity.QDocument;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
+import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.entity.QMember;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * QueryDSL을 이용한 결재 목록 조회 기능을 구현하는 Repository.
@@ -89,6 +91,28 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 pageable,
                 total != null ? total : 0L
         );
+    }
+
+
+    /**
+     * 문서의 결재자를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 결재자
+     */
+    @Override
+    public Optional<Member> findApproverByDocumentId(
+            Long documentId
+    ) {
+        Member approver = queryFactory
+                .select(approval.approver)
+                .from(approval)
+                .where(
+                        approval.document.id.eq(documentId)
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(approver);
     }
 
     /**
