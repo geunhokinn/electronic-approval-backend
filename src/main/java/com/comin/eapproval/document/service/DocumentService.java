@@ -2,6 +2,10 @@ package com.comin.eapproval.document.service;
 
 import com.comin.eapproval.approval.entity.Approval;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
+import com.comin.eapproval.auditLog.annotation.Audit;
+import com.comin.eapproval.auditLog.context.AuditContext;
+import com.comin.eapproval.auditLog.context.AuditContextHolder;
+import com.comin.eapproval.auditLog.entity.enums.AuditLogAction;
 import com.comin.eapproval.document.dto.request.DocumentApprovalRequest;
 import com.comin.eapproval.document.dto.request.DocumentCreateRequest;
 import com.comin.eapproval.document.dto.request.DocumentUpdateRequest;
@@ -202,6 +206,7 @@ public class DocumentService {
      * @param documentId 문서 ID
      * @param request 결재 요청 정보
      */
+    @Audit(action = AuditLogAction.REQUEST)
     @Transactional
     public void requestApproval(
             Long memberId,
@@ -209,6 +214,14 @@ public class DocumentService {
             DocumentApprovalRequest request
     ) {
         Document document = findDocument(documentId);
+
+        AuditContextHolder.set(
+                AuditContext.of(
+                        memberId,
+                        document.getId()
+                )
+        );
+
         Member approver = findMember(request.getApproverId());
 
         validateWriter(document, memberId);
