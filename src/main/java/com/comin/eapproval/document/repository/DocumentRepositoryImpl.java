@@ -119,6 +119,7 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
                         approver.id,
                         approver.name,
                         approval.comment,
+                        approval.createdAt,
                         approval.processedAt,
                         document.createdAt,
                         document.updatedAt,
