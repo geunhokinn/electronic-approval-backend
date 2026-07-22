@@ -2,7 +2,8 @@ package com.comin.eapproval.document.repository;
 
 import com.comin.eapproval.approval.entity.QApproval;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
-import com.comin.eapproval.document.entity.Document;
+import com.comin.eapproval.document.dto.response.DocumentListResponse;
+import com.comin.eapproval.document.dto.response.QDocumentListResponse;
 import com.comin.eapproval.document.entity.QDocument;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.QMember;
@@ -45,14 +46,25 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
      * @return 조건에 맞는 문서 목록
      */
     @Override
-    public Page<Document> searchMyDocuments(
+    public Page<DocumentListResponse> searchMyDocuments(
             Long writerId,
             DocumentStatus status,
             String keyword,
-            Pageable pageable) {
-
-        List<Document> content = queryFactory
-                .selectFrom(document)
+            Pageable pageable
+    ) {
+        List<DocumentListResponse> content = queryFactory
+                .select(new QDocumentListResponse(
+                        document.id,
+                        document.title,
+                        document.status,
+                        approval.approver.id,
+                        approval.approver.name,
+                        document.createdAt,
+                        document.updatedAt
+                ))
+                .from(document)
+                .leftJoin(approval)
+                .on(approval.document.eq(document))
                 .where(
                         writerIdEq(writerId),
                         statusEq(status),
