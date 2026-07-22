@@ -148,7 +148,7 @@ public class DocumentService {
         validateResubmittable(document);
         validateNotAlreadyResubmitted(document);
 
-        return DocumentResubmitResponse.from(document);
+        return findResubmitDocumentResponse(documentId);
     }
 
     /**
@@ -308,6 +308,23 @@ public class DocumentService {
      */
     private DocumentDetailResponse findDocumentDetailResponse(Long documentId) {
         return documentRepository.findDocumentDetailById(documentId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                DocumentErrorCode.DOCUMENT_NOT_FOUND
+                        )
+                );
+    }
+
+    /**
+     * 문서 ID로 재상신 화면에 필요한 문서 정보를 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @return 재상신 문서 정보
+     */
+    private DocumentResubmitResponse findResubmitDocumentResponse(
+            Long documentId
+    ) {
+        return documentRepository.findResubmitDocument(documentId)
                 .orElseThrow(() ->
                         new BusinessException(
                                 DocumentErrorCode.DOCUMENT_NOT_FOUND
