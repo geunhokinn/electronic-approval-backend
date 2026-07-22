@@ -3,14 +3,19 @@ package com.comin.eapproval.member.service;
 import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.global.exception.member.MemberErrorCode;
 import com.comin.eapproval.member.dto.request.MemberSignupRequest;
+import com.comin.eapproval.member.dto.response.ApproverListResponse;
 import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
 import com.comin.eapproval.member.dto.response.MemberSignupResponse;
 import com.comin.eapproval.member.entity.Member;
+import com.comin.eapproval.member.entity.enums.MemberRole;
+import com.comin.eapproval.member.entity.enums.MemberStatus;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 회원 관련 비즈니스 로직을 처리하는 서비스.
@@ -79,5 +84,23 @@ public class MemberService {
                     MemberErrorCode.DUPLICATE_USERNAME
             );
         }
+    }
+
+    /**
+     * 결재자 목록을 조회한다.
+     *
+     * @param memberId 로그인 회원 ID
+     * @return 결재자 목록
+     */
+    public List<ApproverListResponse> getApprovers(Long memberId) {
+
+        return memberRepository.findAllByStatusAndRole(
+                        MemberStatus.ACTIVE,
+                        MemberRole.ROLE_APPROVER
+                )
+                .stream()
+                .filter(member -> !member.getId().equals(memberId))
+                .map(ApproverListResponse::from)
+                .toList();
     }
 }
