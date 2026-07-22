@@ -65,6 +65,11 @@ public enum DocumentErrorCode implements ErrorCode {
     DOCUMENT_ALREADY_RESUBMITTED(
             HttpStatus.CONFLICT,
             "이미 재상신된 문서입니다."
+    ),
+
+    PREVIOUS_APPROVER_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "이전 문서의 결재자를 찾을 수 없습니다."
     );
 
     private final HttpStatus httpStatus;
