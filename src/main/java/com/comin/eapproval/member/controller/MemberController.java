@@ -2,6 +2,7 @@ package com.comin.eapproval.member.controller;
 
 import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.member.dto.request.MemberSignupRequest;
+import com.comin.eapproval.member.dto.response.ApproverListResponse;
 import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
 import com.comin.eapproval.member.dto.response.MemberSignupResponse;
 import com.comin.eapproval.member.security.CustomUserDetails;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 회원 관련 API를 제공하는 컨트롤러.
@@ -60,6 +63,25 @@ public class MemberController {
                 memberService.getCurrentMember(
                         userDetails.getMemberId()
                 );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
+        );
+    }
+
+    /**
+     * 결재자 목록을 조회한다.
+     *
+     * @param userDetails 로그인 사용자 정보
+     * @return 결재자 목록
+     */
+    @GetMapping("/approvers")
+    public ResponseEntity<ApiResponse<List<ApproverListResponse>>> getApprovers(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        List<ApproverListResponse> response =
+                memberService.getApprovers(userDetails.getMemberId());
 
         return ResponseEntity.ok(
                 ApiResponse.success(response)
