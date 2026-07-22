@@ -4,6 +4,10 @@ import com.comin.eapproval.approval.dto.request.RejectApprovalRequest;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.Approval;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
+import com.comin.eapproval.auditLog.annotation.Audit;
+import com.comin.eapproval.auditLog.context.AuditContext;
+import com.comin.eapproval.auditLog.context.AuditContextHolder;
+import com.comin.eapproval.auditLog.entity.enums.AuditLogAction;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.global.exception.approval.ApprovalErrorCode;
@@ -56,12 +60,20 @@ public class ApprovalService {
      * @param memberId 로그인한 회원 ID
      * @param approvalId 결재 ID
      */
+    @Audit(action = AuditLogAction.APPROVE)
     @Transactional
     public void approve(
             Long memberId,
             Long approvalId
     ) {
         Approval approval = findApproval(approvalId);
+
+        AuditContextHolder.set(
+                AuditContext.of(
+                        memberId,
+                        approval.getDocument().getId()
+                )
+        );
 
         validateApprover(approval, memberId);
         validateNotProcessed(approval);
@@ -77,6 +89,7 @@ public class ApprovalService {
      * @param approvalId 결재 ID
      * @param request 반려 요청 정보
      */
+    @Audit(action = AuditLogAction.REJECT)
     @Transactional
     public void reject(
             Long memberId,
@@ -84,6 +97,13 @@ public class ApprovalService {
             RejectApprovalRequest request
     ) {
         Approval approval = findApproval(approvalId);
+
+        AuditContextHolder.set(
+                AuditContext.of(
+                        memberId,
+                        approval.getDocument().getId()
+                )
+        );
 
         validateApprover(approval, memberId);
         validateNotProcessed(approval);
