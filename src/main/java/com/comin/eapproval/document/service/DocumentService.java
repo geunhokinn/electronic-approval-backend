@@ -98,8 +98,7 @@ public class DocumentService {
                         status,
                         keyword,
                         pageable
-                )
-                .map(DocumentListResponse::from);
+                );
 
         return PageResponse.from(documents);
     }
