@@ -12,6 +12,49 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum SecurityErrorCode implements ErrorCode {
 
+    /**
+     * 로그인에 성공했지만 아직 관리자 승인이 완료되지 않은 계정.
+     */
+    ACCOUNT_PENDING(
+            HttpStatus.FORBIDDEN,
+            "승인 대기 중인 계정입니다."
+    ),
+
+    /**
+     * 관리자가 비활성화한 계정.
+     */
+    ACCOUNT_INACTIVE(
+            HttpStatus.FORBIDDEN,
+            "비활성화된 계정입니다."
+    ),
+
+    /**
+     * 관리자가 가입을 거부한 계정.
+     */
+    ACCOUNT_REJECTED(
+            HttpStatus.FORBIDDEN,
+            "가입이 거부된 계정입니다."
+    ),
+
+    /**
+     * 아이디 또는 비밀번호가 올바르지 않은 경우.
+     */
+    LOGIN_FAILED(
+            HttpStatus.UNAUTHORIZED,
+            "아이디 또는 비밀번호가 올바르지 않습니다."
+    ),
+
+    /**
+     * 인증되지 않은 사용자의 요청.
+     */
+    AUTHENTICATION_REQUIRED(
+            HttpStatus.UNAUTHORIZED,
+            "로그인이 필요합니다."
+    ),
+
+    /**
+     * 권한이 없는 사용자의 요청.
+     */
     ACCESS_DENIED(
             HttpStatus.FORBIDDEN,
             "접근 권한이 없습니다."
