@@ -1,12 +1,10 @@
 package com.comin.eapproval.global.config;
 
-import com.comin.eapproval.global.security.CustomAccessDeniedHandler;
+import com.comin.eapproval.global.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -17,22 +15,23 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
-    /**
-     * 비밀번호 암호화를 위한 PasswordEncoder를 등록한다.
-     *
-     * @return BCrypt 기반 비밀번호 인코더
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+//    /**
+//     * 비밀번호 암호화를 위한 PasswordEncoder를 등록한다.
+//     *
+//     * @return BCrypt 기반 비밀번호 인코더
+//     */
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 
     /**
      * 애플리케이션의 인증 및 로그아웃 정책을 설정한다.
-     *
-     * 현재는 로그인 기능 검증을 위해 업무 API 접근을 임시로 허용한다.
-     * 역할별 접근 제어는 로그인 검증 완료 후 적용한다.
      *
      * @param http HTTP 보안 설정 객체
      * @return 보안 필터 체인
@@ -56,10 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/login",
-                                "/members/signup",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
+                                "/members/signup"
                         ).permitAll()
 
                         .requestMatchers("/admin/**")
@@ -68,18 +64,18 @@ public class SecurityConfig {
                         .authenticated()
                 )
                 .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error")
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .failureHandler(customAuthenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
