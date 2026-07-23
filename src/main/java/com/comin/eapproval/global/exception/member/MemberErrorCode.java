@@ -57,6 +57,20 @@ public enum MemberErrorCode implements ErrorCode {
     MEMBER_NOT_INACTIVE(
             HttpStatus.CONFLICT,
             "비활성 상태의 사용자만 다시 활성화할 수 있습니다."
+    ),
+    INVALID_HEADQUARTERS(
+            HttpStatus.BAD_REQUEST,
+            "허용되지 않은 본부입니다."
+    ),
+
+    INVALID_TEAM(
+            HttpStatus.BAD_REQUEST,
+            "선택한 팀이 해당 본부에 속하지 않습니다."
+    ),
+
+    INVALID_POSITION(
+            HttpStatus.BAD_REQUEST,
+            "허용되지 않은 직급입니다."
     );
 
     private final HttpStatus httpStatus;
