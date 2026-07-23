@@ -22,6 +22,7 @@ import com.comin.eapproval.global.exception.member.MemberErrorCode;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.entity.enums.MemberRole;
+import com.comin.eapproval.member.entity.enums.MemberStatus;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -230,7 +231,7 @@ public class DocumentService {
         );
 
         validateSelfApproval(memberId, approver.getId());
-        validateApproverRole(approver);
+        validateApprover(approver);
 
         Approval approval = Approval.create(document, approver);
 
@@ -474,8 +475,9 @@ public class DocumentService {
      *
      * @param approver 결재자
      */
-    private void validateApproverRole(Member approver) {
-        if (approver.getRole() != MemberRole.ROLE_APPROVER) {
+    private void validateApprover(Member approver) {
+        if (approver.getRole() != MemberRole.ROLE_APPROVER
+                || approver.getStatus() != MemberStatus.ACTIVE) {
             throw new BusinessException(
                     DocumentErrorCode.INVALID_APPROVER
             );
