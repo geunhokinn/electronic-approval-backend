@@ -2,6 +2,7 @@ package com.comin.eapproval.member.service;
 
 import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.global.exception.member.MemberErrorCode;
+import com.comin.eapproval.global.validator.OrganizationValidator;
 import com.comin.eapproval.member.dto.request.MemberSignupRequest;
 import com.comin.eapproval.member.dto.response.ApproverListResponse;
 import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
@@ -30,6 +31,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrganizationValidator organizationValidator;
 
     /**
      * 회원가입을 수행한다.
@@ -39,6 +41,13 @@ public class MemberService {
      */
     @Transactional
     public MemberSignupResponse signup(MemberSignupRequest request) {
+
+        organizationValidator.validate(
+                request.getHeadquarters(),
+                request.getTeam(),
+                request.getPosition()
+        );
+
         validateDuplicateUsername(request.getUsername());
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
