@@ -55,14 +55,15 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
                         document.id,
                         document.title,
                         document.status,
-                        approval.approver.id,
-                        approval.approver.name,
+                        approver.id,
+                        approver.name,
                         document.createdAt,
                         document.updatedAt
                 ))
                 .from(document)
                 .leftJoin(approval)
                 .on(approval.document.eq(document))
+                .leftJoin(approval.approver, approver)
                 .where(
                         writerIdEq(writerId),
                         statusEq(status),
