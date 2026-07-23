@@ -29,18 +29,18 @@ public class PendingApprovalResponse {
     /**
      * 결재 요청일.
      */
-    private final LocalDateTime createdAt;
+    private final LocalDateTime requestedAt;
 
     @QueryProjection
     public PendingApprovalResponse(
             Long documentId,
             String title,
             String writerName,
-            LocalDateTime createdAt
+            LocalDateTime requestedAt
     ) {
         this.documentId = documentId;
         this.title = title;
         this.writerName = writerName;
-        this.createdAt = createdAt;
+        this.requestedAt = requestedAt;
     }
 }

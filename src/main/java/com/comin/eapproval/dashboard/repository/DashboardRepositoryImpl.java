@@ -130,7 +130,7 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                         document.id,
                         document.title,
                         writer.name,
-                        document.createdAt
+                        approval.createdAt
                 ))
                 .from(approval)
                 .join(approval.document, document)
@@ -142,7 +142,7 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                         document.deletedAt.isNull()
                 )
                 .orderBy(
-                        document.createdAt.desc(),
+                        approval.createdAt.desc(),
                         document.id.desc()
                 )
                 .limit(limit)
