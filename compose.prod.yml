@@ -65,6 +65,8 @@ services:
 
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
 
     depends_on:
       - server
@@ -74,6 +76,17 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: eapproval-certbot
+
+    profiles:
+      - certificate
+
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
 
 volumes:
   mariadb_prod_data:
