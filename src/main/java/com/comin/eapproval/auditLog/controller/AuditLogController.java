@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 관리자 감사 로그 조회 API를 제공하는 Controller.
  */
 @RestController
-@RequestMapping("/admin/audit-logs")
+@RequestMapping("/api/admin/audit-logs")
 @RequiredArgsConstructor
 public class AuditLogController {
 

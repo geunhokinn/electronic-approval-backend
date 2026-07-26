@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/approvals")
+@RequestMapping("/api/approvals")
 public class ApprovalController {
 
     private final ApprovalService approvalService;

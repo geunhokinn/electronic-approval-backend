@@ -44,21 +44,21 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
-                                "/login",
-                                "/logout",
-                                "/members/signup",
-                                "/admin/**",
-                                "/documents/**",
-                                "/approvals/**"
+                                "/api/login",
+                                "/api/logout",
+                                "/api/members/signup",
+                                "/api/admin/**",
+                                "/api/documents/**",
+                                "/api/approvals/**"
                         )
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/login",
-                                "/members/signup"
+                                "/api/login",
+                                "/api/members/signup"
                         ).permitAll()
 
-                        .requestMatchers("/admin/**")
+                        .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
@@ -68,13 +68,13 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .formLogin(form -> form
-                        .loginProcessingUrl("/login")
+                        .loginProcessingUrl("/api/login")
                         .successHandler(customAuthenticationSuccessHandler)
                         .failureHandler(customAuthenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .logoutUrl("/api/logout")
                         .logoutSuccessHandler(customLogoutSuccessHandler)
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")

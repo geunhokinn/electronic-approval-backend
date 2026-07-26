@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 public class DocumentController {
 
     private final DocumentService documentService;
