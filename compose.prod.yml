@@ -10,19 +10,28 @@ services:
       MARIADB_USER: ${PROD_DB_USERNAME}
       MARIADB_PASSWORD: ${PROD_DB_PASSWORD}
 
-# 컨테이너끼리는 ports 없이도 통신할 수 있다.
-#    ports:
-#      - "3306:3306"
+    # Docker 내부 네트워크를 사용하므로 외부 포트는 열지 않는다.
+    #    ports:
+    #      - "3306:3306"
 
     volumes:
       - mariadb_prod_data:/var/lib/mysql
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   server:
     image: ${SERVER_IMAGE}
     container_name: eapproval-server
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+
+    #  Nginx가 Docker 내부 네트워크를 통해 접근하므로 외부 포트는 열지 않는다.
+    #    ports:
+    #      - "8080:8080"
+
     environment:
       SPRING_PROFILES_ACTIVE: prodEnv
 
@@ -39,6 +48,26 @@ services:
 
     depends_on:
       - mariadb
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  nginx:
+    image: nginx:alpine
+    container_name: eapproval-nginx
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+    depends_on:
+      - server
 
     logging:
       driver: json-file
