@@ -23,3 +23,10 @@ target/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### Certbot
+certbot/conf/*
+certbot/www/*
+
+!certbot/conf/.gitkeep
+!certbot/www/.gitkeep
