@@ -127,6 +127,7 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
 
         return queryFactory
                 .select(new QPendingApprovalResponse(
+                        approval.id,
                         document.id,
                         document.title,
                         writer.name,
