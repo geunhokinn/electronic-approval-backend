@@ -30,14 +30,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     Optional<Member> findByUsername(String username);
 
     /**
-     * 활성 상태의 결재 권한 회원 목록을 조회한다.
+     * 지정한 상태와 권한에 해당하는 회원 목록을 조회한다.
      *
      * @param status 회원 상태
-     * @param role 회원 권한
-     * @return 결재자 목록
+     * @param roles 회원 권한 목록
+     * @return 조건에 해당하는 회원 목록
      */
-    List<Member> findAllByStatusAndRole(
+    List<Member> findAllByStatusAndRoleIn(
             MemberStatus status,
-            MemberRole role
+            List<MemberRole> roles
     );
 }
