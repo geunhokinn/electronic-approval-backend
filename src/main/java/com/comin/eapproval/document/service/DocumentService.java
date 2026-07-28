@@ -476,8 +476,10 @@ public class DocumentService {
      * @param approver 결재자
      */
     private void validateApprover(Member approver) {
-        if (approver.getRole() != MemberRole.ROLE_APPROVER
-                || approver.getStatus() != MemberStatus.ACTIVE) {
+        boolean hasApprovalPermission = approver.getRole() == MemberRole.ROLE_APPROVER
+                || approver.getRole() == MemberRole.ROLE_ADMIN;
+
+        if (!hasApprovalPermission || approver.getStatus() != MemberStatus.ACTIVE) {
             throw new BusinessException(
                     DocumentErrorCode.INVALID_APPROVER
             );
