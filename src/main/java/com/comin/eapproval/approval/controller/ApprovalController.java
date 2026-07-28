@@ -1,11 +1,13 @@
 package com.comin.eapproval.approval.controller;
 
 import com.comin.eapproval.approval.dto.request.RejectApprovalRequest;
+import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.service.ApprovalService;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.global.response.PageResponse;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import com.comin.eapproval.member.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +64,29 @@ public class ApprovalController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(approvals)
+        );
+    }
+
+    /**
+     * 결재 상세 정보를 조회한다.
+     *
+     * @param approvalId 결재 ID
+     * @param userDetails 로그인 회원 정보
+     * @return 결재 상세 정보
+     */
+    @GetMapping("/{approvalId}")
+    public ResponseEntity<ApiResponse<ApprovalDetailResponse>> getApprovalDetail(
+            @PathVariable Long approvalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        ApprovalDetailResponse response = approvalService.getApprovalDetail(
+                userDetails.getMemberId(),
+                MemberRole.valueOf(userDetails.getRole()),
+                approvalId
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
         );
     }
 
