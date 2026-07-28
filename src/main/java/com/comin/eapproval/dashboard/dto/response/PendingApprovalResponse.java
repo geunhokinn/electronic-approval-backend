@@ -12,6 +12,11 @@ import java.time.LocalDateTime;
 public class PendingApprovalResponse {
 
     /**
+     * 결재 ID.
+     */
+    private final Long approvalId;
+
+    /**
      * 문서 ID.
      */
     private final Long documentId;
@@ -33,11 +38,13 @@ public class PendingApprovalResponse {
 
     @QueryProjection
     public PendingApprovalResponse(
+            Long approvalId,
             Long documentId,
             String title,
             String writerName,
             LocalDateTime requestedAt
     ) {
+        this.approvalId = approvalId;
         this.documentId = documentId;
         this.title = title;
         this.writerName = writerName;
