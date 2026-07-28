@@ -1,6 +1,7 @@
 package com.comin.eapproval.approval.service;
 
 import com.comin.eapproval.approval.dto.request.RejectApprovalRequest;
+import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.Approval;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
@@ -12,6 +13,7 @@ import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.global.exception.approval.ApprovalErrorCode;
 import com.comin.eapproval.global.response.PageResponse;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +56,39 @@ public class ApprovalService {
                 );
 
         return PageResponse.from(approvals);
+    }
+
+    /**
+     * 결재 상세 정보를 조회한다.
+     *
+     * 해당 결재자와 관리자만 조회할 수 있다.
+     *
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 역할
+     * @param approvalId 결재 ID
+     * @return 결재 상세 정보
+     */
+    public ApprovalDetailResponse getApprovalDetail(
+            Long memberId,
+            MemberRole role,
+            Long approvalId
+    ) {
+        ApprovalDetailResponse response = approvalRepository
+                .findApprovalDetailById(approvalId)
+                .orElseThrow(() -> new BusinessException(
+                        ApprovalErrorCode.APPROVAL_NOT_FOUND
+                ));
+
+        boolean isApprover = response.getApproverId().equals(memberId);
+        boolean isAdmin = role == MemberRole.ROLE_ADMIN;
+
+        if (!isApprover && !isAdmin) {
+            throw new BusinessException(
+                    ApprovalErrorCode.APPROVAL_ACCESS_DENIED
+            );
+        }
+
+        return response;
     }
 
     /**
