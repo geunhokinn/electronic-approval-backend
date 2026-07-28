@@ -103,9 +103,12 @@ public class MemberService {
      */
     public List<ApproverListResponse> getApprovers(Long memberId) {
 
-        return memberRepository.findAllByStatusAndRole(
+        return memberRepository.findAllByStatusAndRoleIn(
                         MemberStatus.ACTIVE,
-                        MemberRole.ROLE_APPROVER
+                        List.of(
+                                MemberRole.ROLE_APPROVER,
+                                MemberRole.ROLE_ADMIN
+                        )
                 )
                 .stream()
                 .filter(member -> !member.getId().equals(memberId))
