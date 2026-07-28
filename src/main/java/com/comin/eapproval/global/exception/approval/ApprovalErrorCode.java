@@ -17,6 +17,11 @@ public enum ApprovalErrorCode implements ErrorCode {
             "결재 정보를 찾을 수 없습니다."
     ),
 
+    APPROVAL_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN,
+            "결재 상세 정보를 조회할 권한이 없습니다."
+    ),
+
     NOT_APPROVER(
             HttpStatus.FORBIDDEN,
             "해당 문서를 결재할 권한이 없습니다."
