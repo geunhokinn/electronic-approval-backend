@@ -1,5 +1,6 @@
 package com.comin.eapproval.approval.repository;
 
+import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.QApproval;
 import com.comin.eapproval.document.entity.QDocument;
@@ -29,6 +30,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
     private static final QApproval approval = QApproval.approval;
     private static final QDocument document = QDocument.document;
     private static final QMember writer = new QMember("writer");
+    private static final QMember approver = new QMember("approver");
 
     private final JPAQueryFactory queryFactory;
 
@@ -91,6 +93,48 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 pageable,
                 total != null ? total : 0L
         );
+    }
+
+    /**
+     * 결재 ID로 삭제되지 않은 문서의 결재 상세 정보를 조회한다.
+     *
+     * @param approvalId 결재 ID
+     * @return 결재 상세 정보
+     */
+    @Override
+    public Optional<ApprovalDetailResponse> findApprovalDetailById(
+            Long approvalId
+    ) {
+        ApprovalDetailResponse result = queryFactory
+                .select(Projections.constructor(
+                        ApprovalDetailResponse.class,
+                        approval.id,
+                        document.id,
+                        document.title,
+                        document.content,
+                        document.status,
+                        writer.id,
+                        writer.name,
+                        approver.id,
+                        approver.name,
+                        approval.createdAt,
+                        approval.processedAt,
+                        approval.comment,
+                        document.previousDocument.id,
+                        document.createdAt,
+                        document.updatedAt
+                ))
+                .from(approval)
+                .join(approval.document, document)
+                .join(document.writer, writer)
+                .join(approval.approver, approver)
+                .where(
+                        approval.id.eq(approvalId),
+                        document.deletedAt.isNull()
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 
 
