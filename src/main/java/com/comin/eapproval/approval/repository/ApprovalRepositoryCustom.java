@@ -1,5 +1,6 @@
 package com.comin.eapproval.approval.repository;
 
+import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.Member;
@@ -28,6 +29,14 @@ public interface ApprovalRepositoryCustom {
             String keyword,
             Pageable pageable
     );
+
+    /**
+     * 결재 ID로 삭제되지 않은 문서의 결재 상세 정보를 조회한다.
+     *
+     * @param approvalId 결재 ID
+     * @return 결재 상세 정보
+     */
+    Optional<ApprovalDetailResponse> findApprovalDetailById(Long approvalId);
 
     /**
      * 문서 ID로 결재자를 조회한다.
