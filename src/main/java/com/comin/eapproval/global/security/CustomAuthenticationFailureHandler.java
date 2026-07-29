@@ -42,11 +42,11 @@ public class CustomAuthenticationFailureHandler
 
         SecurityErrorCode errorCode;
 
-        if (authenticationException instanceof AccountPendingException) {
+        if (hasCause(authenticationException, AccountPendingException.class)) {
             errorCode = SecurityErrorCode.ACCOUNT_PENDING;
-        } else if (authenticationException instanceof AccountInactiveException) {
+        } else if (hasCause(authenticationException, AccountInactiveException.class)) {
             errorCode = SecurityErrorCode.ACCOUNT_INACTIVE;
-        } else if (authenticationException instanceof AccountRejectedException) {
+        } else if (hasCause(authenticationException, AccountRejectedException.class)) {
             errorCode = SecurityErrorCode.ACCOUNT_REJECTED;
         } else {
             errorCode = SecurityErrorCode.LOGIN_FAILED;
@@ -60,5 +60,29 @@ public class CustomAuthenticationFailureHandler
                 ApiResponse.fail(errorCode.getMessage());
 
         objectMapper.writeValue(response.getWriter(), apiResponse);
+    }
+
+    /**
+     * Spring Security가 감싼 인증 예외의 원인까지 확인한다.
+     *
+     * @param throwable 확인할 예외
+     * @param exceptionType 찾을 예외 타입
+     * @return 원인 예외에 해당 타입이 포함되어 있으면 true
+     */
+    private boolean hasCause(
+            Throwable throwable,
+            Class<? extends AuthenticationException> exceptionType
+    ) {
+        Throwable cause = throwable;
+
+        while (cause != null) {
+            if (exceptionType.isInstance(cause)) {
+                return true;
+            }
+
+            cause = cause.getCause();
+        }
+
+        return false;
     }
 }
