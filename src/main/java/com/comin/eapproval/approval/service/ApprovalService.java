@@ -4,6 +4,7 @@ import com.comin.eapproval.approval.dto.request.RejectApprovalRequest;
 import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.Approval;
+import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
 import com.comin.eapproval.auditLog.annotation.Audit;
 import com.comin.eapproval.auditLog.context.AuditContext;
@@ -31,25 +32,29 @@ public class ApprovalService {
     private final ApprovalRepository approvalRepository;
 
     /**
-     * 로그인한 결재자의 상태별 결재 목록을 조회한다.
+     * 로그인한 결재자의 업무 구분별 결재 목록을 조회한다.
      *
      * @param memberId 로그인한 회원 ID
-     * @param status 조회할 문서 상태
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
+     * @param keyword 제목 검색어
      * @param pageable 페이징 정보
-     * @return 상태별 결재 목록
+     * @return 업무 구분별 결재 목록
      */
     public PageResponse<ApprovalListResponse> getApprovals(
             Long memberId,
+            ApprovalBox box,
             DocumentStatus status,
             String keyword,
             Pageable pageable
     ) {
 
-        validateSearchStatus(status);
+        validateSearchCondition(box, status);
         
         Page<ApprovalListResponse> approvals =
                 approvalRepository.findApprovals(
                         memberId,
+                        box,
                         status,
                         keyword,
                         pageable
@@ -165,12 +170,23 @@ public class ApprovalService {
     }
 
     /**
-     * 결재 목록 조회 가능 상태인지 검증한다.
+     * 결재 목록 구분과 상태 필터 조합을 검증한다.
      *
-     * @param status 조회할 문서 상태
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
      */
-    private void validateSearchStatus(DocumentStatus status) {
-        if (status == DocumentStatus.DRAFT) {
+    private void validateSearchCondition(
+            ApprovalBox box,
+            DocumentStatus status
+    ) {
+        boolean pendingHasStatus = box == ApprovalBox.PENDING
+                && status != null;
+        boolean completedHasInvalidStatus = box == ApprovalBox.COMPLETED
+                && status != null
+                && status != DocumentStatus.APPROVED
+                && status != DocumentStatus.REJECTED;
+
+        if (pendingHasStatus || completedHasInvalidStatus) {
             throw new BusinessException(
                     ApprovalErrorCode.INVALID_APPROVAL_STATUS
             );
