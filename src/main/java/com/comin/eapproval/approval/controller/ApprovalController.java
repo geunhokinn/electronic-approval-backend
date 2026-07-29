@@ -3,6 +3,7 @@ package com.comin.eapproval.approval.controller;
 import com.comin.eapproval.approval.dto.request.RejectApprovalRequest;
 import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
+import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.approval.service.ApprovalService;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.global.response.ApiResponse;
@@ -35,17 +36,20 @@ public class ApprovalController {
     private final ApprovalService approvalService;
 
     /**
-     * 로그인한 결재자의 상태별 결재 목록을 조회한다.
+     * 로그인한 결재자의 업무 구분별 결재 목록을 조회한다.
      *
      * @param userDetails 로그인한 회원 정보
-     * @param status 조회할 문서 상태
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
+     * @param keyword 제목 검색어
      * @param pageable 페이징 정보
-     * @return 상태별 결재 목록
+     * @return 업무 구분별 결재 목록
      */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ApprovalListResponse>>> getApprovals(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam DocumentStatus status,
+            @RequestParam ApprovalBox box,
+            @RequestParam(required = false) DocumentStatus status,
             @RequestParam(required = false) String keyword,
             @PageableDefault(
                     size = 10,
@@ -57,6 +61,7 @@ public class ApprovalController {
         PageResponse<ApprovalListResponse> approvals =
                 approvalService.getApprovals(
                         userDetails.getMemberId(),
+                        box,
                         status,
                         keyword,
                         pageable
