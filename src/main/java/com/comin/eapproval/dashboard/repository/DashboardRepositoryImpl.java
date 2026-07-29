@@ -1,7 +1,9 @@
 package com.comin.eapproval.dashboard.repository;
 
 import com.comin.eapproval.dashboard.dto.response.DocumentCountResponse;
+import com.comin.eapproval.dashboard.dto.response.DashboardNoticeResponse;
 import com.comin.eapproval.dashboard.dto.response.PendingApprovalResponse;
+import com.comin.eapproval.dashboard.dto.response.QDashboardNoticeResponse;
 import com.comin.eapproval.dashboard.dto.response.QPendingApprovalResponse;
 import com.comin.eapproval.dashboard.dto.response.QRecentDocumentResponse;
 import com.comin.eapproval.dashboard.dto.response.RecentDocumentResponse;
@@ -17,6 +19,7 @@ import java.util.Map;
 
 import static com.comin.eapproval.approval.entity.QApproval.approval;
 import static com.comin.eapproval.document.entity.QDocument.document;
+import static com.comin.eapproval.notice.entity.QNotice.notice;
 
 /**
  * 대시보드 화면에 필요한 사용자 정의 조회 기능을 구현하는 Repository.
@@ -25,6 +28,35 @@ import static com.comin.eapproval.document.entity.QDocument.document;
 public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    /**
+     * 중요 공지를 우선하여 최근 공지사항을 조회한다.
+     *
+     * 삭제된 공지사항은 조회하지 않으며,
+     * 같은 중요도에서는 최근 작성된 공지사항을 우선한다.
+     *
+     * @param limit 조회할 최대 공지사항 수
+     * @return 최근 공지사항 목록
+     */
+    @Override
+    public List<DashboardNoticeResponse> findRecentNotices(long limit) {
+        return queryFactory
+                .select(new QDashboardNoticeResponse(
+                        notice.id,
+                        notice.title,
+                        notice.important,
+                        notice.createdAt
+                ))
+                .from(notice)
+                .where(notice.deletedAt.isNull())
+                .orderBy(
+                        notice.important.desc(),
+                        notice.createdAt.desc(),
+                        notice.id.desc()
+                )
+                .limit(limit)
+                .fetch();
+    }
 
     /**
      * 작성자가 작성한 문서를 상태별로 집계한다.
