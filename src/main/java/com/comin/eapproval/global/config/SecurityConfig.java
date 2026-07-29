@@ -1,10 +1,14 @@
 package com.comin.eapproval.global.config;
 
 import com.comin.eapproval.global.security.*;
+import com.comin.eapproval.member.security.CustomUserDetailsChecker;
+import com.comin.eapproval.member.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -19,6 +23,9 @@ public class SecurityConfig {
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsChecker customUserDetailsChecker;
+    private final PasswordEncoder passwordEncoder;
 
 //    /**
 //     * 비밀번호 암호화를 위한 PasswordEncoder를 등록한다.
@@ -42,6 +49,7 @@ public class SecurityConfig {
             throws Exception {
 
         http
+                .authenticationProvider(authenticationProvider())
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
                                 "/api/login",
@@ -82,5 +90,23 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    /**
+     * 회원 조회, 비밀번호 검증, 계정 상태 검사를 수행하는 인증 제공자를 등록한다.
+     *
+     * @return 사용자 인증 제공자
+     */
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider =
+                new DaoAuthenticationProvider(customUserDetailsService);
+
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setPreAuthenticationChecks(
+                customUserDetailsChecker
+        );
+
+        return authenticationProvider;
     }
 }
