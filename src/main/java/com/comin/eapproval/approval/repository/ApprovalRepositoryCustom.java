@@ -2,6 +2,7 @@ package com.comin.eapproval.approval.repository;
 
 import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
+import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.Member;
 import org.springframework.data.domain.Page;
@@ -15,16 +16,18 @@ import java.util.Optional;
 public interface ApprovalRepositoryCustom {
 
     /**
-     * 결재자의 문서를 상태별로 조회한다.
+     * 결재자의 문서를 업무 구분별로 조회한다.
      *
      * @param approverId 결재자 ID
-     * @param status 조회할 문서 상태
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
      * @param keyword 제목 검색어
      * @param pageable 페이징 정보
-     * @return 상태별 결재 목록
+     * @return 업무 구분별 결재 목록
      */
     Page<ApprovalListResponse> findApprovals(
             Long approverId,
+            ApprovalBox box,
             DocumentStatus status,
             String keyword,
             Pageable pageable
