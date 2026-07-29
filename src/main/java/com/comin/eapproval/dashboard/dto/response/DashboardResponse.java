@@ -13,7 +13,12 @@ public class DashboardResponse {
     /**
      * 내 문서 상태별 건수.
      */
-    private final DocumentCountResponse documentCounts;
+//    private final DocumentCountResponse documentCounts;
+
+    /**
+     * 중요 공지 우선 최근 공지사항 목록.
+     */
+    private final List<DashboardNoticeResponse> notices;
 
     /**
      * 최근 작성한 문서 목록.
@@ -23,15 +28,23 @@ public class DashboardResponse {
     /**
      * 나에게 배정된 결재 대기 문서 목록.
      */
-    private final List<PendingApprovalResponse> pendingApprovals;
+//    private final List<PendingApprovalResponse> pendingApprovals;
 
+    /**
+     * 대시보드 응답을 생성한다.
+     *
+     * @param notices 최근 공지사항 목록
+     * @param recentDocuments 최근 작성 문서 목록
+     */
     public DashboardResponse(
-            DocumentCountResponse documentCounts,
-            List<RecentDocumentResponse> recentDocuments,
-            List<PendingApprovalResponse> pendingApprovals
+//            DocumentCountResponse documentCounts,
+            List<DashboardNoticeResponse> notices,
+            List<RecentDocumentResponse> recentDocuments
+//            List<PendingApprovalResponse> pendingApprovals
     ) {
-        this.documentCounts = documentCounts;
+//        this.documentCounts = documentCounts;
+        this.notices = notices;
         this.recentDocuments = recentDocuments;
-        this.pendingApprovals = pendingApprovals;
+//        this.pendingApprovals = pendingApprovals;
     }
 }
