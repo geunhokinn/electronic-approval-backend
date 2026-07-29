@@ -3,6 +3,7 @@ package com.comin.eapproval.approval.repository;
 import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
 import com.comin.eapproval.approval.entity.QApproval;
+import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.document.entity.QDocument;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.Member;
@@ -35,10 +36,11 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     /**
-     * 결재자의 상태별 결재 목록을 조회한다.
+     * 결재자의 업무 구분별 결재 목록을 조회한다.
      *
      * @param approverId 결재자 회원 ID
-     * @param status 문서 상태
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
      * @param keyword 제목 검색어
      * @param pageable 페이징 정보
      * @return 조건에 맞는 결재 목록
@@ -46,6 +48,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
     @Override
     public Page<ApprovalListResponse> findApprovals(
             Long approverId,
+            ApprovalBox box,
             DocumentStatus status,
             String keyword,
             Pageable pageable
@@ -67,11 +70,15 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 .join(document.writer, writer)
                 .where(
                         approverIdEq(approverId),
-                        statusEq(status),
+                        statusCondition(box, status),
                         titleContains(keyword),
                         notDeleted()
                 )
-                .orderBy(approval.createdAt.desc())
+                .orderBy(
+                        box == ApprovalBox.PENDING
+                                ? approval.createdAt.desc()
+                                : approval.processedAt.desc()
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -82,7 +89,7 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
                 .join(approval.document, document)
                 .where(
                         approverIdEq(approverId),
-                        statusEq(status),
+                        statusCondition(box, status),
                         titleContains(keyword),
                         notDeleted()
                 )
@@ -174,13 +181,28 @@ public class ApprovalRepositoryImpl implements ApprovalRepositoryCustom {
     }
 
     /**
-     * 문서 상태 검색 조건을 생성한다.
+     * 결재 목록 구분과 상태 필터에 따른 검색 조건을 생성한다.
      *
-     * @param status 문서 상태
-     * @return 문서 상태 검색 조건
+     * @param box 조회할 결재 목록 구분
+     * @param status 완료함 상태 필터
+     * @return 결재 상태 검색 조건
      */
-    private BooleanExpression statusEq(DocumentStatus status) {
-        return document.status.eq(status);
+    private BooleanExpression statusCondition(
+            ApprovalBox box,
+            DocumentStatus status
+    ) {
+        if (box == ApprovalBox.PENDING) {
+            return document.status.eq(DocumentStatus.PENDING);
+        }
+
+        if (status != null) {
+            return document.status.eq(status);
+        }
+
+        return document.status.in(
+                DocumentStatus.APPROVED,
+                DocumentStatus.REJECTED
+        );
     }
 
     /**
