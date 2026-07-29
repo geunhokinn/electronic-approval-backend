@@ -1,8 +1,5 @@
 package com.comin.eapproval.member.security;
 
-import com.comin.eapproval.global.exception.security.AccountInactiveException;
-import com.comin.eapproval.global.exception.security.AccountPendingException;
-import com.comin.eapproval.global.exception.security.AccountRejectedException;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,20 +34,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                                 "회원을 찾을 수 없습니다."
                         )
                 );
-
-        switch (member.getStatus()) {
-            case PENDING ->
-                    throw new AccountPendingException();
-
-            case INACTIVE ->
-                    throw new AccountInactiveException();
-
-            case REJECTED ->
-                    throw new AccountRejectedException();
-
-            default -> {
-            }
-        }
 
         return CustomUserDetails.from(member);
     }
