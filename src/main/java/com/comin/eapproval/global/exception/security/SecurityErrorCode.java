@@ -17,7 +17,7 @@ public enum SecurityErrorCode implements ErrorCode {
      */
     ACCOUNT_PENDING(
             HttpStatus.FORBIDDEN,
-            "승인 대기 중인 계정입니다."
+            "가입 승인 대기 중입니다. 관리자 승인 후 이용 가능합니다."
     ),
 
     /**
@@ -33,7 +33,7 @@ public enum SecurityErrorCode implements ErrorCode {
      */
     ACCOUNT_REJECTED(
             HttpStatus.FORBIDDEN,
-            "가입이 거부된 계정입니다."
+            "가입이 거절된 계정입니다. 관리자에게 문의하세요."
     ),
 
     /**
