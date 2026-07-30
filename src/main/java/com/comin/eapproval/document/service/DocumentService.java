@@ -147,7 +147,6 @@ public class DocumentService {
 
         validateWriter(document, memberId);
         validateResubmittable(document);
-        validateNotAlreadyResubmitted(document);
 
         return findResubmitDocumentResponse(documentId);
     }
