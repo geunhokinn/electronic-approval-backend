@@ -26,6 +26,7 @@ import java.util.Optional;
 public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
 
     private static final QDocument document = QDocument.document;
+    private static final QDocument resubmittedDocument = new QDocument("resubmittedDocument");
     private static final QApproval approval = QApproval.approval;
     private static final QMember writer = new QMember("writer");
     private static final QMember approver = new QMember("approver");
@@ -177,12 +178,19 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
                         document.title,
                         document.content,
                         approver.id,
-                        approver.name
+                        approver.name,
+                        resubmittedDocument.id,
+                        resubmittedDocument.status
                 ))
                 .from(document)
                 .join(approval)
                 .on(approval.document.eq(document))
                 .join(approval.approver, approver)
+                .leftJoin(resubmittedDocument)
+                .on(
+                        resubmittedDocument.previousDocument.eq(document),
+                        resubmittedDocument.deletedAt.isNull()
+                )
                 .where(
                         document.id.eq(documentId),
                         document.deletedAt.isNull()
