@@ -39,9 +39,6 @@ public class Document extends BaseEntity {
     @JoinColumn(name = "previous_document_id")
     private Document previousDocument;
 
-    // @Version
-    private Long version;
-
     private LocalDateTime deletedAt;
 
     @Builder
