@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
 
     environment:
+      TZ: Asia/Seoul
+
       MARIADB_ROOT_PASSWORD: ${PROD_DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${PROD_DB_NAME}
       MARIADB_USER: ${PROD_DB_USERNAME}
@@ -33,6 +35,9 @@ services:
     #      - "8080:8080"
 
     environment:
+      TZ: Asia/Seoul
+      JAVA_TOOL_OPTIONS: -Duser.timezone=Asia/Seoul
+
       SPRING_PROFILES_ACTIVE: prodEnv
 
       PROD_DB_URL: ${PROD_DB_URL}
