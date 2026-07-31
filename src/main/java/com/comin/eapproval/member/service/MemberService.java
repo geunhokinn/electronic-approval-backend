@@ -7,6 +7,7 @@ import com.comin.eapproval.member.dto.request.MemberSignupRequest;
 import com.comin.eapproval.member.dto.response.ApproverListResponse;
 import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
 import com.comin.eapproval.member.dto.response.MemberSignupResponse;
+import com.comin.eapproval.member.dto.response.UsernameAvailabilityResponse;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.entity.enums.MemberRole;
 import com.comin.eapproval.member.entity.enums.MemberStatus;
@@ -29,9 +30,26 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class MemberService {
 
+    private static final String USERNAME_PATTERN = "^[a-z0-9]{3,12}$";
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrganizationValidator organizationValidator;
+
+    /**
+     * 아이디 사용 가능 여부를 조회한다.
+     *
+     * @param username 확인할 아이디
+     * @return 아이디 사용 가능 여부
+     */
+    public UsernameAvailabilityResponse checkUsernameAvailability(
+            String username
+    ) {
+        boolean available = username.matches(USERNAME_PATTERN)
+                && !memberRepository.existsByUsername(username);
+
+        return UsernameAvailabilityResponse.of(available);
+    }
 
     /**
      * 회원가입을 수행한다.
