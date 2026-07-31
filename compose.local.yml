@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
 
     environment:
+      TZ: Asia/Seoul
+
       MARIADB_ROOT_PASSWORD: ${LOCAL_DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${LOCAL_DB_NAME}
       MARIADB_USER: ${LOCAL_DB_USERNAME}
