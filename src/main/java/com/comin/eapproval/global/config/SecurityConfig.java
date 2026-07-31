@@ -63,7 +63,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/login",
-                                "/api/members/signup"
+                                "/api/members/signup",
+                                "/api/members/check-username"
                         ).permitAll()
 
                         .requestMatchers("/api/admin/**")
