@@ -5,6 +5,7 @@ import com.comin.eapproval.member.dto.request.MemberSignupRequest;
 import com.comin.eapproval.member.dto.response.ApproverListResponse;
 import com.comin.eapproval.member.dto.response.CurrentMemberResponse;
 import com.comin.eapproval.member.dto.response.MemberSignupResponse;
+import com.comin.eapproval.member.dto.response.UsernameAvailabilityResponse;
 import com.comin.eapproval.member.security.CustomUserDetails;
 import com.comin.eapproval.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -28,6 +29,24 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+
+    /**
+     * 아이디 사용 가능 여부를 조회한다.
+     *
+     * @param username 확인할 아이디
+     * @return 아이디 사용 가능 여부
+     */
+    @GetMapping("/check-username")
+    public ResponseEntity<ApiResponse<UsernameAvailabilityResponse>> checkUsername(
+            @RequestParam String username
+    ) {
+        UsernameAvailabilityResponse response =
+                memberService.checkUsernameAvailability(username);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
+        );
+    }
 
     /**
      * 회원가입을 요청한다.
