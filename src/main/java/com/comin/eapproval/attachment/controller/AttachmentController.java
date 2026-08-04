@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 문서 첨부파일 관련 API를 제공하는 컨트롤러.
@@ -116,7 +120,7 @@ public class AttachmentController {
      * @param userDetails 로그인 사용자 정보
      * @return 첨부파일 미리보기 URL 정보
      */
-    @GetMapping("/{attachmentId}/preview")
+    @GetMapping("/{attachmentId}/presigned/preview")
     public ResponseEntity<ApiResponse<AttachmentUrlResponse>> createPreviewUrl(
             @PathVariable Long documentId,
             @PathVariable Long attachmentId,
@@ -140,7 +144,7 @@ public class AttachmentController {
      * @param userDetails 로그인 사용자 정보
      * @return 첨부파일 다운로드 URL 정보
      */
-    @GetMapping("/{attachmentId}/download")
+    @GetMapping("/{attachmentId}/presigned/download")
     public ResponseEntity<ApiResponse<AttachmentUrlResponse>> createDownloadUrl(
             @PathVariable Long documentId,
             @PathVariable Long attachmentId,
@@ -154,5 +158,82 @@ public class AttachmentController {
         );
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 권한이 확인된 첨부파일을 브라우저에서 바로 표시한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 첨부파일 스트리밍 응답
+     */
+    @GetMapping("/{attachmentId}/preview")
+    public ResponseEntity<Resource> streamPreview(
+            @PathVariable Long documentId,
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return streamAttachment(
+                documentId,
+                attachmentId,
+                userDetails,
+                ContentDisposition.inline()
+        );
+    }
+
+    /**
+     * 권한이 확인된 첨부파일을 원본 파일명으로 다운로드한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 첨부파일 다운로드 스트리밍 응답
+     */
+    @GetMapping("/{attachmentId}/download")
+    public ResponseEntity<Resource> streamDownload(
+            @PathVariable Long documentId,
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return streamAttachment(
+                documentId,
+                attachmentId,
+                userDetails,
+                ContentDisposition.attachment()
+        );
+    }
+
+    private ResponseEntity<Resource> streamAttachment(
+            Long documentId,
+            Long attachmentId,
+            CustomUserDetails userDetails,
+            ContentDisposition.Builder dispositionBuilder
+    ) {
+        AttachmentService.AttachmentFile attachmentFile =
+                attachmentService.getAttachmentFile(
+                        documentId,
+                        attachmentId,
+                        userDetails.getMemberId(),
+                        MemberRole.valueOf(userDetails.getRole())
+                );
+
+        ContentDisposition contentDisposition = dispositionBuilder
+                .filename(
+                        attachmentFile.originalFilename(),
+                        StandardCharsets.UTF_8
+                )
+                .build();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(
+                        attachmentFile.contentType()
+                ))
+                .contentLength(attachmentFile.contentLength())
+                .header(
+                        "Content-Disposition",
+                        contentDisposition.toString()
+                )
+                .body(new InputStreamResource(attachmentFile.inputStream()));
     }
 }
