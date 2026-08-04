@@ -40,6 +40,10 @@ public enum AttachmentErrorCode implements ErrorCode {
             HttpStatus.BAD_REQUEST,
             "PDF, JPG, JPEG, PNG 파일만 첨부할 수 있습니다."
     ),
+    INVALID_RESUBMIT_ATTACHMENT_SELECTION(
+            HttpStatus.BAD_REQUEST,
+            "재상신할 이전 문서의 첨부파일 선택이 올바르지 않습니다."
+    ),
 
     ATTACHMENT_UPLOAD_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
