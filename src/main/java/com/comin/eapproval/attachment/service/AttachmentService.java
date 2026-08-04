@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -223,6 +224,57 @@ public class AttachmentService {
     }
 
     /**
+     * 이전 문서의 첨부파일을 재상신 문서에 독립된 객체로 복사한다.
+     *
+     * @param previousDocumentId 이전 문서 ID
+     * @param targetDocument 재상신 문서
+     */
+    @Transactional
+    public void copyAttachments(
+            Long previousDocumentId,
+            Document targetDocument
+    ) {
+        List<Attachment> sourceAttachments = attachmentRepository
+                .findAllByDocumentIdAndDeletedAtIsNullOrderByCreatedAtAsc(
+                        previousDocumentId
+                );
+
+        if (sourceAttachments.isEmpty()) {
+            return;
+        }
+
+        List<String> copiedObjectKeys = new ArrayList<>();
+        List<Attachment> copiedAttachments = new ArrayList<>();
+
+        try {
+            for (Attachment sourceAttachment : sourceAttachments) {
+                String extension = getExtension(
+                        sourceAttachment.getOriginalFilename()
+                );
+                String copiedObjectKey = s3StorageService.copy(
+                        targetDocument.getId(),
+                        sourceAttachment.getObjectKey(),
+                        extension
+                );
+
+                copiedObjectKeys.add(copiedObjectKey);
+                copiedAttachments.add(Attachment.create(
+                        targetDocument,
+                        sourceAttachment.getOriginalFilename(),
+                        copiedObjectKey,
+                        sourceAttachment.getContentType(),
+                        sourceAttachment.getFileSize()
+                ));
+            }
+
+            attachmentRepository.saveAllAndFlush(copiedAttachments);
+        } catch (RuntimeException exception) {
+            deleteCopiedObjects(copiedObjectKeys);
+            throw exception;
+        }
+    }
+
+    /**
      * 파일 내용과 메타데이터를 검증한다.
      *
      * @param file 업로드 파일
@@ -340,6 +392,40 @@ public class AttachmentService {
                     cleanupException
             );
         }
+    }
+
+    /**
+     * 재상신 첨부파일 복사 실패 시 생성된 S3 객체를 정리한다.
+     */
+    private void deleteCopiedObjects(List<String> objectKeys) {
+        for (String objectKey : objectKeys) {
+            try {
+                s3StorageService.delete(objectKey);
+            } catch (RuntimeException cleanupException) {
+                log.error(
+                        "재상신 첨부파일 복사 실패 후 S3 객체 정리에 실패했습니다. objectKey={}",
+                        objectKey,
+                        cleanupException
+                );
+            }
+        }
+    }
+
+    /**
+     * 기존 첨부파일의 원본 파일명에서 확장자를 조회한다.
+     */
+    private String getExtension(String originalFilename) {
+        String extension = StringUtils.getFilenameExtension(
+                originalFilename
+        );
+
+        if (!StringUtils.hasText(extension)) {
+            throw new BusinessException(
+                    AttachmentErrorCode.ATTACHMENT_COPY_FAILED
+            );
+        }
+
+        return extension.toLowerCase(Locale.ROOT);
     }
 
     /**
