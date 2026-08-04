@@ -2,6 +2,7 @@ package com.comin.eapproval.attachment.controller;
 
 import com.comin.eapproval.attachment.dto.response.AttachmentListResponse;
 import com.comin.eapproval.attachment.dto.response.AttachmentUploadResponse;
+import com.comin.eapproval.attachment.dto.response.AttachmentUrlResponse;
 import com.comin.eapproval.attachment.service.AttachmentService;
 import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.member.entity.enums.MemberRole;
@@ -105,5 +106,53 @@ public class AttachmentController {
         return ResponseEntity.ok(
                 ApiResponse.success("첨부파일을 삭제했습니다.")
         );
+    }
+
+    /**
+     * 첨부파일을 브라우저에서 미리 볼 수 있는 URL을 발급한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 첨부파일 미리보기 URL 정보
+     */
+    @GetMapping("/{attachmentId}/preview")
+    public ResponseEntity<ApiResponse<AttachmentUrlResponse>> createPreviewUrl(
+            @PathVariable Long documentId,
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        AttachmentUrlResponse response = attachmentService.createPreviewUrl(
+                documentId,
+                attachmentId,
+                userDetails.getMemberId(),
+                MemberRole.valueOf(userDetails.getRole())
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 첨부파일을 원본 파일명으로 내려받을 수 있는 URL을 발급한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param userDetails 로그인 사용자 정보
+     * @return 첨부파일 다운로드 URL 정보
+     */
+    @GetMapping("/{attachmentId}/download")
+    public ResponseEntity<ApiResponse<AttachmentUrlResponse>> createDownloadUrl(
+            @PathVariable Long documentId,
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        AttachmentUrlResponse response = attachmentService.createDownloadUrl(
+                documentId,
+                attachmentId,
+                userDetails.getMemberId(),
+                MemberRole.valueOf(userDetails.getRole())
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
