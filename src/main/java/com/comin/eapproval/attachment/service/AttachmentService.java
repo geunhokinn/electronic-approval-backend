@@ -3,6 +3,7 @@ package com.comin.eapproval.attachment.service;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
 import com.comin.eapproval.attachment.dto.response.AttachmentListResponse;
 import com.comin.eapproval.attachment.dto.response.AttachmentUploadResponse;
+import com.comin.eapproval.attachment.dto.response.AttachmentUrlResponse;
 import com.comin.eapproval.attachment.entity.Attachment;
 import com.comin.eapproval.attachment.repository.AttachmentRepository;
 import com.comin.eapproval.document.entity.Document;
@@ -21,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +41,7 @@ public class AttachmentService {
     private static final int MAX_ATTACHMENT_COUNT = 3;
     private static final long MAX_ATTACHMENT_SIZE = 10L * 1024 * 1024;
     private static final int MAX_FILENAME_LENGTH = 255;
+    private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
     private static final Map<String, Set<String>> ALLOWED_FILE_TYPES = Map.of(
             "pdf", Set.of("application/pdf"),
             "jpg", Set.of("image/jpeg"),
@@ -152,6 +156,70 @@ public class AttachmentService {
 
         attachment.delete();
         s3StorageService.delete(attachment.getObjectKey());
+    }
+
+    /**
+     * 첨부파일을 브라우저에서 미리 볼 수 있는 URL을 발급한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 권한
+     * @return 첨부파일 미리보기 URL 정보
+     */
+    public AttachmentUrlResponse createPreviewUrl(
+            Long documentId,
+            Long attachmentId,
+            Long memberId,
+            MemberRole role
+    ) {
+        Attachment attachment = findReadableAttachment(
+                documentId,
+                attachmentId,
+                memberId,
+                role
+        );
+
+        S3StorageService.PresignedUrl presignedUrl =
+                s3StorageService.createPreviewUrl(
+                        attachment.getObjectKey(),
+                        attachment.getOriginalFilename(),
+                        attachment.getContentType()
+                );
+
+        return toUrlResponse(presignedUrl);
+    }
+
+    /**
+     * 첨부파일을 원본 파일명으로 내려받을 수 있는 URL을 발급한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 권한
+     * @return 첨부파일 다운로드 URL 정보
+     */
+    public AttachmentUrlResponse createDownloadUrl(
+            Long documentId,
+            Long attachmentId,
+            Long memberId,
+            MemberRole role
+    ) {
+        Attachment attachment = findReadableAttachment(
+                documentId,
+                attachmentId,
+                memberId,
+                role
+        );
+
+        S3StorageService.PresignedUrl presignedUrl =
+                s3StorageService.createDownloadUrl(
+                        attachment.getObjectKey(),
+                        attachment.getOriginalFilename(),
+                        attachment.getContentType()
+                );
+
+        return toUrlResponse(presignedUrl);
     }
 
     /**
@@ -282,6 +350,45 @@ public class AttachmentService {
                 .orElseThrow(() -> new BusinessException(
                         DocumentErrorCode.DOCUMENT_NOT_FOUND
                 ));
+    }
+
+    /**
+     * 조회 권한을 확인하고 문서에 속한 첨부파일을 조회한다.
+     */
+    private Attachment findReadableAttachment(
+            Long documentId,
+            Long attachmentId,
+            Long memberId,
+            MemberRole role
+    ) {
+        Document document = findDocument(documentId);
+        validateReadPermission(document, memberId, role);
+
+        return attachmentRepository
+                .findByIdAndDocumentIdAndDeletedAtIsNull(
+                        attachmentId,
+                        documentId
+                )
+                .orElseThrow(() -> new BusinessException(
+                        AttachmentErrorCode.ATTACHMENT_NOT_FOUND
+                ));
+    }
+
+    /**
+     * Presigned URL 만료 시각을 한국 표준시 응답으로 변환한다.
+     */
+    private AttachmentUrlResponse toUrlResponse(
+            S3StorageService.PresignedUrl presignedUrl
+    ) {
+        LocalDateTime expiresAt = LocalDateTime.ofInstant(
+                presignedUrl.expiresAt(),
+                KST_ZONE_ID
+        );
+
+        return AttachmentUrlResponse.of(
+                presignedUrl.url(),
+                expiresAt
+        );
     }
 
     /**
