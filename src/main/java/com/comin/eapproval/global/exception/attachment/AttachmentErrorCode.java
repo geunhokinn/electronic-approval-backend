@@ -48,6 +48,10 @@ public enum AttachmentErrorCode implements ErrorCode {
     ATTACHMENT_DELETE_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "첨부파일 삭제에 실패했습니다."
+    ),
+    ATTACHMENT_URL_GENERATION_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "첨부파일 접근 URL 생성에 실패했습니다."
     );
 
     private final HttpStatus httpStatus;
