@@ -1,11 +1,13 @@
 package com.comin.eapproval.global.exception;
 
+import com.comin.eapproval.global.exception.attachment.AttachmentErrorCode;
 import com.comin.eapproval.global.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
@@ -33,6 +35,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest()
                 .body(ApiResponse.fail(message));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceeded() {
+        AttachmentErrorCode errorCode =
+                AttachmentErrorCode.ATTACHMENT_SIZE_EXCEEDED;
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponse.fail(errorCode.getMessage()));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
