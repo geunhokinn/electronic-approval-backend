@@ -20,6 +20,18 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     Optional<Attachment> findByIdAndDeletedAtIsNull(Long attachmentId);
 
     /**
+     * 첨부파일 ID와 문서 ID로 삭제되지 않은 첨부파일을 조회합니다.
+     *
+     * @param attachmentId 첨부파일 ID
+     * @param documentId 문서 ID
+     * @return 조회한 첨부파일
+     */
+    Optional<Attachment> findByIdAndDocumentIdAndDeletedAtIsNull(
+            Long attachmentId,
+            Long documentId
+    );
+
+    /**
      * 문서에 포함된 삭제되지 않은 첨부파일을 업로드 순서로 조회합니다.
      *
      * @param documentId 문서 ID
