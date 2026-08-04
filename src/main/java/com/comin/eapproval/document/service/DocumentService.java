@@ -2,6 +2,7 @@ package com.comin.eapproval.document.service;
 
 import com.comin.eapproval.approval.entity.Approval;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
+import com.comin.eapproval.attachment.service.AttachmentService;
 import com.comin.eapproval.auditLog.annotation.Audit;
 import com.comin.eapproval.auditLog.context.AuditContext;
 import com.comin.eapproval.auditLog.context.AuditContextHolder;
@@ -41,6 +42,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
     private final ApprovalRepository approvalRepository;
+    private final AttachmentService attachmentService;
 
     /**
      * 로그인한 사용자의 문서를 임시저장한다.
@@ -74,6 +76,13 @@ public class DocumentService {
         );
 
         Document savedDocument = documentRepository.save(document);
+
+        if (previousDocument != null) {
+            attachmentService.copyAttachments(
+                    previousDocument.getId(),
+                    savedDocument
+            );
+        }
 
         return DocumentCreateResponse.of(savedDocument.getId());
     }
