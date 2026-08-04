@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -108,6 +109,38 @@ public class S3StorageService {
             );
             throw new BusinessException(
                     AttachmentErrorCode.ATTACHMENT_DELETE_FAILED
+            );
+        }
+    }
+
+    /**
+     * S3에서 첨부파일 객체를 스트림으로 조회한다.
+     *
+     * @param objectKey 조회할 S3 객체 키
+     * @return S3 객체 응답 스트림
+     */
+    public StoredObject getObject(String objectKey) {
+        GetObjectRequest request = GetObjectRequest.builder()
+                .bucket(getAttachmentBucket())
+                .key(objectKey)
+                .build();
+
+        try {
+            ResponseInputStream<software.amazon.awssdk.services.s3.model.GetObjectResponse> response =
+                    s3Client.getObject(request);
+
+            return new StoredObject(
+                    response,
+                    response.response().contentLength()
+            );
+        } catch (SdkException exception) {
+            log.error(
+                    "S3 첨부파일 조회에 실패했습니다. objectKey={}",
+                    objectKey,
+                    exception
+            );
+            throw new BusinessException(
+                    AttachmentErrorCode.ATTACHMENT_STREAMING_FAILED
             );
         }
     }
@@ -281,5 +314,14 @@ public class S3StorageService {
      * 생성된 Presigned URL과 만료 시각.
      */
     public record PresignedUrl(String url, Instant expiresAt) {
+    }
+
+    /**
+     * S3 객체 응답 스트림과 파일 크기.
+     */
+    public record StoredObject(
+            InputStream inputStream,
+            long contentLength
+    ) {
     }
 }
