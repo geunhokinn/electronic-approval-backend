@@ -80,7 +80,8 @@ public class DocumentService {
         if (previousDocument != null) {
             attachmentService.copyAttachments(
                     previousDocument.getId(),
-                    savedDocument
+                    savedDocument,
+                    request.getAttachmentIds()
             );
         }
 
