@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -228,16 +229,23 @@ public class AttachmentService {
      *
      * @param previousDocumentId 이전 문서 ID
      * @param targetDocument 재상신 문서
+     * @param attachmentIds 재상신에 포함할 이전 문서 첨부파일 ID 목록
      */
     @Transactional
     public void copyAttachments(
             Long previousDocumentId,
-            Document targetDocument
+            Document targetDocument,
+            List<Long> attachmentIds
     ) {
         List<Attachment> sourceAttachments = attachmentRepository
                 .findAllByDocumentIdAndDeletedAtIsNullOrderByCreatedAtAsc(
                         previousDocumentId
                 );
+
+        sourceAttachments = selectAttachmentsToCopy(
+                sourceAttachments,
+                attachmentIds
+        );
 
         if (sourceAttachments.isEmpty()) {
             return;
@@ -272,6 +280,48 @@ public class AttachmentService {
             deleteCopiedObjects(copiedObjectKeys);
             throw exception;
         }
+    }
+
+    /**
+     * 재상신 문서에 복사할 이전 문서의 첨부파일만 선택한다.
+     *
+     * attachmentIds가 null이면 기존 요청과의 호환성을 위해
+     * 이전 문서의 첨부파일을 모두 복사한다.
+     *
+     * @param sourceAttachments 이전 문서의 첨부파일 목록
+     * @param attachmentIds 재상신에 포함할 첨부파일 ID 목록
+     * @return 재상신 문서에 복사할 첨부파일 목록
+     */
+    private List<Attachment> selectAttachmentsToCopy(
+            List<Attachment> sourceAttachments,
+            List<Long> attachmentIds
+    ) {
+        if (attachmentIds == null) {
+            return sourceAttachments;
+        }
+
+        if (attachmentIds.size() > MAX_ATTACHMENT_COUNT
+                || attachmentIds.stream().anyMatch(Objects::isNull)
+                || Set.copyOf(attachmentIds).size() != attachmentIds.size()) {
+            throw new BusinessException(
+                    AttachmentErrorCode.INVALID_RESUBMIT_ATTACHMENT_SELECTION
+            );
+        }
+
+        Set<Long> selectedAttachmentIds = Set.copyOf(attachmentIds);
+        List<Attachment> selectedAttachments = sourceAttachments.stream()
+                .filter(attachment -> selectedAttachmentIds.contains(
+                        attachment.getId()
+                ))
+                .toList();
+
+        if (selectedAttachments.size() != selectedAttachmentIds.size()) {
+            throw new BusinessException(
+                    AttachmentErrorCode.INVALID_RESUBMIT_ATTACHMENT_SELECTION
+            );
+        }
+
+        return selectedAttachments;
     }
 
     /**
