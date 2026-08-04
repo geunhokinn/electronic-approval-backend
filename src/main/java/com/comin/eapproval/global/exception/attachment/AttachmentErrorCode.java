@@ -52,6 +52,10 @@ public enum AttachmentErrorCode implements ErrorCode {
     ATTACHMENT_URL_GENERATION_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "첨부파일 접근 URL 생성에 실패했습니다."
+    ),
+    ATTACHMENT_COPY_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "재상신 문서의 첨부파일 복사에 실패했습니다."
     );
 
     private final HttpStatus httpStatus;
