@@ -21,3 +21,8 @@ admin:
   headquarters: ${LOCAL_ADMIN_HEADQUARTERS}
   team: ${LOCAL_ADMIN_TEAM}
   position: ${LOCAL_ADMIN_POSITION}
+
+aws:
+  region: ${LOCAL_AWS_REGION}
+  s3:
+    attachment-bucket: ${LOCAL_S3_ATTACHMENT_BUCKET}
