@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -107,6 +108,46 @@ public class S3StorageService {
             );
             throw new BusinessException(
                     AttachmentErrorCode.ATTACHMENT_DELETE_FAILED
+            );
+        }
+    }
+
+    /**
+     * 기존 첨부파일을 새 문서 경로에 새로운 객체로 복사한다.
+     *
+     * @param targetDocumentId 복사 대상 문서 ID
+     * @param sourceObjectKey 원본 S3 객체 키
+     * @param extension 검증된 파일 확장자
+     * @return 새로 생성된 S3 객체 키
+     */
+    public String copy(
+            Long targetDocumentId,
+            String sourceObjectKey,
+            String extension
+    ) {
+        String targetObjectKey = createObjectKey(
+                targetDocumentId,
+                extension
+        );
+        CopyObjectRequest request = CopyObjectRequest.builder()
+                .sourceBucket(getAttachmentBucket())
+                .sourceKey(sourceObjectKey)
+                .destinationBucket(getAttachmentBucket())
+                .destinationKey(targetObjectKey)
+                .build();
+
+        try {
+            s3Client.copyObject(request);
+            return targetObjectKey;
+        } catch (SdkException exception) {
+            log.error(
+                    "S3 첨부파일 복사에 실패했습니다. sourceObjectKey={}, targetObjectKey={}",
+                    sourceObjectKey,
+                    targetObjectKey,
+                    exception
+            );
+            throw new BusinessException(
+                    AttachmentErrorCode.ATTACHMENT_COPY_FAILED
             );
         }
     }
