@@ -25,3 +25,8 @@ admin:
   headquarters: ${PROD_ADMIN_HEADQUARTERS}
   team: ${PROD_ADMIN_TEAM}
   position: ${PROD_ADMIN_POSITION}
+
+aws:
+  region: ${PROD_AWS_REGION}
+  s3:
+    attachment-bucket: ${PROD_S3_ATTACHMENT_BUCKET}
