@@ -225,6 +225,39 @@ public class AttachmentService {
     }
 
     /**
+     * 권한을 확인한 후 첨부파일 객체를 브라우저 응답용 스트림으로 조회한다.
+     *
+     * @param documentId 문서 ID
+     * @param attachmentId 첨부파일 ID
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 권한
+     * @return 첨부파일 스트림 정보
+     */
+    public AttachmentFile getAttachmentFile(
+            Long documentId,
+            Long attachmentId,
+            Long memberId,
+            MemberRole role
+    ) {
+        Attachment attachment = findReadableAttachment(
+                documentId,
+                attachmentId,
+                memberId,
+                role
+        );
+
+        S3StorageService.StoredObject storedObject =
+                s3StorageService.getObject(attachment.getObjectKey());
+
+        return new AttachmentFile(
+                storedObject.inputStream(),
+                storedObject.contentLength(),
+                attachment.getOriginalFilename(),
+                attachment.getContentType()
+        );
+    }
+
+    /**
      * 이전 문서의 첨부파일을 재상신 문서에 독립된 객체로 복사한다.
      *
      * @param previousDocumentId 이전 문서 ID
@@ -589,6 +622,17 @@ public class AttachmentService {
     private record ValidatedFile(
             String originalFilename,
             String extension,
+            String contentType
+    ) {
+    }
+
+    /**
+     * 브라우저에 첨부파일을 전달하기 위한 스트림과 파일 메타데이터.
+     */
+    public record AttachmentFile(
+            InputStream inputStream,
+            long contentLength,
+            String originalFilename,
             String contentType
     ) {
     }
