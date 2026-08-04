@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 문서 임시저장 요청 정보를 전달하는 객체.
  */
@@ -21,4 +23,7 @@ public class DocumentCreateRequest {
     private String content;
 
     private Long previousDocumentId;
+
+    @Size(max = 3, message = "첨부파일은 최대 3개까지 선택할 수 있습니다.")
+    private List<Long> attachmentIds;
 }
