@@ -13,7 +13,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.comin.eapproval: INFO
+    com.comin.eapproval: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: OFF
     org.hibernate.orm.jdbc.bind: OFF
