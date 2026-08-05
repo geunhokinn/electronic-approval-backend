@@ -35,6 +35,8 @@ public class ApprovalController {
 
     private final ApprovalService approvalService;
 
+    private int test;
+
     /**
      * 로그인한 결재자의 업무 구분별 결재 목록을 조회한다.
      *
