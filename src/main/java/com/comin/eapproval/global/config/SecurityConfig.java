@@ -60,6 +60,9 @@ public class SecurityConfig {
                                 "/api/approvals/**"
                         )
                 )
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/login",
