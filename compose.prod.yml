@@ -1,4 +1,18 @@
 services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: eapproval-qdrant
+    restart: unless-stopped
+
+    volumes:
+      - qdrant_prod_data:/qdrant/storage
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
   mariadb:
     image: mariadb:11.4
     container_name: eapproval-mariadb
@@ -54,8 +68,13 @@ services:
       PROD_AWS_REGION: ${PROD_AWS_REGION}
       PROD_S3_ATTACHMENT_BUCKET: ${PROD_S3_ATTACHMENT_BUCKET}
 
+      QDRANT_HOST: ${PROD_QDRANT_HOST}
+      QDRANT_PORT: ${PROD_QDRANT_PORT}
+      QDRANT_COLLECTION: ${PROD_QDRANT_COLLECTION}
+
     depends_on:
       - mariadb
+      - qdrant
 
     logging:
       driver: json-file
@@ -99,3 +118,4 @@ services:
 
 volumes:
   mariadb_prod_data:
+  qdrant_prod_data:
