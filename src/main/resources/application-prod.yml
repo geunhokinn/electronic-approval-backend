@@ -30,3 +30,8 @@ aws:
   region: ${PROD_AWS_REGION}
   s3:
     attachment-bucket: ${PROD_S3_ATTACHMENT_BUCKET}
+
+qdrant:
+  host: ${PROD_QDRANT_HOST}
+  port: ${PROD_QDRANT_PORT}
+  collection: ${PROD_QDRANT_COLLECTION}
