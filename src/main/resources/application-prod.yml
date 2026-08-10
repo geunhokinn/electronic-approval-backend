@@ -10,6 +10,18 @@ spring:
       ddl-auto: create
     show-sql: false
 
+  ai:
+    bedrock:
+      aws:
+        region: ${PROD_AWS_REGION}
+      converse:
+        chat:
+          options:
+            model: ${PROD_BEDROCK_CHAT_MODEL_ID}
+      titan:
+        embedding:
+          model: ${PROD_BEDROCK_EMBEDDING_MODEL_ID}
+
 logging:
   level:
     root: INFO
@@ -35,3 +47,9 @@ qdrant:
   host: ${PROD_QDRANT_HOST}
   port: ${PROD_QDRANT_PORT}
   collection: ${PROD_QDRANT_COLLECTION}
+
+ai:
+  bedrock:
+    region: ${PROD_AWS_REGION}
+    chat-model: ${PROD_BEDROCK_CHAT_MODEL_ID}
+    embedding-model: ${PROD_BEDROCK_EMBEDDING_MODEL_ID}
