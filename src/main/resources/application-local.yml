@@ -14,6 +14,18 @@ spring:
         format_sql: true
         highlight_sql: true
 
+  ai:
+    bedrock:
+      aws:
+        region: ${LOCAL_AWS_REGION}
+      converse:
+        chat:
+          options:
+            model: ${LOCAL_BEDROCK_CHAT_MODEL_ID}
+      titan:
+        embedding:
+          model: ${LOCAL_BEDROCK_EMBEDDING_MODEL_ID}
+
 admin:
   username: ${LOCAL_ADMIN_USERNAME}
   password: ${LOCAL_ADMIN_PASSWORD}
@@ -31,3 +43,9 @@ qdrant:
   host: ${LOCAL_QDRANT_HOST}
   port: ${LOCAL_QDRANT_PORT}
   collection: ${LOCAL_QDRANT_COLLECTION}
+
+ai:
+  bedrock:
+    region: ${LOCAL_AWS_REGION}
+    chat-model: ${LOCAL_BEDROCK_CHAT_MODEL_ID}
+    embedding-model: ${LOCAL_BEDROCK_EMBEDDING_MODEL_ID}
