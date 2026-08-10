@@ -1,4 +1,15 @@
 services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: eapproval-qdrant
+    restart: unless-stopped
+
+    ports:
+      - "6333:6333"
+
+    volumes:
+      - qdrant_local_data:/qdrant/storage
+
   mariadb:
     image: mariadb:11.4
     container_name: eapproval-mariadb
@@ -20,3 +31,4 @@ services:
 
 volumes:
   mariadb_local_data:
+  qdrant_local_data:
