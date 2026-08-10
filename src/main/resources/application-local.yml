@@ -26,3 +26,8 @@ aws:
   region: ${LOCAL_AWS_REGION}
   s3:
     attachment-bucket: ${LOCAL_S3_ATTACHMENT_BUCKET}
+
+qdrant:
+  host: ${LOCAL_QDRANT_HOST}
+  port: ${LOCAL_QDRANT_PORT}
+  collection: ${LOCAL_QDRANT_COLLECTION}
