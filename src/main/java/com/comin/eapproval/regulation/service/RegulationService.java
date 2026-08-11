@@ -5,6 +5,8 @@ import com.comin.eapproval.global.exception.regulation.RegulationErrorCode;
 import com.comin.eapproval.regulation.dto.request.RegulationUploadRequest;
 import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
 import com.comin.eapproval.regulation.entity.RegulationDocument;
+import com.comin.eapproval.regulation.entity.RegulationIngestionStatus;
+import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.List;
 import java.util.Set;
 
 /** 규정 등록과 원본 파일 저장을 처리하는 서비스입니다. */
@@ -95,6 +98,41 @@ public class RegulationService {
         if (!ALLOWED_EXTENSIONS.contains(getExtension(file.getOriginalFilename()))) {
             throw new BusinessException(RegulationErrorCode.REGULATION_FILE_TYPE_NOT_ALLOWED);
         }
+    }
+
+    /**
+     * 관리자가 규정의 사용 상태를 변경합니다.
+     *
+     * @param regulationId 상태를 변경할 규정 ID
+     * @param status 변경할 규정 사용 상태
+     */
+    @Transactional
+    public void updateStatus(Long regulationId, RegulationStatus status) {
+        RegulationDocument document = documentRepository.findById(regulationId)
+                .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED));
+
+        if (status == RegulationStatus.ACTIVE) {
+            List<RegulationDocument> activeDocuments = documentRepository.findByTitleAndStatus(
+                    document.getTitle(), RegulationStatus.ACTIVE);
+            activeDocuments.stream()
+                    .filter(activeDocument -> !activeDocument.getId().equals(regulationId))
+                    .forEach(activeDocument -> activeDocument.updateStatus(RegulationStatus.INACTIVE));
+        }
+
+        document.updateStatus(status);
+    }
+
+    /**
+     * 규정의 AI 적재 처리 상태를 변경합니다.
+     *
+     * @param regulationId 상태를 변경할 규정 ID
+     * @param status 변경할 AI 적재 처리 상태
+     */
+    @Transactional
+    public void updateIngestionStatus(Long regulationId, RegulationIngestionStatus status) {
+        documentRepository.findById(regulationId)
+                .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED))
+                .updateIngestionStatus(status);
     }
 
     /**
