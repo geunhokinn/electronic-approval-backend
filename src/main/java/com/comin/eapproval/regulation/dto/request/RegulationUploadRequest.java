@@ -1,11 +1,11 @@
 package com.comin.eapproval.regulation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.comin.eapproval.regulation.entity.RegulationAccessLevel;
 import com.comin.eapproval.regulation.entity.RegulationCategory;
 
 import java.time.LocalDate;
@@ -26,12 +26,8 @@ public class RegulationUploadRequest {
     private RegulationCategory category;
 
     /** 규정 시행일입니다. */
-    @jakarta.validation.constraints.NotNull(message = "규정 시행일은 필수입니다.")
+    @NotNull(message = "규정 시행일은 필수입니다.")
     private LocalDate effectiveDate;
-
-    /** 규정 검색 접근 범위입니다. */
-    @jakarta.validation.constraints.NotNull(message = "규정 공개 범위는 필수입니다.")
-    private RegulationAccessLevel accessLevel;
 
     /** v1, v2 형식의 규정 버전입니다. */
     @NotBlank(message = "규정 버전은 필수입니다.")
