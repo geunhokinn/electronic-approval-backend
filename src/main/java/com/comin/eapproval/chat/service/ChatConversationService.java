@@ -7,6 +7,9 @@ import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.chat.repository.ChatConversationRepository;
 import com.comin.eapproval.chat.repository.ChatMessageRepository;
 import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.chat.ChatErrorCode;
+import com.comin.eapproval.chat.dto.response.ChatConversationResponse;
+import com.comin.eapproval.chat.dto.response.ChatMessageResponse;
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * AI 대화방과 첫 사용자 메시지 저장 기능을 제공하는 서비스.
@@ -44,11 +50,11 @@ public class ChatConversationService {
                 memberId,
                 ChatConversationStatus.DELETED
         ) >= MAX_CONVERSATION_COUNT) {
-            throw new IllegalStateException("채팅방은 사용자당 최대 10개까지 생성할 수 있습니다.");
+            throw new BusinessException(ChatErrorCode.CHAT_CONVERSATION_LIMIT_EXCEEDED);
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalStateException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_MEMBER_NOT_FOUND));
 
         ChatConversation conversation = ChatConversation.create(member, request.getMessage());
         conversationRepository.save(conversation);
@@ -63,5 +69,67 @@ public class ChatConversationService {
         conversation.updateLastMessageAt(LocalDateTime.now());
 
         return conversation;
+    }
+
+    /**
+     * 사용자의 대화방 목록을 최근 메시지 순으로 조회한다.
+     *
+     * @param memberId 사용자 ID
+     * @return 대화방 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ChatConversationResponse> getConversations(Long memberId) {
+        return conversationRepository
+                .findByMemberIdAndStatusNotOrderByLastMessageAtDesc(
+                        memberId,
+                        ChatConversationStatus.DELETED
+                )
+                .stream()
+                .map(conversation -> ChatConversationResponse.from(conversation, Collections.emptyList()))
+                .toList();
+    }
+
+    /**
+     * 사용자의 대화방과 최근 메시지 20개를 조회한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @return 대화방 상세 정보
+     */
+    @Transactional(readOnly = true)
+    public ChatConversationResponse getConversation(Long memberId, Long conversationId) {
+        ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+        List<ChatMessageResponse> messages = messageRepository
+                .findByConversationIdOrderBySequenceDesc(
+                        conversationId,
+                        org.springframework.data.domain.PageRequest.of(0, 20)
+                )
+                .stream()
+                .sorted(java.util.Comparator.comparingInt(ChatMessage::getSequence))
+                .map(ChatMessageResponse::from)
+                .toList();
+        return ChatConversationResponse.from(conversation, messages);
+    }
+
+    /**
+     * 사용자가 소유한 대화방을 논리 삭제한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     */
+    @Transactional
+    public void deleteConversation(Long memberId, Long conversationId) {
+        ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+        conversation.delete();
+    }
+
+    private ChatConversation getOwnedConversation(Long memberId, Long conversationId) {
+        return conversationRepository
+                .findByIdAndMemberIdAndStatusNot(
+                        conversationId,
+                        memberId,
+                        ChatConversationStatus.DELETED
+                )
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
     }
 }
