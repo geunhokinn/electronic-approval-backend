@@ -73,6 +73,45 @@ public class ChatConversationService {
     }
 
     /**
+     * 첫 메시지 또는 기존 대화방의 사용자 메시지를 저장한다.
+     *
+     * @param memberId 사용자 ID
+     * @param request 사용자 메시지 요청
+     * @return 메시지가 저장된 대화방
+     */
+    @Transactional
+    public ChatConversation saveUserMessage(
+            Long memberId,
+            ChatMessageCreateRequest request
+    ) {
+        if (request.getConversationId() == null) {
+            return createWithFirstMessage(memberId, request);
+        }
+
+        ChatConversation conversation = getOwnedConversation(
+                memberId,
+                request.getConversationId()
+        );
+
+        if (messageRepository.findByConversationIdAndRequestId(
+                conversation.getId(),
+                request.getRequestId()
+        ).isPresent()) {
+            return conversation;
+        }
+
+        messageRepository.save(ChatMessage.userMessage(
+                conversation,
+                request.getRequestId(),
+                request.getMessage().trim(),
+                conversation.nextMessageSequence()
+        ));
+        conversation.updateLastMessageAt(LocalDateTime.now());
+
+        return conversation;
+    }
+
+    /**
      * 사용자의 대화방 목록을 최근 메시지 순으로 조회한다.
      *
      * @param memberId 사용자 ID
