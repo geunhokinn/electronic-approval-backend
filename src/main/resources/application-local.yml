@@ -38,6 +38,7 @@ aws:
   region: ${LOCAL_AWS_REGION}
   s3:
     attachment-bucket: ${LOCAL_S3_ATTACHMENT_BUCKET}
+    regulation-bucket: ${LOCAL_S3_REGULATION_BUCKET}
 
 qdrant:
   host: ${LOCAL_QDRANT_HOST}
