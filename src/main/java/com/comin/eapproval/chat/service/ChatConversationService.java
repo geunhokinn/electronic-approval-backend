@@ -15,6 +15,7 @@ import com.comin.eapproval.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -248,7 +249,7 @@ public class ChatConversationService {
     }
 
     /** AI 응답을 실패 상태로 변경한다. */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failAssistantMessage(Long messageId, String errorCode) {
         ChatMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
@@ -256,7 +257,7 @@ public class ChatConversationService {
     }
 
     /** 사용자가 중지한 AI 응답을 취소 상태로 변경한다. */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancelAssistantMessage(Long messageId) {
         ChatMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
