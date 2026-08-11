@@ -28,7 +28,7 @@ public class RegulationIngestionService {
     private final RegulationTextExtractor textExtractor;
     private final RegulationChunkingService chunkingService;
     private final RegulationEmbeddingService embeddingService;
-    private final QdrantStorageService qdrantStorageService;
+    private final RegulationQdrantService regulationQdrantService;
 
     /**
      * 규정 적재 작업을 비동기로 시작합니다.
@@ -55,7 +55,7 @@ public class RegulationIngestionService {
                 document.getOriginalFilename()
         );
         document.updateContent(markdown);
-        qdrantStorageService.ensureCollection();
+        regulationQdrantService.ensureCollection();
 
         for (RegulationTextChunk textChunk : chunkingService.chunk(
                 markdown,
@@ -69,7 +69,7 @@ public class RegulationIngestionService {
             );
             chunk.updateVectorId(pointId);
             chunkRepository.save(chunk);
-            qdrantStorageService.upsert(
+            regulationQdrantService.upsert(
                     pointId,
                     embeddingService.embed(textChunk.getEmbeddingText()),
                     Map.ofEntries(

@@ -13,7 +13,7 @@ import java.util.Map;
 /** 규정 임베딩을 Qdrant Point로 저장하는 서비스입니다. */
 @Service
 @RequiredArgsConstructor
-public class QdrantStorageService {
+public class RegulationQdrantService {
 
     private static final int VECTOR_DIMENSION = 1_024;
 
