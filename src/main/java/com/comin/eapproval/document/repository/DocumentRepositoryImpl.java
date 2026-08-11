@@ -95,6 +95,61 @@ public class DocumentRepositoryImpl implements DocumentRepositoryCustom {
     }
 
     /**
+     * 로그인 사용자가 조회할 수 있는 문서만 검색합니다.
+     *
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 역할
+     * @param status 문서 상태
+     * @param keyword 제목 검색어
+     * @param pageable 결과 제한 정보
+     * @return 권한이 확인된 문서 목록
+     */
+    @Override
+    public Page<DocumentListResponse> searchAccessibleDocuments(
+            Long memberId,
+            String role,
+            DocumentStatus status,
+            String keyword,
+            Pageable pageable
+    ) {
+        BooleanExpression permission = "ROLE_ADMIN".equals(role)
+                ? notDeleted()
+                : writer.id.eq(memberId).or(approver.id.eq(memberId));
+
+        List<DocumentListResponse> content = queryFactory
+                .select(new QDocumentListResponse(
+                        document.id,
+                        document.title,
+                        document.status,
+                        approver.id,
+                        approver.name,
+                        document.createdAt,
+                        document.updatedAt
+                ))
+                .from(document)
+                .join(document.writer, writer)
+                .leftJoin(approval).on(approval.document.eq(document))
+                .leftJoin(approval.approver, approver)
+                .where(permission, statusEq(status), titleContains(keyword), notDeleted())
+                .distinct()
+                .orderBy(document.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(document.id.countDistinct())
+                .from(document)
+                .join(document.writer, writer)
+                .leftJoin(approval).on(approval.document.eq(document))
+                .leftJoin(approval.approver, approver)
+                .where(permission, statusEq(status), titleContains(keyword), notDeleted())
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    /**
      * 문서 ID로 삭제되지 않은 문서의 상세 정보를 조회한다.
      *
      * 작성자와 결재 정보를 함께 조회한다.
