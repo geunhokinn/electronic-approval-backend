@@ -24,8 +24,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RegulationService {
 
-    private static final long MAX_FILE_SIZE = 20L * 1024 * 1024;
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "hwp", "hwpx", "txt");
+    private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("md");
 
     private final RegulationDocumentRepository documentRepository;
     private final RegulationStorageService storageService;
@@ -55,6 +55,8 @@ public class RegulationService {
                         request.getTitle(),
                         request.getCategory(),
                         request.getVersion(),
+                        request.getEffectiveDate(),
+                        request.getAccessLevel(),
                         ""
                 )
         );
@@ -97,6 +99,20 @@ public class RegulationService {
         }
         if (!ALLOWED_EXTENSIONS.contains(getExtension(file.getOriginalFilename()))) {
             throw new BusinessException(RegulationErrorCode.REGULATION_FILE_TYPE_NOT_ALLOWED);
+        }
+        validateMarkdown(file);
+    }
+
+    /** Markdown 규정 문서의 기본 구조를 검증합니다. */
+    private void validateMarkdown(MultipartFile file) {
+        try {
+            String markdown = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            if (!markdown.matches("(?ms).*^#\\s+.+$.*")
+                    || !markdown.matches("(?ms).*^##\\s+제\\d+조.*$.*")) {
+                throw new BusinessException(RegulationErrorCode.REGULATION_FILE_TYPE_NOT_ALLOWED);
+            }
+        } catch (IOException exception) {
+            throw new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED);
         }
     }
 
