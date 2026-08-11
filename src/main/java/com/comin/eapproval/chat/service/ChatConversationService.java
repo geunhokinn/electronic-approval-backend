@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public class ChatConversationService {
 
     private static final int MAX_CONVERSATION_COUNT = 10;
+    private static final int RECENT_MESSAGE_LIMIT = 20;
 
     private final ChatConversationRepository conversationRepository;
     private final ChatMessageRepository messageRepository;
@@ -102,7 +103,10 @@ public class ChatConversationService {
         List<ChatMessageResponse> messages = messageRepository
                 .findByConversationIdOrderBySequenceDesc(
                         conversationId,
-                        org.springframework.data.domain.PageRequest.of(0, 20)
+                        org.springframework.data.domain.PageRequest.of(
+                                0,
+                                RECENT_MESSAGE_LIMIT
+                        )
                 )
                 .stream()
                 .sorted(java.util.Comparator.comparingInt(ChatMessage::getSequence))
