@@ -30,6 +30,7 @@ public class ChatConversationService {
 
     private static final int MAX_CONVERSATION_COUNT = 10;
     private static final int RECENT_MESSAGE_LIMIT = 20;
+    private static final int AI_CONTEXT_MESSAGE_LIMIT = 10;
 
     private final ChatConversationRepository conversationRepository;
     private final ChatMessageRepository messageRepository;
@@ -109,6 +110,36 @@ public class ChatConversationService {
         conversation.updateLastMessageAt(LocalDateTime.now());
 
         return conversation;
+    }
+
+    /**
+     * AI 요청에 사용할 최근 메시지 10개를 조회한다.
+     *
+     * 전체 메시지는 데이터베이스에 보존하고, 현재 요청에 필요한 메시지만
+     * 임시 목록으로 구성하여 호출자에게 반환한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @return 시간순으로 정렬된 최근 메시지 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ChatMessage> getRecentMessagesForAi(
+            Long memberId,
+            Long conversationId
+    ) {
+        ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+
+        return messageRepository
+                .findByConversationIdOrderBySequenceDesc(
+                        conversation.getId(),
+                        org.springframework.data.domain.PageRequest.of(
+                                0,
+                                AI_CONTEXT_MESSAGE_LIMIT
+                        )
+                )
+                .stream()
+                .sorted(java.util.Comparator.comparingInt(ChatMessage::getSequence))
+                .toList();
     }
 
     /**
