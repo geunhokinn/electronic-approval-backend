@@ -1,12 +1,18 @@
 package com.comin.eapproval.regulation.service;
 
 import com.comin.eapproval.global.config.properties.QdrantProperties;
+import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.regulation.RegulationErrorCode;
 import lombok.RequiredArgsConstructor;
+import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +24,7 @@ public class RegulationQdrantService {
     private static final int VECTOR_DIMENSION = 1_024;
 
     private final QdrantProperties properties;
+    private final ObjectMapper objectMapper;
 
     /** Qdrant 컬렉션을 생성하고 이미 존재하면 기존 컬렉션을 사용합니다. */
     public void ensureCollection() {
@@ -52,6 +59,84 @@ public class RegulationQdrantService {
                 ))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    /**
+     * 질문 벡터와 유사한 규정 청크를 권한 조건과 함께 검색합니다.
+     *
+     * @param vector 질문 임베딩 벡터
+     * @param limit 반환할 최대 결과 수
+     * @param scoreThreshold 최소 유사도 점수
+     * @return Qdrant 검색 결과
+     */
+    public List<RegulationSearchResult> search(
+            List<Float> vector,
+            int limit,
+            double scoreThreshold
+    ) {
+        Map<String, Object> filter = Map.of(
+                "must", List.of(
+                        Map.of("key", "active", "match", Map.of("value", true))
+                )
+        );
+        String response = client().post()
+                .uri("/collections/{collection}/points/search", properties.getCollection())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "vector", vector,
+                        "filter", filter,
+                        "limit", limit,
+                        "score_threshold", scoreThreshold,
+                        "with_payload", true
+                ))
+                .retrieve()
+                .body(String.class);
+        return parseSearchResults(response);
+    }
+
+    /**
+     * 특정 규정에 연결된 모든 Point의 활성 상태를 갱신합니다.
+     *
+     * @param regulationId 규정 ID
+     * @param active 변경할 활성 상태
+     */
+    public void updateActiveStatus(Long regulationId, boolean active) {
+        client().post()
+                .uri("/collections/{collection}/points/payload", properties.getCollection())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "payload", Map.of("active", active),
+                        "filter", Map.of("must", List.of(
+                                Map.of("key", "regulationId", "match", Map.of("value", regulationId))
+                        ))
+                ))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private List<RegulationSearchResult> parseSearchResults(String response) {
+        try {
+            JsonNode results = objectMapper.readTree(response).path("result");
+            List<RegulationSearchResult> searchResults = new java.util.ArrayList<>();
+            for (JsonNode result : results) {
+                JsonNode payload = result.path("payload");
+                searchResults.add(new RegulationSearchResult(
+                        result.path("id").asText(),
+                        result.path("score").asDouble(),
+                        payload.path("regulationId").isNumber() ? payload.path("regulationId").asLong() : null,
+                        payload.path("regulationName").asText(null),
+                        payload.path("category").asText(null),
+                        payload.path("version").asText(null),
+                        payload.path("articleNumber").asText(null),
+                        payload.path("articleTitle").asText(null),
+                        payload.path("paragraphNumber").asText(null),
+                        payload.path("content").asText(null)
+                ));
+            }
+            return searchResults;
+        } catch (IOException exception) {
+            throw new BusinessException(RegulationErrorCode.REGULATION_SEARCH_FAILED);
+        }
     }
 
     private RestClient client() {
