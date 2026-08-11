@@ -71,4 +71,63 @@ public class ChatMessage extends BaseEntity {
     ) {
         return new ChatMessage(conversation, requestId, ChatMessageRole.USER, content, sequence);
     }
+
+    /**
+     * AI 응답 메시지를 생성한다.
+     *
+     * @param conversation 대화방
+     * @param requestId 요청 식별자
+     * @param sequence 메시지 순번
+     * @return AI 응답 메시지
+     */
+    public static ChatMessage assistantMessage(
+            ChatConversation conversation,
+            String requestId,
+            int sequence
+    ) {
+        return new ChatMessage(
+                conversation,
+                requestId,
+                ChatMessageRole.ASSISTANT,
+                "",
+                sequence
+        );
+    }
+
+    /** AI 응답 처리를 시작한다. */
+    public void startProcessing() {
+        this.status = ChatMessageStatus.PROCESSING;
+    }
+
+    /**
+     * AI 응답을 완료하고 전체 응답과 사용량을 저장한다.
+     */
+    public void complete(
+            String content,
+            String model,
+            Integer promptTokens,
+            Integer completionTokens,
+            Integer totalTokens
+    ) {
+        this.content = content;
+        this.model = model;
+        this.promptTokens = promptTokens;
+        this.completionTokens = completionTokens;
+        this.totalTokens = totalTokens;
+        this.status = ChatMessageStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
+
+    /** AI 응답 처리를 실패 상태로 변경한다. */
+    public void fail(String errorCode) {
+        this.status = ChatMessageStatus.FAILED;
+        this.errorCode = errorCode;
+        this.completedAt = LocalDateTime.now();
+    }
+
+    /** 사용자가 중지한 AI 응답을 취소 상태로 변경한다. */
+    public void cancel() {
+        this.status = ChatMessageStatus.CANCELLED;
+        this.completedAt = LocalDateTime.now();
+    }
 }
