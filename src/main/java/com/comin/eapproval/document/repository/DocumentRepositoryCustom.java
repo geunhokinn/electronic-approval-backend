@@ -30,6 +30,24 @@ public interface DocumentRepositoryCustom {
             Pageable pageable
     );
 
+    /**
+     * 로그인 사용자의 문서 접근 범위에서 문서를 검색합니다.
+     *
+     * @param memberId 로그인 회원 ID
+     * @param role 로그인 회원 역할
+     * @param status 문서 상태
+     * @param keyword 제목 검색어
+     * @param pageable 결과 제한 정보
+     * @return 접근 가능한 문서 목록
+     */
+    Page<DocumentListResponse> searchAccessibleDocuments(
+            Long memberId,
+            String role,
+            DocumentStatus status,
+            String keyword,
+            Pageable pageable
+    );
+
 //    /**
 //     * 문서 ID로 삭제되지 않은 문서를 조회한다.
 //     *
