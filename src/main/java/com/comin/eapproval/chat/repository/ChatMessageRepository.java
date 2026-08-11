@@ -3,6 +3,7 @@ package com.comin.eapproval.chat.repository;
 import com.comin.eapproval.chat.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,5 +23,17 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     Optional<ChatMessage> findByConversationIdAndRequestId(
             Long conversationId,
             String requestId
+    );
+
+    /**
+     * 대화방의 최근 메시지를 순서 역순으로 조회한다.
+     *
+     * @param conversationId 대화방 ID
+     * @param pageable 조회 개수와 정렬 조건
+     * @return 최근 메시지 목록
+     */
+    List<ChatMessage> findByConversationIdOrderBySequenceDesc(
+            Long conversationId,
+            org.springframework.data.domain.Pageable pageable
     );
 }
