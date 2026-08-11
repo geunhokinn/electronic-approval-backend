@@ -8,6 +8,9 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -62,6 +65,22 @@ public class RegulationStorageService {
                 .bucket(s3Properties.getS3().getRegulationBucket())
                 .key(objectKey)
                 .build());
+    }
+
+    /**
+     * S3에 저장된 규정 원본 파일을 읽습니다.
+     *
+     * @param objectKey S3 객체 키
+     * @return 원본 파일 바이트 데이터
+     */
+    public byte[] download(String objectKey) {
+        ResponseBytes<GetObjectResponse> response = s3Client.getObjectAsBytes(
+                GetObjectRequest.builder()
+                        .bucket(s3Properties.getS3().getRegulationBucket())
+                        .key(objectKey)
+                        .build()
+        );
+        return response.asByteArray();
     }
 
     /**
