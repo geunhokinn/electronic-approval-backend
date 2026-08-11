@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -55,6 +56,20 @@ public class RegulationStorageService {
         return objectKey;
     }
 
+    /** S3에 업로드된 규정 원본을 삭제합니다. */
+    public void delete(String objectKey) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(s3Properties.getS3().getRegulationBucket())
+                .key(objectKey)
+                .build());
+    }
+
+    /**
+     * 파일명에서 S3 저장에 사용할 확장자를 추출합니다.
+     *
+     * @param filename 원본 파일명
+     * @return 소문자로 변환된 확장자
+     */
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
             return "bin";
