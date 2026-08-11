@@ -29,6 +29,7 @@ public class RegulationService {
 
     private final RegulationDocumentRepository documentRepository;
     private final RegulationStorageService storageService;
+    private final RegulationIngestionService ingestionService;
 
     /** 관리자 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다. */
     /**
@@ -75,6 +76,7 @@ public class RegulationService {
                 file.getContentType(),
                 file.getSize()
         );
+        ingestionService.ingestAsync(document.getId());
 
         return new RegulationUploadResponse(
                 document.getId(),
