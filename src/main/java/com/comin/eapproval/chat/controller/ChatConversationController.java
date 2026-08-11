@@ -4,6 +4,7 @@ import com.comin.eapproval.chat.dto.request.ChatMessageCreateRequest;
 import com.comin.eapproval.chat.dto.response.ChatConversationResponse;
 import com.comin.eapproval.chat.service.ChatConversationService;
 import com.comin.eapproval.global.response.ApiResponse;
+import com.comin.eapproval.global.security.AiAuthorizationService;
 import com.comin.eapproval.member.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 public class ChatConversationController {
 
     private final ChatConversationService conversationService;
+    private final AiAuthorizationService authorizationService;
 
     /**
      * 첫 메시지 전송 시 대화방을 생성한다.
@@ -35,6 +37,7 @@ public class ChatConversationController {
             @Valid @RequestBody ChatMessageCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        authorizationService.requireAuthenticated(userDetails);
         var conversation = conversationService.createWithFirstMessage(
                 userDetails.getMemberId(),
                 request
@@ -56,6 +59,7 @@ public class ChatConversationController {
     public ResponseEntity<ApiResponse<List<ChatConversationResponse>>> getConversations(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        authorizationService.requireAuthenticated(userDetails);
         return ResponseEntity.ok(ApiResponse.success(
                 conversationService.getConversations(userDetails.getMemberId())
         ));
@@ -73,6 +77,7 @@ public class ChatConversationController {
             @PathVariable Long conversationId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        authorizationService.requireAuthenticated(userDetails);
         return ResponseEntity.ok(ApiResponse.success(
                 conversationService.getConversation(
                         userDetails.getMemberId(), conversationId
@@ -92,6 +97,7 @@ public class ChatConversationController {
             @PathVariable Long conversationId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        authorizationService.requireAuthenticated(userDetails);
         conversationService.deleteConversation(
                 userDetails.getMemberId(), conversationId
         );
