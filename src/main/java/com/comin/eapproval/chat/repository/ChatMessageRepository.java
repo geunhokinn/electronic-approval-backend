@@ -2,6 +2,7 @@ package com.comin.eapproval.chat.repository;
 
 import com.comin.eapproval.chat.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
      */
     List<ChatMessage> findByConversationIdOrderBySequenceDesc(
             Long conversationId,
-            org.springframework.data.domain.Pageable pageable
+            Pageable pageable
     );
 }
