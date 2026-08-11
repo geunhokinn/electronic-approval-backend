@@ -127,6 +127,72 @@ public class ChatConversationService {
         conversation.delete();
     }
 
+    /**
+     * AI 응답 메시지를 생성하고 처리 중 상태로 저장한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @param requestId 요청 식별자
+     * @return 저장된 AI 응답 메시지
+     */
+    @Transactional
+    public ChatMessage startAssistantMessage(
+            Long memberId,
+            Long conversationId,
+            String requestId
+    ) {
+        ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+        ChatMessage message = ChatMessage.assistantMessage(
+                conversation,
+                requestId,
+                conversation.nextMessageSequence()
+        );
+        message.startProcessing();
+        messageRepository.save(message);
+        conversation.updateLastMessageAt(LocalDateTime.now());
+        return message;
+    }
+
+    /**
+     * AI 응답 전체 내용과 모델 사용량을 저장한다.
+     *
+     * @param messageId AI 응답 메시지 ID
+     * @param content 전체 응답 내용
+     * @param model 사용 모델명
+     * @param promptTokens 입력 토큰 수
+     * @param completionTokens 출력 토큰 수
+     * @param totalTokens 전체 토큰 수
+     */
+    @Transactional
+    public void completeAssistantMessage(
+            Long messageId,
+            String content,
+            String model,
+            Integer promptTokens,
+            Integer completionTokens,
+            Integer totalTokens
+    ) {
+        ChatMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
+        message.complete(content, model, promptTokens, completionTokens, totalTokens);
+    }
+
+    /** AI 응답을 실패 상태로 변경한다. */
+    @Transactional
+    public void failAssistantMessage(Long messageId, String errorCode) {
+        ChatMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
+        message.fail(errorCode);
+    }
+
+    /** 사용자가 중지한 AI 응답을 취소 상태로 변경한다. */
+    @Transactional
+    public void cancelAssistantMessage(Long messageId) {
+        ChatMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
+        message.cancel();
+    }
+
     private ChatConversation getOwnedConversation(Long memberId, Long conversationId) {
         return conversationRepository
                 .findByIdAndMemberIdAndStatusNot(
