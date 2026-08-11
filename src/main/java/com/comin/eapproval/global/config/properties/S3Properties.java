@@ -31,5 +31,8 @@ public class S3Properties {
 
         @NotBlank
         private String attachmentBucket;
+
+        @NotBlank
+        private String regulationBucket;
     }
 }
