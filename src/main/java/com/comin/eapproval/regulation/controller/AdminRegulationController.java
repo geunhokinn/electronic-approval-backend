@@ -3,6 +3,7 @@ package com.comin.eapproval.regulation.controller;
 import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.regulation.dto.request.RegulationUploadRequest;
 import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
+import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.service.RegulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,4 +45,20 @@ public class AdminRegulationController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("규정 파일이 업로드되었습니다.", response));
     }
+    /**
+     * 관리자 규정의 사용 상태 변경 API를 제공합니다.
+     *
+     * @param regulationId 상태를 변경할 규정 ID
+     * @param status 변경할 규정 사용 상태
+     * @return 상태 변경 결과
+     */
+    @PatchMapping("/{regulationId}/status")
+    public ResponseEntity<ApiResponse<Void>> updateStatus(
+            @PathVariable Long regulationId,
+            @RequestParam RegulationStatus status
+    ) {
+        regulationService.updateStatus(regulationId, status);
+        return ResponseEntity.ok(ApiResponse.success("규정 상태가 변경되었습니다.", null));
+    }
+
 }
