@@ -35,22 +35,40 @@ public class ChatResponseService {
                 requestId
         );
 
-        String content = generationService.generate(
-                conversationService.getRecentMessagesForAi(
-                        memberId,
-                        conversationId
-                )
-        );
+        try {
+            String content = generationService.generate(
+                    conversationService.getRecentMessagesForAi(
+                            memberId,
+                            conversationId
+                    )
+            );
 
-        conversationService.completeAssistantMessage(
-                assistantMessage.getId(),
-                content,
-                "amazon.nova-2-lite-v1:0",
-                null,
-                null,
-                null
-        );
+            conversationService.completeAssistantMessage(
+                    assistantMessage.getId(),
+                    content,
+                    "amazon.nova-2-lite-v1:0",
+                    null,
+                    null,
+                    null
+            );
+        } catch (RuntimeException exception) {
+            conversationService.failAssistantMessage(
+                    assistantMessage.getId(),
+                    "AI_RESPONSE_FAILED"
+            );
+            throw exception;
+        }
 
         return assistantMessage;
+    }
+
+    /**
+     * 사용자가 중지한 AI 응답을 취소 상태로 변경한다.
+     *
+     * @param messageId AI 응답 메시지 ID
+     */
+    @Transactional
+    public void cancel(Long messageId) {
+        conversationService.cancelAssistantMessage(messageId);
     }
 }
