@@ -39,11 +39,6 @@ public class RegulationDocument extends BaseEntity {
     @Column(nullable = false)
     private LocalDate effectiveDate;
 
-    /** 규정 검색 접근 범위입니다. */
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private RegulationAccessLevel accessLevel;
-
     /** 규정 버전입니다. */
     @Column(nullable = false, length = 30)
     private String version;
@@ -87,7 +82,6 @@ public class RegulationDocument extends BaseEntity {
             RegulationCategory category,
             String version,
             LocalDate effectiveDate,
-            RegulationAccessLevel accessLevel,
             String content,
             RegulationStatus status,
             RegulationIngestionStatus ingestionStatus
@@ -108,7 +102,6 @@ public class RegulationDocument extends BaseEntity {
             RegulationCategory category,
             String version,
             LocalDate effectiveDate,
-            RegulationAccessLevel accessLevel,
             String content
     ) {
         return RegulationDocument.builder()
@@ -116,7 +109,6 @@ public class RegulationDocument extends BaseEntity {
                 .category(category)
                 .version(version.trim())
                 .effectiveDate(effectiveDate)
-                .accessLevel(accessLevel)
                 .content(content.trim())
                 .status(RegulationStatus.INACTIVE)
                 .ingestionStatus(RegulationIngestionStatus.PENDING)
@@ -131,7 +123,6 @@ public class RegulationDocument extends BaseEntity {
             RegulationCategory category,
             String version,
             LocalDate effectiveDate,
-            RegulationAccessLevel accessLevel,
             String originalFilename,
             String objectKey,
             String fileType,
@@ -144,7 +135,6 @@ public class RegulationDocument extends BaseEntity {
                 category,
                 version,
                 effectiveDate,
-                accessLevel,
                 content
         );
         document.originalFilename = originalFilename;
