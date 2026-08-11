@@ -38,7 +38,7 @@ public class ChatConversationController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         authorizationService.requireAuthenticated(userDetails);
-        var conversation = conversationService.createWithFirstMessage(
+        var conversation = conversationService.saveUserMessage(
                 userDetails.getMemberId(),
                 request
         );
