@@ -40,6 +40,12 @@ public enum RegulationErrorCode implements ErrorCode {
     REGULATION_UPLOAD_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "규정 파일 업로드에 실패했습니다."
+    ),
+
+    /** Qdrant 규정 검색 응답을 해석하지 못한 경우입니다. */
+    REGULATION_SEARCH_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "규정 검색 중 오류가 발생했습니다."
     );
 
     private final HttpStatus httpStatus;
