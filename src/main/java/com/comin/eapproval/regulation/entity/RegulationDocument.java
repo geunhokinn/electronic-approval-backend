@@ -13,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 /**
  * 규정 원본 파일의 메타데이터와 버전 정보를 저장하는 엔티티입니다.
  */
@@ -31,7 +33,16 @@ public class RegulationDocument extends BaseEntity {
 
     /** 규정 분류입니다. */
     @Column(nullable = false, length = 100)
-    private String category;
+    private RegulationCategory category;
+
+    /** 규정 시행일입니다. */
+    @Column(nullable = false)
+    private LocalDate effectiveDate;
+
+    /** 규정 검색 접근 범위입니다. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private RegulationAccessLevel accessLevel;
 
     /** 규정 버전입니다. */
     @Column(nullable = false, length = 30)
@@ -73,8 +84,10 @@ public class RegulationDocument extends BaseEntity {
     @Builder
     private RegulationDocument(
             String title,
-            String category,
+            RegulationCategory category,
             String version,
+            LocalDate effectiveDate,
+            RegulationAccessLevel accessLevel,
             String content,
             RegulationStatus status,
             RegulationIngestionStatus ingestionStatus
@@ -92,14 +105,18 @@ public class RegulationDocument extends BaseEntity {
      */
     public static RegulationDocument create(
             String title,
-            String category,
+            RegulationCategory category,
             String version,
+            LocalDate effectiveDate,
+            RegulationAccessLevel accessLevel,
             String content
     ) {
         return RegulationDocument.builder()
                 .title(title.trim())
-                .category(category.trim())
+                .category(category)
                 .version(version.trim())
+                .effectiveDate(effectiveDate)
+                .accessLevel(accessLevel)
                 .content(content.trim())
                 .status(RegulationStatus.INACTIVE)
                 .ingestionStatus(RegulationIngestionStatus.PENDING)
@@ -111,8 +128,10 @@ public class RegulationDocument extends BaseEntity {
      */
     public static RegulationDocument createWithFile(
             String title,
-            String category,
+            RegulationCategory category,
             String version,
+            LocalDate effectiveDate,
+            RegulationAccessLevel accessLevel,
             String originalFilename,
             String objectKey,
             String fileType,
@@ -120,7 +139,14 @@ public class RegulationDocument extends BaseEntity {
             Long fileSize,
             String content
     ) {
-        RegulationDocument document = create(title, category, version, content);
+        RegulationDocument document = create(
+                title,
+                category,
+                version,
+                effectiveDate,
+                accessLevel,
+                content
+        );
         document.originalFilename = originalFilename;
         document.objectKey = objectKey;
         document.fileType = fileType;
