@@ -59,4 +59,13 @@ public class RegulationChunk {
                 .content(content.trim())
                 .build();
     }
+
+    /**
+     * Qdrant Point ID를 저장합니다.
+     *
+     * @param vectorId Qdrant Point ID
+     */
+    public void updateVectorId(String vectorId) {
+        this.vectorId = vectorId;
+    }
 }
