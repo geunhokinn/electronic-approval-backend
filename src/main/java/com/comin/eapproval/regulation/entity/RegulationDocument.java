@@ -65,19 +65,26 @@ public class RegulationDocument extends BaseEntity {
     @Column(nullable = false, length = 20)
     private RegulationStatus status;
 
+    /** AI 검색 데이터 적재 처리 상태입니다. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RegulationIngestionStatus ingestionStatus;
+
     @Builder
     private RegulationDocument(
             String title,
             String category,
             String version,
             String content,
-            RegulationStatus status
+            RegulationStatus status,
+            RegulationIngestionStatus ingestionStatus
     ) {
         this.title = title;
         this.category = category;
         this.version = version;
         this.content = content;
         this.status = status;
+        this.ingestionStatus = ingestionStatus;
     }
 
     /**
@@ -94,7 +101,8 @@ public class RegulationDocument extends BaseEntity {
                 .category(category.trim())
                 .version(version.trim())
                 .content(content.trim())
-                .status(RegulationStatus.ACTIVE)
+                .status(RegulationStatus.INACTIVE)
+                .ingestionStatus(RegulationIngestionStatus.PENDING)
                 .build();
     }
 
@@ -136,5 +144,23 @@ public class RegulationDocument extends BaseEntity {
         this.fileType = fileType;
         this.contentType = contentType;
         this.fileSize = fileSize;
+    }
+
+    /**
+     * 규정의 사용 상태를 변경합니다.
+     *
+     * @param status 변경할 규정 사용 상태
+     */
+    public void updateStatus(RegulationStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * 규정의 AI 적재 처리 상태를 변경합니다.
+     *
+     * @param ingestionStatus 변경할 AI 적재 처리 상태
+     */
+    public void updateIngestionStatus(RegulationIngestionStatus ingestionStatus) {
+        this.ingestionStatus = ingestionStatus;
     }
 }
