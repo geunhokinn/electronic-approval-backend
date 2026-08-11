@@ -30,6 +30,7 @@ public class RegulationService {
     private final RegulationDocumentRepository documentRepository;
     private final RegulationStorageService storageService;
     private final RegulationIngestionService ingestionService;
+    private final RegulationQdrantService regulationQdrantService;
 
     /** 관리자 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다. */
     /**
@@ -57,7 +58,6 @@ public class RegulationService {
                         request.getCategory(),
                         request.getVersion(),
                         request.getEffectiveDate(),
-                        request.getAccessLevel(),
                         ""
                 )
         );
@@ -138,6 +138,10 @@ public class RegulationService {
         }
 
         document.updateStatus(status);
+        regulationQdrantService.updateActiveStatus(
+                regulationId,
+                status == RegulationStatus.ACTIVE
+        );
     }
 
     /**
