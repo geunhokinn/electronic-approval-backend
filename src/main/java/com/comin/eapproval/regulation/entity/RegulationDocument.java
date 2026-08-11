@@ -189,4 +189,13 @@ public class RegulationDocument extends BaseEntity {
     public void updateIngestionStatus(RegulationIngestionStatus ingestionStatus) {
         this.ingestionStatus = ingestionStatus;
     }
+
+    /**
+     * 파일에서 추출한 규정 원문을 저장합니다.
+     *
+     * @param content 추출된 Markdown 원문
+     */
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
