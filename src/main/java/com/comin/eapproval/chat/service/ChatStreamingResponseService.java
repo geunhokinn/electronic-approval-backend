@@ -47,7 +47,21 @@ public class ChatStreamingResponseService {
     ) {
         List<ChatResponse> responses = responseStream.collectList().block();
         if (responses == null || responses.isEmpty()) {
-            throw new IllegalStateException("AI 응답이 비어 있습니다.");
+            String fallbackContent = "관련 규정을 찾지 못했습니다.";
+            conversationService.completeAssistantMessage(
+                    assistantMessage.getId(),
+                    fallbackContent,
+                    MODEL,
+                    null,
+                    null,
+                    null
+            );
+            return new SseCompletedData(
+                    assistantMessage.getId(),
+                    fallbackContent,
+                    sources == null ? List.of() : sources,
+                    null
+            );
         }
 
         String content = responses.stream()
