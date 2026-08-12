@@ -3,6 +3,8 @@ package com.comin.eapproval.regulation.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 /**
  * Qdrant에서 검색된 규정 청크 결과입니다.
  */
@@ -27,6 +29,9 @@ public class RegulationSearchResult {
 
     /** 규정 버전입니다. */
     private String version;
+
+    /** 규정 시행일입니다. */
+    private LocalDate effectiveDate;
 
     /** 조항 번호입니다. */
     private String articleNumber;
