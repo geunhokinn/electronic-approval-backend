@@ -14,6 +14,7 @@ import com.comin.eapproval.document.service.DocumentToolService;
 import com.comin.eapproval.regulation.service.RegulationToolService;
 
 import java.util.List;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
@@ -43,6 +44,18 @@ public class ChatGenerationService {
      * @return 생성된 AI 응답
      */
     public String generate(List<ChatMessage> messages) {
+        return generate(messages, null, null);
+    }
+
+    /**
+     * 서버가 인증한 사용자 정보를 ToolContext로 주입하여 AI 응답을 생성합니다.
+     *
+     * @param messages AI에 전달할 대화 메시지
+     * @param memberId 인증된 회원 ID
+     * @param role 인증된 회원 역할
+     * @return 생성된 AI 응답
+     */
+    public String generate(List<ChatMessage> messages, Long memberId, String role) {
         List<Message> promptMessages = messages.stream()
                 .filter(message -> message.getContent() != null
                         && !message.getContent().isBlank())
@@ -59,6 +72,7 @@ public class ChatGenerationService {
                         documentToolService,
                         approvalDetailToolService
                 )
+                .toolContext(toolContext(memberId, role))
                 .call()
                 .content();
     }
@@ -70,6 +84,18 @@ public class ChatGenerationService {
      * @return Nova 응답 스트림
      */
     public Flux<ChatResponse> stream(List<ChatMessage> messages) {
+        return stream(messages, null, null);
+    }
+
+    /**
+     * 서버가 인증한 사용자 정보를 ToolContext로 주입하여 AI 스트림을 생성합니다.
+     *
+     * @param messages AI에 전달할 대화 메시지
+     * @param memberId 인증된 회원 ID
+     * @param role 인증된 회원 역할
+     * @return AI 응답 스트림
+     */
+    public Flux<ChatResponse> stream(List<ChatMessage> messages, Long memberId, String role) {
         List<Message> promptMessages = messages.stream()
                 .filter(message -> message.getContent() != null
                         && !message.getContent().isBlank())
@@ -86,8 +112,23 @@ public class ChatGenerationService {
                         documentToolService,
                         approvalDetailToolService
                 )
+                .toolContext(toolContext(memberId, role))
                 .stream()
                 .chatResponse();
+    }
+
+    /**
+     * 인증 정보를 ToolContext 맵으로 변환합니다.
+     *
+     * @param memberId 인증된 회원 ID
+     * @param role 인증된 회원 역할
+     * @return Tool 실행 컨텍스트
+     */
+    private Map<String, Object> toolContext(Long memberId, String role) {
+        if (memberId == null || role == null) {
+            return Map.of();
+        }
+        return Map.of(ChatToolContext.MEMBER_ID, memberId, ChatToolContext.ROLE, role);
     }
 
     private Message toPromptMessage(ChatMessage message) {

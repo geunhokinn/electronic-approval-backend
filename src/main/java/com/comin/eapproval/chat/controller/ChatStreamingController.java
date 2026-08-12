@@ -40,6 +40,10 @@ public class ChatStreamingController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         authorizationService.requireAuthenticated(userDetails);
-        return streamingService.stream(userDetails.getMemberId(), request);
+        return streamingService.stream(
+                userDetails.getMemberId(),
+                userDetails.getRole(),
+                request
+        );
     }
 }

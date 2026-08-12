@@ -5,11 +5,13 @@ import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalToolResponse;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
 import com.comin.eapproval.chat.dto.response.AiToolResponse;
+import com.comin.eapproval.chat.service.ChatToolContext;
 import com.comin.eapproval.global.security.AiAuthorizationService;
 import com.comin.eapproval.member.entity.enums.MemberRole;
 import com.comin.eapproval.member.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,12 +54,16 @@ public class ApprovalDetailToolService {
      * @return Tool 결재 조회 결과
      */
     @Tool(description = "문서 ID로 결재자와 결재 상태를 조회합니다. 사용자가 조회할 수 있는 결재만 반환합니다.")
-    public AiToolResponse<ApprovalToolResponse> getApproval(Long documentId) {
+    public AiToolResponse<ApprovalToolResponse> getApproval(
+            Long documentId,
+            ToolContext toolContext
+    ) {
         if (documentId == null) {
             return AiToolResponse.failure("INVALID_DOCUMENT_ID", "문서 ID가 필요합니다.");
         }
 
-        CustomUserDetails userDetails = currentUser();
+        Long memberId = ChatToolContext.memberId(toolContext);
+        MemberRole role = ChatToolContext.role(toolContext);
         Long approvalId = approvalRepository.findByDocument_Id(documentId)
                 .map(approval -> approval.getId())
                 .orElse(null);
@@ -67,9 +73,19 @@ public class ApprovalDetailToolService {
 
         ApprovalDetailResponse response = getApprovalDetail(
                 new com.comin.eapproval.approval.dto.request.ApprovalDetailToolRequest(approvalId),
-                userDetails
+                memberId,
+                role
         );
         return AiToolResponse.success(ApprovalToolResponse.from(response));
+    }
+
+    /** 서버가 주입한 인증 정보로 결재 상세를 조회합니다. */
+    private ApprovalDetailResponse getApprovalDetail(
+            ApprovalDetailToolRequest request,
+            Long memberId,
+            MemberRole role
+    ) {
+        return approvalService.getApprovalDetail(memberId, role, request.getApprovalId());
     }
 
     /** 현재 인증된 사용자를 조회합니다. */

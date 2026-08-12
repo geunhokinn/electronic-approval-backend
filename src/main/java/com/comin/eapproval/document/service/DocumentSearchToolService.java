@@ -41,6 +41,18 @@ public class DocumentSearchToolService {
                 request.getStatus(),
                 request.getKeyword(),
                 PageRequest.of(0, MAX_RESULT_SIZE)
+                ).getContent();
+    }
+
+    /** 서버가 주입한 인증 정보로 문서를 검색합니다. */
+    public List<DocumentListResponse> search(
+            DocumentSearchToolRequest request,
+            Long memberId,
+            String role
+    ) {
+        return documentRepository.searchAccessibleDocuments(
+                memberId, role, request.getStatus(), request.getKeyword(),
+                PageRequest.of(0, MAX_RESULT_SIZE)
         ).getContent();
     }
 }

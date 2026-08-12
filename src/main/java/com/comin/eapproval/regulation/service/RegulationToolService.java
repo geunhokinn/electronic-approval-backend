@@ -1,6 +1,7 @@
 package com.comin.eapproval.regulation.service;
 
 import com.comin.eapproval.chat.dto.response.AiToolResponse;
+import com.comin.eapproval.chat.service.ChatToolContext;
 import com.comin.eapproval.regulation.dto.response.RegulationListToolResponse;
 import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
 import com.comin.eapproval.regulation.dto.response.RegulationSearchToolResponse;
@@ -8,6 +9,7 @@ import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,7 +35,11 @@ public class RegulationToolService {
      * @return 검색 근거 또는 안전한 오류 응답
      */
     @Tool(description = "사용자 질문과 관련된 활성 사내 규정을 검색합니다. 특정 규정의 조항이나 기준을 확인할 때 사용합니다.")
-    public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(String query) {
+    public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(
+            String query,
+            ToolContext toolContext
+    ) {
+        ChatToolContext.memberId(toolContext);
         if (query == null || query.isBlank()) {
             return AiToolResponse.failure("INVALID_QUERY", "규정 검색어가 필요합니다.");
         }
@@ -54,7 +60,10 @@ public class RegulationToolService {
      * @return 활성 규정 목록 또는 안전한 오류 응답
      */
     @Tool(description = "현재 활성화된 사내 규정 목록을 조회합니다. 등록된 규정의 종류나 이름을 물을 때 사용합니다.")
-    public AiToolResponse<List<RegulationListToolResponse>> listActiveRegulations() {
+    public AiToolResponse<List<RegulationListToolResponse>> listActiveRegulations(
+            ToolContext toolContext
+    ) {
+        ChatToolContext.memberId(toolContext);
         List<RegulationListToolResponse> results = regulationDocumentRepository
                 .findByStatusOrderByTitleAscVersionDesc(RegulationStatus.ACTIVE)
                 .stream()

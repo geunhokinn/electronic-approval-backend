@@ -37,4 +37,9 @@ public class DocumentDetailToolService {
                 MemberRole.valueOf(userDetails.getRole())
         );
     }
+
+    /** 서버가 주입한 인증 정보로 문서 상세를 조회합니다. */
+    public DocumentDetailResponse getDocumentDetail(Long documentId, Long memberId, String role) {
+        return documentService.getDocumentDetail(documentId, memberId, MemberRole.valueOf(role));
+    }
 }

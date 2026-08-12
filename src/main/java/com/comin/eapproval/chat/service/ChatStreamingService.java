@@ -36,7 +36,7 @@ public class ChatStreamingService {
      * @param request 스트리밍 요청
      * @return SSE 이벤트 스트림
      */
-    public Flux<ServerSentEvent<Object>> stream(Long memberId, ChatStreamingRequest request) {
+    public Flux<ServerSentEvent<Object>> stream(Long memberId, String role, ChatStreamingRequest request) {
         ChatMessage userMessage = preparationService.saveUserMessage(memberId, request);
         Long conversationId = userMessage.getConversation().getId();
         String requestId = request.getRequestId();
@@ -53,7 +53,7 @@ public class ChatStreamingService {
 
         return Flux.concat(
                 Flux.just(event("started", started)),
-                createResponseStream(memberId, request, assistantMessage)
+                createResponseStream(memberId, role, request, assistantMessage)
         ).onErrorResume(error -> {
             responseService.fail(assistantMessage, "CHAT_AI_RESPONSE_FAILED");
             SseEvent<SseErrorData> failed = SseEvent.of(
@@ -76,6 +76,7 @@ public class ChatStreamingService {
      */
     private Flux<ServerSentEvent<Object>> createResponseStream(
             Long memberId,
+            String role,
             ChatStreamingRequest request,
             ChatMessage assistantMessage
     ) {
@@ -83,7 +84,7 @@ public class ChatStreamingService {
         String requestId = request.getRequestId();
         List<ChatResponse> responses = new ArrayList<>();
 
-        Flux<ChatResponse> responseStream = createModelStream(memberId, request, conversationId);
+        Flux<ChatResponse> responseStream = createModelStream(memberId, role, request, conversationId);
         Flux<ServerSentEvent<Object>> deltas = responseStream
                 .doOnNext(responses::add)
                 .map(response -> event("delta", SseEvent.of(
@@ -125,9 +126,14 @@ public class ChatStreamingService {
      * @param conversationId 대화방 ID
      * @return Nova 응답 스트림
      */
-    private Flux<ChatResponse> createModelStream(Long memberId, ChatStreamingRequest request, Long conversationId) {
+    private Flux<ChatResponse> createModelStream(
+            Long memberId,
+            String role,
+            ChatStreamingRequest request,
+            Long conversationId
+    ) {
         List<ChatMessage> context = conversationService.getRecentMessagesForAi(memberId, conversationId);
-        return generationService.stream(context);
+        return generationService.stream(context, memberId, role);
     }
 
     /**
