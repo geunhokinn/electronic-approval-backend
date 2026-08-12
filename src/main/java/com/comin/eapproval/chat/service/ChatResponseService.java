@@ -1,6 +1,7 @@
 package com.comin.eapproval.chat.service;
 
 import com.comin.eapproval.chat.entity.ChatMessage;
+import com.comin.eapproval.chat.dto.response.ChatResponseResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,29 @@ public class ChatResponseService {
         }
 
         return assistantMessage;
+    }
+
+    /**
+     * AI 응답을 저장하고 SSE 전송에 필요한 공통 결과 DTO로 반환한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @param requestId 요청 식별자
+     * @return 사용자 메시지와 AI 메시지를 포함한 응답 결과
+     */
+    @Transactional
+    public ChatResponseResult generateResult(
+            Long memberId,
+            Long conversationId,
+            String requestId
+    ) {
+        ChatMessage assistantMessage = generateAndSave(memberId, conversationId, requestId);
+        ChatMessage userMessage = conversationService.findUserMessage(
+                memberId,
+                conversationId,
+                requestId
+        );
+        return ChatResponseResult.completed(userMessage, assistantMessage);
     }
 
     /**
