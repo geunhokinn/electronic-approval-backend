@@ -20,6 +20,16 @@ public class ChatStreamingResponseService {
 
     private final ChatConversationService conversationService;
 
+    /** 스트리밍 실패 시 ASSISTANT 메시지를 실패 상태로 기록한다. */
+    public void fail(ChatMessage assistantMessage, String errorCode) {
+        conversationService.failAssistantMessage(assistantMessage.getId(), errorCode);
+    }
+
+    /** 사용자가 스트리밍을 중지한 경우 ASSISTANT 메시지를 취소 상태로 기록한다. */
+    public void cancel(ChatMessage assistantMessage) {
+        conversationService.cancelAssistantMessage(assistantMessage.getId());
+    }
+
     /**
      * 스트림을 끝까지 수집하고 ASSISTANT 메시지와 완료 데이터를 생성한다.
      *
