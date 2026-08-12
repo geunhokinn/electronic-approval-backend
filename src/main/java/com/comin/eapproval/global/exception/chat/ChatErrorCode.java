@@ -26,7 +26,11 @@ public enum ChatErrorCode implements ErrorCode {
 
     CHAT_MEMBER_NOT_FOUND(
             HttpStatus.NOT_FOUND,
-            "회원을 찾을 수 없습니다.");
+            "회원을 찾을 수 없습니다."),
+
+    CHAT_REQUEST_IN_PROGRESS(
+            HttpStatus.CONFLICT,
+            "현재 대화방에서 처리 중인 요청이 있습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
