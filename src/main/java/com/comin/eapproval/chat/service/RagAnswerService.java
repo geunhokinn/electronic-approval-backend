@@ -18,6 +18,7 @@ public class RagAnswerService {
 
     private final ChatClient.Builder chatClientBuilder;
     private final RagPromptService promptService;
+    private final RagEvidenceValidationService evidenceValidationService;
 
     /**
      * 규정 근거를 기반으로 AI 답변을 생성한다.
@@ -27,7 +28,7 @@ public class RagAnswerService {
      * @return Nova가 생성한 규정 답변
      */
     public String generate(String question, List<RagEvidence> evidences) {
-        if (evidences == null || evidences.isEmpty()) {
+        if (!evidenceValidationService.hasUsableEvidence(evidences)) {
             return "관련 규정을 찾지 못했습니다.";
         }
 
