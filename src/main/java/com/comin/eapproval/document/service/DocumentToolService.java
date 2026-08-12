@@ -9,6 +9,7 @@ import com.comin.eapproval.document.dto.response.DocumentToolSearchResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,9 @@ public class DocumentToolService {
      */
     @Tool(description = "사용자가 조회할 수 있는 문서를 제목·본문 키워드와 상태로 검색합니다. 문서 ID가 없을 때 먼저 사용합니다.")
     public AiToolResponse<List<DocumentToolSearchResponse>> searchDocuments(
+            @ToolParam(required = false, description = "검색할 문서 제목 또는 본문 키워드입니다. 없으면 전체 문서를 검색합니다.")
             String keyword,
+            @ToolParam(required = false, description = "문서 상태입니다. 없으면 모든 상태를 검색합니다.")
             String status,
             ToolContext toolContext
     ) {
