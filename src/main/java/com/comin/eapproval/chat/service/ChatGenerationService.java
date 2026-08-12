@@ -4,12 +4,15 @@ import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.chat.entity.ChatMessageRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import reactor.core.publisher.Flux;
 
 /**
  * 최근 대화 맥락을 기반으로 일반 AI 응답을 생성하는 서비스.
@@ -45,6 +48,26 @@ public class ChatGenerationService {
                 .messages(promptMessages)
                 .call()
                 .content();
+    }
+
+    /**
+     * 최근 대화 맥락을 Nova 스트리밍 응답으로 생성한다.
+     *
+     * @param messages AI에 전달할 최근 대화 목록
+     * @return Nova 응답 스트림
+     */
+    public Flux<ChatResponse> stream(List<ChatMessage> messages) {
+        List<Message> promptMessages = messages.stream()
+                .map(this::toPromptMessage)
+                .toList();
+
+        return chatClientBuilder
+                .build()
+                .prompt()
+                .system(SYSTEM_PROMPT)
+                .messages(promptMessages)
+                .stream()
+                .chatResponse();
     }
 
     private Message toPromptMessage(ChatMessage message) {
