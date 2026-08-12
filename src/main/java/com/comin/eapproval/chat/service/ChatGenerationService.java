@@ -38,6 +38,8 @@ public class ChatGenerationService {
      */
     public String generate(List<ChatMessage> messages) {
         List<Message> promptMessages = messages.stream()
+                .filter(message -> message.getContent() != null
+                        && !message.getContent().isBlank())
                 .map(this::toPromptMessage)
                 .toList();
 
@@ -58,6 +60,8 @@ public class ChatGenerationService {
      */
     public Flux<ChatResponse> stream(List<ChatMessage> messages) {
         List<Message> promptMessages = messages.stream()
+                .filter(message -> message.getContent() != null
+                        && !message.getContent().isBlank())
                 .map(this::toPromptMessage)
                 .toList();
 
