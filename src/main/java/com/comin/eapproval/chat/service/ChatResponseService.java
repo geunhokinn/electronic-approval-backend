@@ -3,15 +3,11 @@ package com.comin.eapproval.chat.service;
 import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.chat.dto.response.ChatResponseResult;
 import com.comin.eapproval.chat.dto.response.RagAnswerResponse;
-import com.comin.eapproval.chat.dto.response.RagEvidence;
 import com.comin.eapproval.chat.dto.response.RagSource;
-import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
-import com.comin.eapproval.regulation.service.RegulationSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -126,16 +122,12 @@ public class ChatResponseService {
             String answer = generationService.generate(context);
             complete(assistantMessage, answer);
             return RagAnswerResponse.of(answer, List.of());
-        } catch (IOException | RuntimeException exception) {
+        } catch (RuntimeException exception) {
             conversationService.failAssistantMessage(
                     assistantMessage.getId(),
-                    exception instanceof IOException
-                            ? "QDRANT_SEARCH_FAILED"
-                            : "AI_RESPONSE_FAILED"
+                    "AI_RESPONSE_FAILED"
             );
-            throw exception instanceof RuntimeException runtimeException
-                    ? runtimeException
-                    : new IllegalStateException(exception);
+            throw exception;
         }
     }
 
