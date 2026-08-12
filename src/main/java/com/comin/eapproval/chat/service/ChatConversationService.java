@@ -1,10 +1,7 @@
 package com.comin.eapproval.chat.service;
 
 import com.comin.eapproval.chat.dto.request.ChatMessageCreateRequest;
-import com.comin.eapproval.chat.entity.ChatConversation;
-import com.comin.eapproval.chat.entity.ChatConversationStatus;
-import com.comin.eapproval.chat.entity.ChatMessage;
-import com.comin.eapproval.chat.entity.ChatMessageRole;
+import com.comin.eapproval.chat.entity.*;
 import com.comin.eapproval.chat.repository.ChatConversationRepository;
 import com.comin.eapproval.chat.repository.ChatMessageRepository;
 import com.comin.eapproval.global.exception.BusinessException;
@@ -215,6 +212,13 @@ public class ChatConversationService {
             String requestId
     ) {
         ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+        if (messageRepository.existsByConversationIdAndRoleAndStatus(
+                conversationId,
+                ChatMessageRole.ASSISTANT,
+                ChatMessageStatus.PROCESSING
+        )) {
+            throw new BusinessException(ChatErrorCode.CHAT_REQUEST_IN_PROGRESS);
+        }
         ChatMessage message = ChatMessage.assistantMessage(
                 conversation,
                 requestId,
