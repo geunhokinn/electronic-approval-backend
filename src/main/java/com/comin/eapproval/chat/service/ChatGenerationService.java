@@ -10,6 +10,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import com.comin.eapproval.approval.service.ApprovalDetailToolService;
+import com.comin.eapproval.approval.service.ApprovalToolService;
 import com.comin.eapproval.document.service.DocumentToolService;
 import com.comin.eapproval.regulation.service.RegulationToolService;
 
@@ -44,6 +45,7 @@ public class ChatGenerationService {
     private final RegulationToolService regulationToolService;
     private final DocumentToolService documentToolService;
     private final ApprovalDetailToolService approvalDetailToolService;
+    private final ApprovalToolService approvalToolService;
 
     /**
      * 최근 대화 목록을 Nova 2 Lite에 전달해 일반 응답을 생성한다.
@@ -79,7 +81,8 @@ public class ChatGenerationService {
                 .tools(
                         regulationToolService,
                         documentToolService,
-                        approvalDetailToolService
+                        approvalDetailToolService,
+                        approvalToolService
                 )
                 .toolContext(toolContext(memberId, role))
                 .call()
@@ -120,7 +123,8 @@ public class ChatGenerationService {
                 .tools(
                         regulationToolService,
                         documentToolService,
-                        approvalDetailToolService
+                        approvalDetailToolService,
+                        approvalToolService
                 )
                 .toolContext(toolContext(memberId, role))
                 .stream()
