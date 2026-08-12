@@ -57,7 +57,8 @@ public class SecurityConfig {
                                 "/api/members/signup",
                                 "/api/admin/**",
                                 "/api/documents/**",
-                                "/api/approvals/**"
+                                "/api/approvals/**",
+                                "/api/chat/messages/stream"
                         )
                 )
                 .headers(headers -> headers
