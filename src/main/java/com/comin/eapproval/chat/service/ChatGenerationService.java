@@ -9,6 +9,9 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
+import com.comin.eapproval.approval.service.ApprovalDetailToolService;
+import com.comin.eapproval.document.service.DocumentToolService;
+import com.comin.eapproval.regulation.service.RegulationToolService;
 
 import java.util.List;
 
@@ -29,6 +32,9 @@ public class ChatGenerationService {
             """;
 
     private final ChatClient.Builder chatClientBuilder;
+    private final RegulationToolService regulationToolService;
+    private final DocumentToolService documentToolService;
+    private final ApprovalDetailToolService approvalDetailToolService;
 
     /**
      * 최근 대화 목록을 Nova 2 Lite에 전달해 일반 응답을 생성한다.
@@ -48,6 +54,11 @@ public class ChatGenerationService {
                 .prompt()
                 .system(SYSTEM_PROMPT)
                 .messages(promptMessages)
+                .tools(
+                        regulationToolService,
+                        documentToolService,
+                        approvalDetailToolService
+                )
                 .call()
                 .content();
     }
@@ -70,6 +81,11 @@ public class ChatGenerationService {
                 .prompt()
                 .system(SYSTEM_PROMPT)
                 .messages(promptMessages)
+                .tools(
+                        regulationToolService,
+                        documentToolService,
+                        approvalDetailToolService
+                )
                 .stream()
                 .chatResponse();
     }
