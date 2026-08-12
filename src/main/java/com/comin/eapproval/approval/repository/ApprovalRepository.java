@@ -3,6 +3,8 @@ package com.comin.eapproval.approval.repository;
 import com.comin.eapproval.approval.entity.Approval;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface ApprovalRepository extends JpaRepository<Approval, Long>, ApprovalRepositoryCustom {
 
     /**
@@ -16,4 +18,7 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long>, Appro
             Long documentId,
             Long approverId
     );
+
+    /** 문서 ID로 연결된 결재 정보를 조회합니다. */
+    Optional<Approval> findByDocument_Id(Long documentId);
 }
