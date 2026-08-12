@@ -25,11 +25,6 @@ public class ChatResponseService {
 
     private final ChatConversationService conversationService;
     private final ChatGenerationService generationService;
-    private final RegulationQuestionClassifier questionClassifier;
-    private final RegulationSearchService regulationSearchService;
-    private final RagContextService ragContextService;
-    private final RagAnswerService ragAnswerService;
-    private final RagSourceService ragSourceService;
 
     /**
      * 최근 대화 맥락으로 AI 응답을 생성하고 완료된 메시지로 저장한다.
@@ -128,19 +123,9 @@ public class ChatResponseService {
         );
 
         try {
-            if (!questionClassifier.isRegulationQuestion(question)) {
-                String answer = generationService.generate(context);
-                complete(assistantMessage, answer);
-                return RagAnswerResponse.of(answer, List.of());
-            }
-
-            List<RegulationSearchResult> searchResults = regulationSearchService.search(question);
-            List<RagEvidence> evidences = ragContextService.prepare(question, searchResults);
-            String answer = ragAnswerService.generate(question, evidences);
-            List<RagSource> sources = ragSourceService.createSources(evidences);
-            String storedContent = appendSources(answer, sources);
-            complete(assistantMessage, storedContent);
-            return RagAnswerResponse.of(answer, sources);
+            String answer = generationService.generate(context);
+            complete(assistantMessage, answer);
+            return RagAnswerResponse.of(answer, List.of());
         } catch (IOException | RuntimeException exception) {
             conversationService.failAssistantMessage(
                     assistantMessage.getId(),
@@ -158,7 +143,7 @@ public class ChatResponseService {
         conversationService.completeAssistantMessage(
                 assistantMessage.getId(),
                 content,
-                ragAnswerService.getModel(),
+                MODEL,
                 null,
                 null,
                 null

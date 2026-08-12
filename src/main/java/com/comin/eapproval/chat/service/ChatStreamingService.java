@@ -25,10 +25,6 @@ public class ChatStreamingService {
     private final ChatStreamingPreparationService preparationService;
     private final ChatConversationService conversationService;
     private final ChatGenerationService generationService;
-    private final RegulationQuestionClassifier questionClassifier;
-    private final RegulationSearchService regulationSearchService;
-    private final RagContextService ragContextService;
-    private final RagAnswerService ragAnswerService;
     private final RagSourceService ragSourceService;
     private final ChatStreamingResponseService responseService;
 
@@ -132,13 +128,7 @@ public class ChatStreamingService {
     private Flux<ChatResponse> createModelStream(Long memberId, ChatStreamingRequest request, Long conversationId) {
         try {
             List<ChatMessage> context = conversationService.getRecentMessagesForAi(memberId, conversationId);
-            if (!questionClassifier.isRegulationQuestion(request.getMessage())) {
-                return generationService.stream(context);
-            }
-
-            List<RegulationSearchResult> results = regulationSearchService.search(request.getMessage());
-            List<RagEvidence> evidences = ragContextService.prepare(request.getMessage(), results);
-            return ragAnswerService.stream(request.getMessage(), evidences);
+            return generationService.stream(context);
         } catch (IOException exception) {
             return Flux.error(exception);
         }
