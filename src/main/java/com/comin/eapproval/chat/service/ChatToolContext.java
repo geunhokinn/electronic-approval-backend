@@ -1,6 +1,8 @@
 package com.comin.eapproval.chat.service;
 
 import com.comin.eapproval.member.entity.enums.MemberRole;
+import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.security.SecurityErrorCode;
 import org.springframework.ai.chat.model.ToolContext;
 
 /**
@@ -22,12 +24,12 @@ public final class ChatToolContext {
      *
      * @param toolContext Spring AI Tool 실행 컨텍스트
      * @return 인증된 회원 ID
-     * @throws IllegalArgumentException 컨텍스트에 인증 정보가 없을 때
+     * @throws BusinessException 컨텍스트에 인증 정보가 없을 때
      */
     public static Long memberId(ToolContext toolContext) {
         Object value = toolContext == null ? null : toolContext.getContext().get(MEMBER_ID);
         if (!(value instanceof Number number)) {
-            throw new IllegalArgumentException("인증된 회원 정보가 없습니다.");
+            throw new BusinessException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
         }
         return number.longValue();
     }
@@ -37,17 +39,17 @@ public final class ChatToolContext {
      *
      * @param toolContext Spring AI Tool 실행 컨텍스트
      * @return 인증된 회원 역할
-     * @throws IllegalArgumentException 역할 정보가 없거나 잘못된 경우
+     * @throws BusinessException 역할 정보가 없거나 잘못된 경우
      */
     public static MemberRole role(ToolContext toolContext) {
         Object value = toolContext == null ? null : toolContext.getContext().get(ROLE);
         if (!(value instanceof String role)) {
-            throw new IllegalArgumentException("인증된 역할 정보가 없습니다.");
+            throw new BusinessException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
         }
         try {
             return MemberRole.valueOf(role);
         } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException("유효하지 않은 역할 정보입니다.", exception);
+            throw new BusinessException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
         }
     }
 }
