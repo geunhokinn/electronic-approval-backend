@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RagAnswerService {
 
-    private static final String MODEL = "amazon.nova-2-lite-v1:0";
+    private static final String MODEL = "global.amazon.nova-2-lite-v1:0";
 
     private final ChatClient.Builder chatClientBuilder;
     private final RagPromptService promptService;
