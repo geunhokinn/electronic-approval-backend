@@ -21,6 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatResponseService {
 
+    private static final String MODEL = "global.amazon.nova-2-lite-v1:0";
+
     private final ChatConversationService conversationService;
     private final ChatGenerationService generationService;
     private final RegulationQuestionClassifier questionClassifier;
@@ -60,7 +62,7 @@ public class ChatResponseService {
             conversationService.completeAssistantMessage(
                     assistantMessage.getId(),
                     content,
-                    "amazon.nova-2-lite-v1:0",
+                    MODEL,
                     null,
                     null,
                     null
