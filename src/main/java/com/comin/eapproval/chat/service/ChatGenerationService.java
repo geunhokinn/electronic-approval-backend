@@ -32,6 +32,14 @@ public class ChatGenerationService {
             확인할 수 없는 내용은 추측하지 않고 모른다고 답변합니다.
             """;
 
+    /** 문서 검색 조건을 선택적으로 처리하도록 안내하는 Tool 지침입니다. */
+    private static final String DOCUMENT_SEARCH_INSTRUCTION = """
+            문서 검색 Tool의 keyword와 status는 모두 선택값입니다.
+            사용자가 특정 키워드만 말하면 status 없이 검색하고, 특정 상태만 말하면 keyword 없이 검색합니다.
+            사용자가 내 문서 목록을 요청하면 두 조건을 비워 전체 문서를 검색합니다.
+            검색 결과가 있으면 추가 조건을 먼저 묻지 말고 결과를 바로 안내합니다.
+            """;
+
     private final ChatClient.Builder chatClientBuilder;
     private final RegulationToolService regulationToolService;
     private final DocumentToolService documentToolService;
@@ -66,6 +74,7 @@ public class ChatGenerationService {
                 .build()
                 .prompt()
                 .system(SYSTEM_PROMPT)
+                .system(DOCUMENT_SEARCH_INSTRUCTION)
                 .messages(promptMessages)
                 .tools(
                         regulationToolService,
@@ -106,6 +115,7 @@ public class ChatGenerationService {
                 .build()
                 .prompt()
                 .system(SYSTEM_PROMPT)
+                .system(DOCUMENT_SEARCH_INSTRUCTION)
                 .messages(promptMessages)
                 .tools(
                         regulationToolService,
