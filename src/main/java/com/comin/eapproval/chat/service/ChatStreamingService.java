@@ -126,12 +126,8 @@ public class ChatStreamingService {
      * @return Nova 응답 스트림
      */
     private Flux<ChatResponse> createModelStream(Long memberId, ChatStreamingRequest request, Long conversationId) {
-        try {
-            List<ChatMessage> context = conversationService.getRecentMessagesForAi(memberId, conversationId);
-            return generationService.stream(context);
-        } catch (IOException exception) {
-            return Flux.error(exception);
-        }
+        List<ChatMessage> context = conversationService.getRecentMessagesForAi(memberId, conversationId);
+        return generationService.stream(context);
     }
 
     /**
