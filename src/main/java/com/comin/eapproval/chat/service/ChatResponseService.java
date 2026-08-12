@@ -2,9 +2,17 @@ package com.comin.eapproval.chat.service;
 
 import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.chat.dto.response.ChatResponseResult;
+import com.comin.eapproval.chat.dto.response.RagAnswerResponse;
+import com.comin.eapproval.chat.dto.response.RagEvidence;
+import com.comin.eapproval.chat.dto.response.RagSource;
+import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
+import com.comin.eapproval.regulation.service.RegulationSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * AI 응답 생성 결과를 ASSISTANT 메시지로 저장하는 서비스.
@@ -15,6 +23,11 @@ public class ChatResponseService {
 
     private final ChatConversationService conversationService;
     private final ChatGenerationService generationService;
+    private final RegulationQuestionClassifier questionClassifier;
+    private final RegulationSearchService regulationSearchService;
+    private final RagContextService ragContextService;
+    private final RagAnswerService ragAnswerService;
+    private final RagSourceService ragSourceService;
 
     /**
      * 최근 대화 맥락으로 AI 응답을 생성하고 완료된 메시지로 저장한다.
@@ -84,6 +97,92 @@ public class ChatResponseService {
                 requestId
         );
         return ChatResponseResult.completed(userMessage, assistantMessage);
+    }
+
+    /**
+     * 질문 유형에 따라 일반 답변 또는 규정 기반 답변을 생성하고 저장한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @param requestId 요청 식별자
+     * @param question 사용자 질문
+     * @return AI 답변과 규정 출처
+     */
+    @Transactional
+    public RagAnswerResponse generateAndSaveByQuestion(
+            Long memberId,
+            Long conversationId,
+            String requestId,
+            String question
+    ) {
+        List<ChatMessage> context = conversationService.getRecentMessagesForAi(
+                memberId,
+                conversationId
+        );
+        ChatMessage assistantMessage = conversationService.startAssistantMessage(
+                memberId,
+                conversationId,
+                requestId
+        );
+
+        try {
+            if (!questionClassifier.isRegulationQuestion(question)) {
+                String answer = generationService.generate(context);
+                complete(assistantMessage, answer);
+                return RagAnswerResponse.of(answer, List.of());
+            }
+
+            List<RegulationSearchResult> searchResults = regulationSearchService.search(question);
+            List<RagEvidence> evidences = ragContextService.prepare(question, searchResults);
+            String answer = ragAnswerService.generate(question, evidences);
+            List<RagSource> sources = ragSourceService.createSources(evidences);
+            String storedContent = appendSources(answer, sources);
+            complete(assistantMessage, storedContent);
+            return RagAnswerResponse.of(answer, sources);
+        } catch (IOException | RuntimeException exception) {
+            conversationService.failAssistantMessage(
+                    assistantMessage.getId(),
+                    exception instanceof IOException
+                            ? "QDRANT_SEARCH_FAILED"
+                            : "AI_RESPONSE_FAILED"
+            );
+            throw exception instanceof RuntimeException runtimeException
+                    ? runtimeException
+                    : new IllegalStateException(exception);
+        }
+    }
+
+    private void complete(ChatMessage assistantMessage, String content) {
+        conversationService.completeAssistantMessage(
+                assistantMessage.getId(),
+                content,
+                ragAnswerService.getModel(),
+                null,
+                null,
+                null
+        );
+    }
+
+    private String appendSources(String answer, List<RagSource> sources) {
+        if (sources.isEmpty()) {
+            return answer;
+        }
+
+        StringBuilder content = new StringBuilder(answer)
+                .append("\n\n[출처]\n");
+        sources.forEach(source -> content
+                .append("- ")
+                .append(source.getRegulationName())
+                .append(" ")
+                .append(source.getArticleNumber())
+                .append(" ")
+                .append(source.getArticleTitle())
+                .append("\n  버전: ")
+                .append(source.getVersion())
+                .append("\n  시행일: ")
+                .append(source.getEffectiveDate())
+                .append("\n"));
+        return content.toString().trim();
     }
 
     /**
