@@ -4,6 +4,7 @@ import com.comin.eapproval.chat.dto.request.ChatMessageCreateRequest;
 import com.comin.eapproval.chat.entity.ChatConversation;
 import com.comin.eapproval.chat.entity.ChatConversationStatus;
 import com.comin.eapproval.chat.entity.ChatMessage;
+import com.comin.eapproval.chat.entity.ChatMessageRole;
 import com.comin.eapproval.chat.repository.ChatConversationRepository;
 import com.comin.eapproval.chat.repository.ChatMessageRepository;
 import com.comin.eapproval.global.exception.BusinessException;
@@ -95,9 +96,10 @@ public class ChatConversationService {
                 request.getConversationId()
         );
 
-        if (messageRepository.findByConversationIdAndRequestId(
+        if (messageRepository.findByConversationIdAndRequestIdAndRole(
                 conversation.getId(),
-                request.getRequestId()
+                request.getRequestId(),
+                ChatMessageRole.USER
         ).isPresent()) {
             return conversation;
         }
@@ -262,6 +264,29 @@ public class ChatConversationService {
         ChatMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
         message.cancel();
+    }
+
+    /**
+     * 소유자가 보낸 특정 요청의 USER 메시지를 조회한다.
+     *
+     * @param memberId 사용자 ID
+     * @param conversationId 대화방 ID
+     * @param requestId 요청 식별자
+     * @return 사용자 메시지
+     */
+    @Transactional(readOnly = true)
+    public ChatMessage findUserMessage(
+            Long memberId,
+            Long conversationId,
+            String requestId
+    ) {
+        ChatConversation conversation = getOwnedConversation(memberId, conversationId);
+        return messageRepository.findByConversationIdAndRequestIdAndRole(
+                        conversation.getId(),
+                        requestId,
+                        ChatMessageRole.USER
+                )
+                .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
     }
 
     private ChatConversation getOwnedConversation(Long memberId, Long conversationId) {
