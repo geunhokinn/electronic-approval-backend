@@ -2,6 +2,7 @@ package com.comin.eapproval.chat.repository;
 
 import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.chat.entity.ChatMessageRole;
+import com.comin.eapproval.chat.entity.ChatMessageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 
@@ -26,6 +27,13 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             Long conversationId,
             String requestId,
             ChatMessageRole role
+    );
+
+    /** 대화방에 처리 중인 AI 응답이 존재하는지 확인한다. */
+    boolean existsByConversationIdAndRoleAndStatus(
+            Long conversationId,
+            ChatMessageRole role,
+            ChatMessageStatus status
     );
 
     /**
