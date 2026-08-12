@@ -127,6 +127,9 @@ public class RegulationQdrantService {
                         payload.path("regulationName").asText(null),
                         payload.path("category").asText(null),
                         payload.path("version").asText(null),
+                        payload.path("effectiveDate").isTextual()
+                                ? java.time.LocalDate.parse(payload.path("effectiveDate").asText())
+                                : null,
                         payload.path("articleNumber").asText(null),
                         payload.path("articleTitle").asText(null),
                         payload.path("paragraphNumber").asText(null),
