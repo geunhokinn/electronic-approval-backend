@@ -14,13 +14,11 @@ public class RagSource {
 
     private Long regulationId;
     private String regulationName;
-    private String category;
     private String articleNumber;
     private String articleTitle;
     private String paragraphNumber;
     private String version;
     private LocalDate effectiveDate;
-    private double score;
 
     /**
      * RAG 근거를 사용자 표시용 출처로 변환한다.
@@ -32,13 +30,11 @@ public class RagSource {
         return new RagSource(
                 evidence.getRegulationId(),
                 evidence.getRegulationName(),
-                evidence.getCategory(),
                 evidence.getArticleNumber(),
                 evidence.getArticleTitle(),
                 evidence.getParagraphNumber(),
                 evidence.getVersion(),
-                evidence.getEffectiveDate(),
-                evidence.getScore()
+                evidence.getEffectiveDate()
         );
     }
 }
