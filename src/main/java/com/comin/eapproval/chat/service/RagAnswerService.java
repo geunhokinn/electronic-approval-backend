@@ -3,7 +3,9 @@ package com.comin.eapproval.chat.service;
 import com.comin.eapproval.chat.dto.response.RagEvidence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -38,6 +40,26 @@ public class RagAnswerService {
                 .user(promptService.build(question, evidences))
                 .call()
                 .content();
+    }
+
+    /**
+     * 규정 근거를 기반으로 Nova 스트리밍 응답을 생성한다.
+     *
+     * @param question 사용자 질문
+     * @param evidences Nova에 전달할 규정 근거
+     * @return Nova 응답 스트림
+     */
+    public Flux<ChatResponse> stream(String question, List<RagEvidence> evidences) {
+        if (!evidenceValidationService.hasUsableEvidence(evidences)) {
+            return Flux.empty();
+        }
+
+        return chatClientBuilder
+                .build()
+                .prompt()
+                .user(promptService.build(question, evidences))
+                .stream()
+                .chatResponse();
     }
 
     /**
