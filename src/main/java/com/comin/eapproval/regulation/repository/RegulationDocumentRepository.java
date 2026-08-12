@@ -15,4 +15,7 @@ public interface RegulationDocumentRepository extends JpaRepository<RegulationDo
 
     /** 같은 규정의 활성 버전을 조회합니다. */
     List<RegulationDocument> findByTitleAndStatus(String title, RegulationStatus status);
+
+    /** 활성 상태인 규정 원본 목록을 조회합니다. */
+    List<RegulationDocument> findByStatusOrderByTitleAscVersionDesc(RegulationStatus status);
 }
