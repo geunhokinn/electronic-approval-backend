@@ -19,6 +19,26 @@ public class RagContextService {
     private static final int SIMPLE_EVIDENCE_LIMIT = 3;
     private static final int COMPLEX_EVIDENCE_LIMIT = 5;
 
+    private final ComplexRegulationQuestionClassifier questionClassifier;
+
+    public RagContextService(ComplexRegulationQuestionClassifier questionClassifier) {
+        this.questionClassifier = questionClassifier;
+    }
+
+    /**
+     * 질문 유형을 판단한 뒤 검색 결과를 RAG 근거로 정리한다.
+     *
+     * @param question 사용자 질문
+     * @param results Qdrant 검색 결과
+     * @return 질문 유형에 맞게 제한된 규정 근거
+     */
+    public List<RagEvidence> prepare(
+            String question,
+            List<RegulationSearchResult> results
+    ) {
+        return prepare(results, questionClassifier.isComplexQuestion(question));
+    }
+
     /** 검색 결과를 유사도와 중복 기준으로 정리한다. */
     public List<RagEvidence> prepare(
             List<RegulationSearchResult> results,
