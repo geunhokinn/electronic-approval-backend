@@ -1,6 +1,7 @@
 package com.comin.eapproval.chat.repository;
 
 import com.comin.eapproval.chat.entity.ChatMessage;
+import com.comin.eapproval.chat.entity.ChatMessageRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 
@@ -21,9 +22,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
      * @param requestId 요청 식별자
      * @return 조건에 맞는 메시지
      */
-    Optional<ChatMessage> findByConversationIdAndRequestId(
+    Optional<ChatMessage> findByConversationIdAndRequestIdAndRole(
             Long conversationId,
-            String requestId
+            String requestId,
+            ChatMessageRole role
     );
 
     /**
