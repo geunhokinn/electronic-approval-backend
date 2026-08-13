@@ -13,31 +13,9 @@ services:
         max-size: "10m"
         max-file: "5"
 
-  mariadb:
-    image: mariadb:11.4
-    container_name: eapproval-mariadb
-    restart: unless-stopped
-
-    environment:
-      TZ: Asia/Seoul
-
-      MARIADB_ROOT_PASSWORD: ${PROD_DB_ROOT_PASSWORD}
-      MARIADB_DATABASE: ${PROD_DB_NAME}
-      MARIADB_USER: ${PROD_DB_USERNAME}
-      MARIADB_PASSWORD: ${PROD_DB_PASSWORD}
-
     # Docker 내부 네트워크를 사용하므로 외부 포트는 열지 않는다.
     #    ports:
     #      - "3306:3306"
-
-    volumes:
-      - mariadb_prod_data:/var/lib/mysql
-
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5"
 
   server:
     image: ${SERVER_IMAGE}
@@ -77,7 +55,6 @@ services:
       QDRANT_COLLECTION: ${PROD_QDRANT_COLLECTION}
 
     depends_on:
-      - mariadb
       - qdrant
 
     logging:
@@ -121,5 +98,4 @@ services:
       - ./certbot/www:/var/www/certbot
 
 volumes:
-  mariadb_prod_data:
   qdrant_prod_data:
