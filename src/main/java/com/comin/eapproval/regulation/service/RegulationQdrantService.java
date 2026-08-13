@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.util.List;
@@ -101,7 +102,8 @@ public class RegulationQdrantService {
      * @param active 변경할 활성 상태
      */
     public void updateActiveStatus(Long regulationId, boolean active) {
-        client().post()
+        try {
+            client().post()
                 .uri("/collections/{collection}/points/payload", properties.getCollection())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of(
@@ -111,7 +113,10 @@ public class RegulationQdrantService {
                         ))
                 ))
                 .retrieve()
-                .toBodilessEntity();
+                    .toBodilessEntity();
+        } catch (RestClientException exception) {
+            throw new BusinessException(RegulationErrorCode.REGULATION_SEARCH_FAILED);
+        }
     }
 
     private List<RegulationSearchResult> parseSearchResults(String response) {
