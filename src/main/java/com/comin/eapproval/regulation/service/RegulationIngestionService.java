@@ -29,6 +29,7 @@ public class RegulationIngestionService {
     private final RegulationChunkingService chunkingService;
     private final RegulationEmbeddingService embeddingService;
     private final RegulationQdrantService regulationQdrantService;
+    private final RegulationIngestionSseService sseService;
 
     /**
      * 규정 적재 작업을 비동기로 시작합니다.
@@ -38,10 +39,12 @@ public class RegulationIngestionService {
     @Async
     @Transactional
     public void ingestAsync(Long regulationId) {
+        sseService.send(regulationId, RegulationIngestionStatus.PROCESSING);
         try {
             process(regulationId);
         } catch (Exception exception) {
             updateStatus(regulationId, RegulationIngestionStatus.FAILED);
+            sseService.send(regulationId, RegulationIngestionStatus.FAILED);
         }
     }
 
@@ -88,6 +91,7 @@ public class RegulationIngestionService {
             );
         }
         document.updateIngestionStatus(RegulationIngestionStatus.COMPLETED);
+        sseService.send(regulationId, RegulationIngestionStatus.COMPLETED);
     }
 
     private RegulationDocument findDocument(Long regulationId) {
