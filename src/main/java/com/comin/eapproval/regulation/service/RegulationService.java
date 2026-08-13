@@ -6,11 +6,14 @@ import com.comin.eapproval.regulation.dto.request.RegulationUploadRequest;
 import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
 import com.comin.eapproval.regulation.entity.RegulationDocument;
 import com.comin.eapproval.regulation.entity.RegulationIngestionStatus;
+import com.comin.eapproval.regulation.dto.response.RegulationAdminListResponse;
+import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +27,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RegulationService {
 
+    /** 관리자 규정 목록의 기본 페이지 크기입니다. */
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
     private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("md");
 
@@ -32,6 +38,16 @@ public class RegulationService {
     private final RegulationIngestionService ingestionService;
     private final RegulationQdrantService regulationQdrantService;
 
+    /** 관리자 규정 목록을 페이지 단위로 조회합니다. */
+    @Transactional(readOnly = true)
+    public PageResponse<RegulationAdminListResponse> getAdminRegulations(int page, int size) {
+        int pageNumber = Math.max(page, 0);
+        int pageSize = size > 0 ? Math.min(size, 50) : DEFAULT_PAGE_SIZE;
+        return PageResponse.from(documentRepository.findAllByOrderByCreatedAtDesc(
+                PageRequest.of(pageNumber, pageSize)
+        ).map(RegulationAdminListResponse::from));
+    }
+    
     /** 관리자 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다. */
     /**
      * 관리자가 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다.
