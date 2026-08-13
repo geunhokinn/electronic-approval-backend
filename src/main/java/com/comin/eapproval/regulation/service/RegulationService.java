@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -101,11 +103,17 @@ public class RegulationService {
                 file.getContentType(),
                 file.getSize()
         );
-        sseService.send(document.getId(), RegulationIngestionStatus.PENDING);
-        ingestionService.ingestAsync(document.getId());
+        Long regulationId = document.getId();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                sseService.send(regulationId, RegulationIngestionStatus.PENDING);
+                ingestionService.ingestAsync(regulationId);
+            }
+        });
 
         return new RegulationUploadResponse(
-                document.getId(),
+                regulationId,
                 document.getTitle(),
                 document.getVersion(),
                 document.getOriginalFilename(),
