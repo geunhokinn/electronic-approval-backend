@@ -37,6 +37,7 @@ public class RegulationService {
     private final RegulationStorageService storageService;
     private final RegulationIngestionService ingestionService;
     private final RegulationQdrantService regulationQdrantService;
+    private final RegulationIngestionSseService sseService;
 
     /** 관리자 규정 목록을 페이지 단위로 조회합니다. */
     @Transactional(readOnly = true)
@@ -47,7 +48,15 @@ public class RegulationService {
                 PageRequest.of(pageNumber, pageSize)
         ).map(RegulationAdminListResponse::from));
     }
-    
+
+    /** 규정의 현재 AI 적재 상태를 조회합니다. */
+    @Transactional(readOnly = true)
+    public RegulationIngestionStatus getIngestionStatus(Long regulationId) {
+        return documentRepository.findById(regulationId)
+                .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED))
+                .getIngestionStatus();
+    }
+
     /** 관리자 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다. */
     /**
      * 관리자가 규정 원본 파일을 S3에 저장하고 메타데이터를 등록합니다.
@@ -92,6 +101,7 @@ public class RegulationService {
                 file.getContentType(),
                 file.getSize()
         );
+        sseService.send(document.getId(), RegulationIngestionStatus.PENDING);
         ingestionService.ingestAsync(document.getId());
 
         return new RegulationUploadResponse(
