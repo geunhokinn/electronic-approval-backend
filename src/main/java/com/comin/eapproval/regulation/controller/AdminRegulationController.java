@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import com.comin.eapproval.regulation.service.RegulationIngestionSseService;
+import com.comin.eapproval.regulation.entity.RegulationIngestionStatus;
 
 /** 관리자 규정 원본 업로드 API를 제공합니다. */
 @RestController
@@ -29,6 +32,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminRegulationController {
 
     private final RegulationService regulationService;
+    private final RegulationIngestionSseService ingestionSseService;
+
+    /** 규정 적재 상태를 관리자에게 SSE로 전송합니다. */
+    @GetMapping(value = "/{regulationId}/ingestion-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamIngestionStatus(@PathVariable Long regulationId) {
+        RegulationIngestionStatus status = regulationService.getIngestionStatus(regulationId);
+        return ingestionSseService.connect(regulationId, status);
+    }
 
     /** 관리자 규정 목록을 페이지 단위로 조회합니다. */
     @GetMapping
