@@ -21,8 +21,7 @@ public class RegulationUploadRequest {
     private String title;
 
     /** 규정 분류입니다. */
-    @NotBlank(message = "규정 분류는 필수입니다.")
-    @Size(max = 100, message = "규정 분류는 100자 이하여야 합니다.")
+    @NotNull(message = "규정 분류는 필수입니다.")
     private RegulationCategory category;
 
     /** 규정 시행일입니다. */
