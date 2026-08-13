@@ -89,6 +89,7 @@ public class RegulationDocument extends BaseEntity {
         this.title = title;
         this.category = category;
         this.version = version;
+        this.effectiveDate = effectiveDate;
         this.content = content;
         this.status = status;
         this.ingestionStatus = ingestionStatus;
