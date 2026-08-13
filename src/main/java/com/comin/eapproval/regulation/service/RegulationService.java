@@ -129,12 +129,20 @@ public class RegulationService {
         RegulationDocument document = documentRepository.findById(regulationId)
                 .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED));
 
+        if (status == RegulationStatus.ACTIVE
+                && document.getIngestionStatus() != RegulationIngestionStatus.COMPLETED) {
+            throw new BusinessException(RegulationErrorCode.REGULATION_NOT_READY);
+        }
+
         if (status == RegulationStatus.ACTIVE) {
             List<RegulationDocument> activeDocuments = documentRepository.findByTitleAndStatus(
                     document.getTitle(), RegulationStatus.ACTIVE);
             activeDocuments.stream()
                     .filter(activeDocument -> !activeDocument.getId().equals(regulationId))
-                    .forEach(activeDocument -> activeDocument.updateStatus(RegulationStatus.INACTIVE));
+                    .forEach(activeDocument -> {
+                        regulationQdrantService.updateActiveStatus(activeDocument.getId(), false);
+                        activeDocument.updateStatus(RegulationStatus.INACTIVE);
+                    });
         }
 
         document.updateStatus(status);
