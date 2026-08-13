@@ -115,7 +115,7 @@ public class RegulationQdrantService {
                 .retrieve()
                     .toBodilessEntity();
         } catch (RestClientException exception) {
-            throw new BusinessException(RegulationErrorCode.REGULATION_SEARCH_FAILED);
+            throw new BusinessException(RegulationErrorCode.REGULATION_SYNC_FAILED);
         }
     }
 
