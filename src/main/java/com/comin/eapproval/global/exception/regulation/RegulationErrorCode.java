@@ -43,6 +43,12 @@ public enum RegulationErrorCode implements ErrorCode {
     ),
 
     /** Qdrant 규정 검색 응답을 해석하지 못한 경우입니다. */
+    /** AI 적재가 완료되지 않은 규정을 활성화하려는 경우입니다. */
+    REGULATION_NOT_READY(
+            HttpStatus.BAD_REQUEST,
+            "AI 적재가 완료된 규정만 활성화할 수 있습니다."
+    ),
+
     REGULATION_SEARCH_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "규정 검색 중 오류가 발생했습니다."
