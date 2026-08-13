@@ -49,6 +49,12 @@ public enum RegulationErrorCode implements ErrorCode {
             "AI 적재가 완료된 규정만 활성화할 수 있습니다."
     ),
 
+    /** Qdrant 상태 동기화에 실패한 경우입니다. */
+    REGULATION_SYNC_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "규정 검색 인덱스 상태 동기화에 실패했습니다."
+    ),
+
     REGULATION_SEARCH_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "규정 검색 중 오류가 발생했습니다."
