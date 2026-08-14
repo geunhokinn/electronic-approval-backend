@@ -3,6 +3,7 @@ package com.comin.eapproval.chat.service;
 import com.comin.eapproval.chat.dto.request.ChatStreamingRequest;
 import com.comin.eapproval.chat.dto.response.*;
 import com.comin.eapproval.chat.entity.ChatMessage;
+import com.comin.eapproval.global.exception.BusinessException;
 import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
 import com.comin.eapproval.regulation.service.RegulationSearchService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,21 @@ public class ChatStreamingService {
      * @return SSE 이벤트 스트림
      */
     public Flux<ServerSentEvent<Object>> stream(Long memberId, String role, ChatStreamingRequest request) {
-        ChatMessage userMessage = preparationService.saveUserMessage(memberId, request);
+        ChatMessage userMessage;
+        try {
+            userMessage = preparationService.saveUserMessage(memberId, request);
+        } catch (BusinessException exception) {
+            return Flux.just(event("error", SseEvent.of(
+                    SseEventType.ERROR,
+                    null,
+                    request.getRequestId(),
+                    new SseErrorData(
+                            exception.getErrorCode().toString(),
+                            exception.getMessage(),
+                            false
+                    )
+            )));
+        }
         Long conversationId = userMessage.getConversation().getId();
         String requestId = request.getRequestId();
         ChatMessage assistantMessage = conversationService.startAssistantMessage(
