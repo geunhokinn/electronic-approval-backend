@@ -45,6 +45,7 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                         notice.id,
                         notice.title,
                         notice.isImportant,
+                        notice.noticeType,
                         notice.createdAt
                 ))
                 .from(notice)

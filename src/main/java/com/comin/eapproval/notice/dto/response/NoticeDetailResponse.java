@@ -1,6 +1,7 @@
 package com.comin.eapproval.notice.dto.response;
 
 import lombok.Getter;
+import com.comin.eapproval.notice.entity.NoticeType;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ public class NoticeDetailResponse {
     private final String title;
     private final String content;
     private final boolean isImportant;
+    private final NoticeType noticeType;
     private final Long authorId;
     private final String authorName;
     private final LocalDateTime createdAt;
@@ -26,6 +28,7 @@ public class NoticeDetailResponse {
      * @param title 제목
      * @param content 내용
      * @param isImportant 중요 공지 여부
+     * @param noticeType 공지 분류
      * @param authorId 작성자 ID
      * @param authorName 작성자 이름
      * @param createdAt 작성 시각
@@ -36,6 +39,7 @@ public class NoticeDetailResponse {
             String title,
             String content,
             boolean isImportant,
+            NoticeType noticeType,
             Long authorId,
             String authorName,
             LocalDateTime createdAt,
@@ -45,6 +49,7 @@ public class NoticeDetailResponse {
         this.title = title;
         this.content = content;
         this.isImportant = isImportant;
+        this.noticeType = noticeType;
         this.authorId = authorId;
         this.authorName = authorName;
         this.createdAt = createdAt;

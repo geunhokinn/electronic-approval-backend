@@ -4,6 +4,7 @@ import com.comin.eapproval.member.entity.QMember;
 import com.comin.eapproval.notice.dto.response.NoticeDetailResponse;
 import com.comin.eapproval.notice.dto.response.NoticeListResponse;
 import com.comin.eapproval.notice.entity.QNotice;
+import com.comin.eapproval.notice.entity.NoticeType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -34,6 +35,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
      *
      * @param keyword 제목 검색어
      * @param isImportant 중요 공지 여부
+     * @param noticeType 공지 분류
      * @param pageable 페이징 정보
      * @return 공지사항 목록
      */
@@ -41,6 +43,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
     public Page<NoticeListResponse> searchNotices(
             String keyword,
             Boolean isImportant,
+            NoticeType noticeType,
             Pageable pageable
     ) {
         List<NoticeListResponse> content = queryFactory
@@ -49,6 +52,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                         notice.id,
                         notice.title,
                         notice.isImportant,
+                        notice.noticeType,
                         author.name,
                         notice.createdAt
                 ))
@@ -57,6 +61,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .where(
                         titleContains(keyword),
                         isImportantEq(isImportant),
+                        noticeTypeEq(noticeType),
                         notDeleted()
                 )
                 .orderBy(
@@ -73,6 +78,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .where(
                         titleContains(keyword),
                         isImportantEq(isImportant),
+                        noticeTypeEq(noticeType),
                         notDeleted()
                 )
                 .fetchOne();
@@ -99,6 +105,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                         notice.title,
                         notice.content,
                         notice.isImportant,
+                        notice.noticeType,
                         author.id,
                         author.name,
                         notice.createdAt,
@@ -137,6 +144,16 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
      */
     private BooleanExpression isImportantEq(Boolean isImportant) {
         return isImportant == null ? null : notice.isImportant.eq(isImportant);
+    }
+
+    /**
+     * 공지 분류 검색 조건을 생성한다.
+     *
+     * @param noticeType 공지 분류
+     * @return 공지 분류 검색 조건
+     */
+    private BooleanExpression noticeTypeEq(NoticeType noticeType) {
+        return noticeType == null ? null : notice.noticeType.eq(noticeType);
     }
 
     /**

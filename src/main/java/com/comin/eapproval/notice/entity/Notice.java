@@ -31,6 +31,10 @@ public class Notice extends BaseEntity {
     @Column(name = "is_important", nullable = false)
     private boolean isImportant;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private NoticeType noticeType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Member author;
@@ -42,11 +46,13 @@ public class Notice extends BaseEntity {
             String title,
             String content,
             boolean isImportant,
+            NoticeType noticeType,
             Member author
     ) {
         this.title = title;
         this.content = content;
         this.isImportant = isImportant;
+        this.noticeType = noticeType;
         this.author = author;
     }
 
@@ -56,6 +62,7 @@ public class Notice extends BaseEntity {
      * @param title 제목
      * @param content 내용
      * @param isImportant 중요 공지 여부
+     * @param noticeType 공지 분류
      * @param author 작성자
      * @return 생성된 공지사항
      */
@@ -63,12 +70,14 @@ public class Notice extends BaseEntity {
             String title,
             String content,
             boolean isImportant,
+            NoticeType noticeType,
             Member author
     ) {
         return Notice.builder()
                 .title(title.trim())
                 .content(content.trim())
                 .isImportant(isImportant)
+                .noticeType(noticeType)
                 .author(author)
                 .build();
     }
@@ -79,15 +88,18 @@ public class Notice extends BaseEntity {
      * @param title 제목
      * @param content 내용
      * @param isImportant 중요 공지 여부
+     * @param noticeType 공지 분류
      */
     public void update(
             String title,
             String content,
-            boolean isImportant
+            boolean isImportant,
+            NoticeType noticeType
     ) {
         this.title = title.trim();
         this.content = content.trim();
         this.isImportant = isImportant;
+        this.noticeType = noticeType;
     }
 
     /**

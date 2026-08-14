@@ -4,6 +4,7 @@ import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.notice.dto.response.NoticeDetailResponse;
 import com.comin.eapproval.notice.dto.response.NoticeListResponse;
+import com.comin.eapproval.notice.entity.NoticeType;
 import com.comin.eapproval.notice.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class NoticeController {
      *
      * @param keyword 제목 검색어
      * @param isImportant 중요 공지 여부
+     * @param noticeType 공지 분류
      * @param pageable 페이징 정보
      * @return 공지사항 목록
      */
@@ -34,6 +36,7 @@ public class NoticeController {
     public ResponseEntity<ApiResponse<PageResponse<NoticeListResponse>>> getNotices(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean isImportant,
+            @RequestParam(required = false) NoticeType noticeType,
             @PageableDefault(
                     size = 10,
                     sort = "createdAt",
@@ -44,6 +47,7 @@ public class NoticeController {
         PageResponse<NoticeListResponse> notices = noticeService.getNotices(
                 keyword,
                 isImportant,
+                noticeType,
                 pageable
         );
 
