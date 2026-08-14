@@ -32,6 +32,15 @@ public enum ChatErrorCode implements ErrorCode {
             HttpStatus.CONFLICT,
             "현재 대화방에서 처리 중인 요청이 있습니다.");
 
+    /** 사용자에게 전달할 오류 메시지를 반환합니다. */
+    @Override
+    public String getMessage() {
+        if (this == CHAT_CONVERSATION_LIMIT_EXCEEDED) {
+            return "채팅방은 사용자당 최대 10개까지 생성할 수 있습니다. 기존 채팅방을 삭제한 후 다시 시도해주세요.";
+        }
+        return message;
+    }
+
     private final HttpStatus httpStatus;
     private final String message;
 }
