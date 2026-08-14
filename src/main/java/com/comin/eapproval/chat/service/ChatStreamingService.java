@@ -63,7 +63,7 @@ public class ChatStreamingService {
                     new SseErrorData("CHAT_AI_RESPONSE_FAILED", "AI 응답을 생성하지 못했습니다.", true)
             );
             return Flux.just(event("error", failed));
-        });
+        }).doOnCancel(() -> responseService.cancel(assistantMessage));
     }
 
     /**
