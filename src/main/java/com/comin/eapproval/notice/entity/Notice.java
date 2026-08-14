@@ -28,8 +28,9 @@ public class Notice extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private boolean important;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "notice_type", nullable = false, length = 20)
+    private NoticeType noticeType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -41,12 +42,12 @@ public class Notice extends BaseEntity {
     private Notice(
             String title,
             String content,
-            boolean important,
+            NoticeType noticeType,
             Member author
     ) {
         this.title = title;
         this.content = content;
-        this.important = important;
+        this.noticeType = noticeType;
         this.author = author;
     }
 
@@ -55,20 +56,20 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param important 중요 공지 여부
+     * @param noticeType 공지사항 유형
      * @param author 작성자
      * @return 생성된 공지사항
      */
     public static Notice create(
             String title,
             String content,
-            boolean important,
+            NoticeType noticeType,
             Member author
     ) {
         return Notice.builder()
                 .title(title.trim())
                 .content(content.trim())
-                .important(important)
+                .noticeType(noticeType)
                 .author(author)
                 .build();
     }
@@ -78,16 +79,16 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param important 중요 공지 여부
+     * @param noticeType 공지사항 유형
      */
     public void update(
             String title,
             String content,
-            boolean important
+            NoticeType noticeType
     ) {
         this.title = title.trim();
         this.content = content.trim();
-        this.important = important;
+        this.noticeType = noticeType;
     }
 
     /**
