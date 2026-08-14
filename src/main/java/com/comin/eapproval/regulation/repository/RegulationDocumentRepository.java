@@ -3,15 +3,13 @@ package com.comin.eapproval.regulation.repository;
 import com.comin.eapproval.regulation.entity.RegulationDocument;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 /**
  * 규정 원본 데이터 접근 기능을 제공합니다.
  */
-public interface RegulationDocumentRepository extends JpaRepository<RegulationDocument, Long> {
+public interface RegulationDocumentRepository extends JpaRepository<RegulationDocument, Long>, RegulationDocumentRepositoryCustom {
 
     boolean existsByTitleAndVersion(String title, String version);
 
@@ -21,6 +19,4 @@ public interface RegulationDocumentRepository extends JpaRepository<RegulationDo
     /** 활성 상태인 규정 원본 목록을 조회합니다. */
     List<RegulationDocument> findByStatusOrderByTitleAscVersionDesc(RegulationStatus status);
 
-    /** 관리자 규정 목록을 등록일 내림차순으로 페이지 조회합니다. */
-    Page<RegulationDocument> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
