@@ -112,7 +112,7 @@ public class RegulationDocument extends BaseEntity {
                 .effectiveDate(effectiveDate)
                 .content(content.trim())
                 .status(RegulationStatus.INACTIVE)
-                .ingestionStatus(RegulationIngestionStatus.PENDING)
+                .ingestionStatus(RegulationIngestionStatus.PROCESSING)
                 .build();
     }
 
