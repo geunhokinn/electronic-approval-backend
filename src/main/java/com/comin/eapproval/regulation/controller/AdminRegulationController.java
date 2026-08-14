@@ -6,6 +6,7 @@ import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
 import com.comin.eapproval.regulation.dto.response.RegulationAdminListResponse;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
+import com.comin.eapproval.regulation.entity.RegulationCategory;
 import com.comin.eapproval.regulation.service.RegulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,15 +42,27 @@ public class AdminRegulationController {
         return ingestionSseService.connect(regulationId, status);
     }
 
-    /** 관리자 규정 목록을 페이지 단위로 조회합니다. */
+    /**
+     * 관리자 규정 목록을 검색 조건과 페이지 단위로 조회합니다.
+     *
+     * @param page 페이지 번호
+     * @param size 페이지 크기
+     * @param title 규정명 검색어
+     * @param category 규정 분류
+     * @param status 규정 사용 상태
+     * @return 검색 조건에 맞는 규정 목록
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<RegulationAdminListResponse>>> getRegulations(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) RegulationCategory category,
+            @RequestParam(required = false) RegulationStatus status
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "규정 목록을 조회했습니다.",
-                regulationService.getAdminRegulations(page, size)
+                regulationService.getAdminRegulations(page, size, title, category, status)
         ));
     }
 
