@@ -126,7 +126,6 @@ public class RegulationService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                sseService.send(regulationId, RegulationIngestionStatus.PENDING);
                 ingestionService.ingestAsync(regulationId);
             }
         });
