@@ -1,6 +1,7 @@
 package com.comin.eapproval.notice.dto.response;
 
 import lombok.Getter;
+import com.comin.eapproval.notice.entity.NoticeType;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,7 @@ public class NoticeListResponse {
 
     private final Long noticeId;
     private final String title;
-    private final boolean important;
+    private final NoticeType noticeType;
     private final String authorName;
     private final LocalDateTime createdAt;
 
@@ -21,20 +22,20 @@ public class NoticeListResponse {
      *
      * @param noticeId 공지사항 ID
      * @param title 제목
-     * @param important 중요 공지 여부
+     * @param noticeType 공지사항 유형
      * @param authorName 작성자 이름
      * @param createdAt 작성 시각
      */
     public NoticeListResponse(
             Long noticeId,
             String title,
-            boolean important,
+            NoticeType noticeType,
             String authorName,
             LocalDateTime createdAt
     ) {
         this.noticeId = noticeId;
         this.title = title;
-        this.important = important;
+        this.noticeType = noticeType;
         this.authorName = authorName;
         this.createdAt = createdAt;
     }
