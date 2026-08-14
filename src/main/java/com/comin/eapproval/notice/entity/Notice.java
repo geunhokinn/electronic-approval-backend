@@ -28,9 +28,8 @@ public class Notice extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "notice_type", nullable = false, length = 20)
-    private NoticeType noticeType;
+    @Column(name = "is_important", nullable = false)
+    private boolean isImportant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -42,12 +41,12 @@ public class Notice extends BaseEntity {
     private Notice(
             String title,
             String content,
-            NoticeType noticeType,
+            boolean isImportant,
             Member author
     ) {
         this.title = title;
         this.content = content;
-        this.noticeType = noticeType;
+        this.isImportant = isImportant;
         this.author = author;
     }
 
@@ -56,20 +55,20 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param noticeType 공지사항 유형
+     * @param isImportant 중요 공지 여부
      * @param author 작성자
      * @return 생성된 공지사항
      */
     public static Notice create(
             String title,
             String content,
-            NoticeType noticeType,
+            boolean isImportant,
             Member author
     ) {
         return Notice.builder()
                 .title(title.trim())
                 .content(content.trim())
-                .noticeType(noticeType)
+                .isImportant(isImportant)
                 .author(author)
                 .build();
     }
@@ -79,16 +78,16 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param noticeType 공지사항 유형
+     * @param isImportant 중요 공지 여부
      */
     public void update(
             String title,
             String content,
-            NoticeType noticeType
+            boolean isImportant
     ) {
         this.title = title.trim();
         this.content = content.trim();
-        this.noticeType = noticeType;
+        this.isImportant = isImportant;
     }
 
     /**

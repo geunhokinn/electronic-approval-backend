@@ -2,7 +2,6 @@ package com.comin.eapproval.notice.repository;
 
 import com.comin.eapproval.notice.dto.response.NoticeDetailResponse;
 import com.comin.eapproval.notice.dto.response.NoticeListResponse;
-import com.comin.eapproval.notice.entity.NoticeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,13 +16,13 @@ public interface NoticeRepositoryCustom {
      * 제목 검색 조건에 해당하는 공지사항 목록을 조회한다.
      *
      * @param keyword 제목 검색어
-     * @param noticeType 공지사항 유형
+     * @param isImportant 중요 공지 여부
      * @param pageable 페이징 정보
      * @return 공지사항 목록
      */
     Page<NoticeListResponse> searchNotices(
             String keyword,
-            NoticeType noticeType,
+            Boolean isImportant,
             Pageable pageable
     );
 

@@ -12,7 +12,6 @@ import com.comin.eapproval.notice.dto.response.NoticeCreateResponse;
 import com.comin.eapproval.notice.dto.response.NoticeDetailResponse;
 import com.comin.eapproval.notice.dto.response.NoticeListResponse;
 import com.comin.eapproval.notice.entity.Notice;
-import com.comin.eapproval.notice.entity.NoticeType;
 import com.comin.eapproval.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,18 +34,18 @@ public class NoticeService {
      * 제목 검색 조건에 해당하는 공지사항 목록을 조회한다.
      *
      * @param keyword 제목 검색어
-     * @param noticeType 공지사항 유형
+     * @param isImportant 중요 공지 여부
      * @param pageable 페이징 정보
      * @return 공지사항 목록
      */
     public PageResponse<NoticeListResponse> getNotices(
             String keyword,
-            NoticeType noticeType,
+            Boolean isImportant,
             Pageable pageable
     ) {
         Page<NoticeListResponse> notices = noticeRepository.searchNotices(
                 keyword,
-                noticeType,
+                isImportant,
                 pageable
         );
 
@@ -86,7 +85,7 @@ public class NoticeService {
         Notice notice = Notice.create(
                 request.getTitle(),
                 request.getContent(),
-                request.getNoticeType(),
+                request.getIsImportant(),
                 author
         );
 
@@ -111,7 +110,7 @@ public class NoticeService {
         notice.update(
                 request.getTitle(),
                 request.getContent(),
-                request.getNoticeType()
+                request.getIsImportant()
         );
     }
 
@@ -138,4 +137,5 @@ public class NoticeService {
                         NoticeErrorCode.NOTICE_NOT_FOUND
                 ));
     }
+
 }

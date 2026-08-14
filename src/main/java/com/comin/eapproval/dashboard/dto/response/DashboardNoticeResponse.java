@@ -2,7 +2,6 @@ package com.comin.eapproval.dashboard.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
-import com.comin.eapproval.notice.entity.NoticeType;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +24,7 @@ public class DashboardNoticeResponse {
     /**
      * 중요 공지 여부.
      */
-    private final NoticeType noticeType;
+    private final boolean isImportant;
 
     /**
      * 공지사항 작성일.
@@ -37,19 +36,19 @@ public class DashboardNoticeResponse {
      *
      * @param noticeId 공지사항 ID
      * @param title 공지사항 제목
-     * @param noticeType 공지사항 유형
+     * @param isImportant 중요 공지 여부
      * @param createdAt 공지사항 작성일
      */
     @QueryProjection
     public DashboardNoticeResponse(
             Long noticeId,
             String title,
-            NoticeType noticeType,
+            boolean isImportant,
             LocalDateTime createdAt
     ) {
         this.noticeId = noticeId;
         this.title = title;
-        this.noticeType = noticeType;
+        this.isImportant = isImportant;
         this.createdAt = createdAt;
     }
 }
