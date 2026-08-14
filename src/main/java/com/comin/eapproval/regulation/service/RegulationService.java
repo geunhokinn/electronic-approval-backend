@@ -8,6 +8,7 @@ import com.comin.eapproval.regulation.entity.RegulationDocument;
 import com.comin.eapproval.regulation.entity.RegulationIngestionStatus;
 import com.comin.eapproval.regulation.dto.response.RegulationAdminListResponse;
 import com.comin.eapproval.global.response.PageResponse;
+import com.comin.eapproval.regulation.entity.RegulationCategory;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,12 +42,30 @@ public class RegulationService {
     private final RegulationQdrantService regulationQdrantService;
     private final RegulationIngestionSseService sseService;
 
-    /** 관리자 규정 목록을 페이지 단위로 조회합니다. */
+    /**
+     * 관리자 규정 목록을 검색 조건과 페이지 단위로 조회합니다.
+     *
+     * @param page 페이지 번호
+     * @param size 페이지 크기
+     * @param title 규정명 검색어
+     * @param category 규정 분류
+     * @param status 규정 사용 상태
+     * @return 검색 조건에 맞는 규정 목록
+     */
     @Transactional(readOnly = true)
-    public PageResponse<RegulationAdminListResponse> getAdminRegulations(int page, int size) {
+    public PageResponse<RegulationAdminListResponse> getAdminRegulations(
+            int page,
+            int size,
+            String title,
+            RegulationCategory category,
+            RegulationStatus status
+    ) {
         int pageNumber = Math.max(page, 0);
         int pageSize = size > 0 ? Math.min(size, 50) : DEFAULT_PAGE_SIZE;
-        return PageResponse.from(documentRepository.findAllByOrderByCreatedAtDesc(
+        return PageResponse.from(documentRepository.searchRegulations(
+                title,
+                category,
+                status,
                 PageRequest.of(pageNumber, pageSize)
         ).map(RegulationAdminListResponse::from));
     }
