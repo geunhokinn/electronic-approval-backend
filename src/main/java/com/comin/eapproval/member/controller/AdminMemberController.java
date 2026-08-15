@@ -41,7 +41,7 @@ public class AdminMemberController {
             @RequestParam(required = false) MemberRole role,
             @RequestParam(required = false) String keyword,
             @PageableDefault(
-                    size = 10,
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

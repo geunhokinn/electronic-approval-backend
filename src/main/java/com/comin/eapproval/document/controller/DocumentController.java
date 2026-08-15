@@ -74,7 +74,7 @@ public class DocumentController {
             @RequestParam(required = false) DocumentStatus status,
             @RequestParam(required = false) String keyword,
             @PageableDefault(
-                    size = 10,
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

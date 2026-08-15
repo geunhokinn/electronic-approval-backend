@@ -36,7 +36,7 @@ public class AuditLogController {
     public ResponseEntity<ApiResponse<PageResponse<AuditLogResponse>>> searchAuditLogs(
             @ModelAttribute AuditLogSearchRequest request,
             @PageableDefault(
-                    size = 10,
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

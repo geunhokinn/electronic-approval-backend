@@ -39,7 +39,7 @@ public class NoticeController {
             @RequestParam(required = false) NoticeType noticeType,
             @RequestParam(required = false) NoticeCategory noticeCategory,
             @PageableDefault(
-                    size = 10,
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )

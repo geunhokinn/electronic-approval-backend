@@ -31,7 +31,7 @@ import java.util.Set;
 public class RegulationService {
 
     /** 관리자 규정 목록의 기본 페이지 크기입니다. */
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int DEFAULT_PAGE_SIZE = 5;
 
     private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("md");
