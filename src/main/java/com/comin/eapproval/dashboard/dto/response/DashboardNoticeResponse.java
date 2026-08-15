@@ -24,6 +24,11 @@ public class DashboardNoticeResponse {
     private final String title;
 
     /**
+     * 공지사항 작성자명.
+     */
+    private final String authorName;
+
+    /**
      * 중요 공지 여부.
      */
     private final NoticeType noticeType;
@@ -43,6 +48,7 @@ public class DashboardNoticeResponse {
      *
      * @param noticeId 공지사항 ID
      * @param title 공지사항 제목
+     * @param authorName 작성자명
      * @param noticeType 공지 유형
      * @param noticeCategory 공지 분류
      * @param createdAt 공지사항 작성일
@@ -51,12 +57,14 @@ public class DashboardNoticeResponse {
     public DashboardNoticeResponse(
             Long noticeId,
             String title,
+            String authorName,
             NoticeType noticeType,
             NoticeCategory noticeCategory,
             LocalDateTime createdAt
     ) {
         this.noticeId = noticeId;
         this.title = title;
+        this.authorName = authorName;
         this.noticeType = noticeType;
         this.noticeCategory = noticeCategory;
         this.createdAt = createdAt;

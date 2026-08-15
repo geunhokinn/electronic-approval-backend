@@ -46,6 +46,7 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                 .select(new QDashboardNoticeResponse(
                         notice.id,
                         notice.title,
+                        notice.author.name,
                         notice.noticeType,
                         notice.noticeCategory,
                         notice.createdAt
