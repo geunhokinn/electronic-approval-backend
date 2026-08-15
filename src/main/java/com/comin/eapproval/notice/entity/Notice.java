@@ -28,12 +28,13 @@ public class Notice extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "is_important", nullable = false)
-    private boolean isImportant;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NoticeType noticeType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private NoticeType noticeType;
+    private NoticeCategory noticeCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -45,14 +46,14 @@ public class Notice extends BaseEntity {
     private Notice(
             String title,
             String content,
-            boolean isImportant,
             NoticeType noticeType,
+            NoticeCategory noticeCategory,
             Member author
     ) {
         this.title = title;
         this.content = content;
-        this.isImportant = isImportant;
         this.noticeType = noticeType;
+        this.noticeCategory = noticeCategory;
         this.author = author;
     }
 
@@ -61,23 +62,23 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param isImportant 중요 공지 여부
-     * @param noticeType 공지 분류
+     * @param noticeType 공지 유형
+     * @param noticeCategory 공지 분류
      * @param author 작성자
      * @return 생성된 공지사항
      */
     public static Notice create(
             String title,
             String content,
-            boolean isImportant,
             NoticeType noticeType,
+            NoticeCategory noticeCategory,
             Member author
     ) {
         return Notice.builder()
                 .title(title.trim())
                 .content(content.trim())
-                .isImportant(isImportant)
                 .noticeType(noticeType)
+                .noticeCategory(noticeCategory)
                 .author(author)
                 .build();
     }
@@ -87,19 +88,19 @@ public class Notice extends BaseEntity {
      *
      * @param title 제목
      * @param content 내용
-     * @param isImportant 중요 공지 여부
-     * @param noticeType 공지 분류
+     * @param noticeType 공지 유형
+     * @param noticeCategory 공지 분류
      */
     public void update(
             String title,
             String content,
-            boolean isImportant,
-            NoticeType noticeType
+            NoticeType noticeType,
+            NoticeCategory noticeCategory
     ) {
         this.title = title.trim();
         this.content = content.trim();
-        this.isImportant = isImportant;
         this.noticeType = noticeType;
+        this.noticeCategory = noticeCategory;
     }
 
     /**

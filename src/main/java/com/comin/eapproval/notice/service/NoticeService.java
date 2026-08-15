@@ -12,6 +12,7 @@ import com.comin.eapproval.notice.dto.response.NoticeCreateResponse;
 import com.comin.eapproval.notice.dto.response.NoticeDetailResponse;
 import com.comin.eapproval.notice.dto.response.NoticeListResponse;
 import com.comin.eapproval.notice.entity.Notice;
+import com.comin.eapproval.notice.entity.NoticeCategory;
 import com.comin.eapproval.notice.entity.NoticeType;
 import com.comin.eapproval.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,21 +36,21 @@ public class NoticeService {
      * 제목 검색 조건에 해당하는 공지사항 목록을 조회한다.
      *
      * @param keyword 제목 검색어
-     * @param isImportant 중요 공지 여부
-     * @param noticeType 공지 분류
+     * @param noticeType 공지 유형
+     * @param noticeCategory 공지 분류
      * @param pageable 페이징 정보
      * @return 공지사항 목록
      */
     public PageResponse<NoticeListResponse> getNotices(
             String keyword,
-            Boolean isImportant,
             NoticeType noticeType,
+            NoticeCategory noticeCategory,
             Pageable pageable
     ) {
         Page<NoticeListResponse> notices = noticeRepository.searchNotices(
                 keyword,
-                isImportant,
                 noticeType,
+                noticeCategory,
                 pageable
         );
 
@@ -89,8 +90,8 @@ public class NoticeService {
         Notice notice = Notice.create(
                 request.getTitle(),
                 request.getContent(),
-                request.getIsImportant(),
                 request.getNoticeType(),
+                request.getNoticeCategory(),
                 author
         );
 
@@ -115,8 +116,8 @@ public class NoticeService {
         notice.update(
                 request.getTitle(),
                 request.getContent(),
-                request.getIsImportant(),
-                request.getNoticeType()
+                request.getNoticeType(),
+                request.getNoticeCategory()
         );
     }
 

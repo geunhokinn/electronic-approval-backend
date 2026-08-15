@@ -44,14 +44,14 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                 .select(new QDashboardNoticeResponse(
                         notice.id,
                         notice.title,
-                        notice.isImportant,
                         notice.noticeType,
+                        notice.noticeCategory,
                         notice.createdAt
                 ))
                 .from(notice)
                 .where(notice.deletedAt.isNull())
                 .orderBy(
-                        notice.isImportant.desc(),
+                        notice.noticeType.desc(),
                         notice.createdAt.desc(),
                         notice.id.desc()
                 )
