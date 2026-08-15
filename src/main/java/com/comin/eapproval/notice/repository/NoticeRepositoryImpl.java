@@ -7,6 +7,7 @@ import com.comin.eapproval.notice.entity.QNotice;
 import com.comin.eapproval.notice.entity.NoticeCategory;
 import com.comin.eapproval.notice.entity.NoticeType;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,9 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                         notDeleted()
                 )
                 .orderBy(
-                        notice.noticeType.desc(),
+                        new CaseBuilder()
+                                .when(notice.noticeType.eq(NoticeType.IMPORTANT)).then(0)
+                                .otherwise(1).asc(),
                         notice.createdAt.desc()
                 )
                 .offset(pageable.getOffset())

@@ -9,7 +9,9 @@ import com.comin.eapproval.dashboard.dto.response.QRecentDocumentResponse;
 import com.comin.eapproval.dashboard.dto.response.RecentDocumentResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
 import com.comin.eapproval.member.entity.QMember;
+import com.comin.eapproval.notice.entity.NoticeType;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +53,9 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
                 .from(notice)
                 .where(notice.deletedAt.isNull())
                 .orderBy(
-                        notice.noticeType.desc(),
+                        new CaseBuilder()
+                                .when(notice.noticeType.eq(NoticeType.IMPORTANT)).then(0)
+                                .otherwise(1).asc(),
                         notice.createdAt.desc(),
                         notice.id.desc()
                 )
