@@ -163,7 +163,7 @@ public class RegulationService {
             String markdown = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
             if (!markdown.matches("(?ms).*^#\\s+.+$.*")
                     || !markdown.matches("(?ms).*^##\\s+제\\d+조.*$.*")) {
-                throw new BusinessException(RegulationErrorCode.REGULATION_FILE_TYPE_NOT_ALLOWED);
+                throw new BusinessException(RegulationErrorCode.REGULATION_MARKDOWN_INVALID);
             }
         } catch (IOException exception) {
             throw new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED);

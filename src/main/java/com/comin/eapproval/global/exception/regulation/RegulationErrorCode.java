@@ -33,7 +33,13 @@ public enum RegulationErrorCode implements ErrorCode {
     /** 허용하지 않는 확장자의 파일을 업로드한 경우입니다. */
     REGULATION_FILE_TYPE_NOT_ALLOWED(
             HttpStatus.BAD_REQUEST,
-            "PDF, HWP, HWPX, TXT 파일만 업로드할 수 있습니다."
+            ".md 파일만 업로드할 수 있습니다."
+    ),
+
+    /** Markdown 규정 문서의 필수 구조가 올바르지 않은 경우입니다. */
+    REGULATION_MARKDOWN_INVALID(
+            HttpStatus.BAD_REQUEST,
+            "Markdown 규정 파일 형식이 올바르지 않습니다. 규정명은 #, 조항은 ## 제n조 형식으로 작성해주세요."
     ),
 
     /** S3 규정 원본 업로드에 실패한 경우입니다. */
