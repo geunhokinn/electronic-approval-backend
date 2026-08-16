@@ -21,6 +21,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +93,11 @@ public class RegulationService {
             MultipartFile file
     ) {
         validateFile(file);
+
+        LocalDate effectiveDate = request.getEffectiveDate();
+        if (effectiveDate.getYear() < 2000 || effectiveDate.getYear() > 2100) {
+            throw new BusinessException(RegulationErrorCode.REGULATION_EFFECTIVE_DATE_OUT_OF_RANGE);
+        }
 
         if (documentRepository.existsByTitleAndVersion(
                 request.getTitle().trim(), request.getVersion().trim())) {

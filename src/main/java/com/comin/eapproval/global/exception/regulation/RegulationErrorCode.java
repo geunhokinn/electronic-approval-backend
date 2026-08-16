@@ -36,6 +36,12 @@ public enum RegulationErrorCode implements ErrorCode {
             ".md 파일만 업로드할 수 있습니다."
     ),
 
+    /** 규정 시행일이 허용된 연도 범위를 벗어난 경우입니다. */
+    REGULATION_EFFECTIVE_DATE_OUT_OF_RANGE(
+            HttpStatus.BAD_REQUEST,
+            "시행일을 실제 날짜로 입력해주세요."
+    ),
+
     /** Markdown 규정 문서의 필수 구조가 올바르지 않은 경우입니다. */
     REGULATION_MARKDOWN_INVALID(
             HttpStatus.BAD_REQUEST,

@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException exception
     ) {
         String message = containsDateParseException(exception)
-                ? "시행일을 yyyy-MM-dd(예: 2026-01-01) 형식으로 입력해주세요."
+                ? "시행일을 실제 날짜로 입력해주세요."
                 : "요청 형식이 올바르지 않습니다.";
 
         return ResponseEntity.badRequest().body(ApiResponse.fail(message));
