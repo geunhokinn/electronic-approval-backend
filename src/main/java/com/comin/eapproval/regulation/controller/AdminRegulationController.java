@@ -14,6 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import java.nio.charset.StandardCharsets;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -81,6 +85,29 @@ public class AdminRegulationController {
                 "규정 상세 정보를 조회했습니다.",
                 regulationService.getRegulationDetail(regulationId)
         ));
+    }
+
+    /**
+     * 규정 원본 파일을 브라우저에서 미리보기합니다.
+     *
+     * @param regulationId 조회할 규정 식별자
+     * @return 규정 원본 파일 스트리밍 응답
+     */
+    @GetMapping("/{regulationId}/preview")
+    public ResponseEntity<Resource> previewRegulation(
+            @PathVariable Long regulationId
+    ) {
+        RegulationService.RegulationFile regulationFile =
+                regulationService.getRegulationFile(regulationId);
+        ContentDisposition contentDisposition = ContentDisposition.inline()
+                .filename(regulationFile.originalFilename(), StandardCharsets.UTF_8)
+                .build();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(regulationFile.contentType()))
+                .contentLength(regulationFile.content().length)
+                .header("Content-Disposition", contentDisposition.toString())
+                .body(new ByteArrayResource(regulationFile.content()));
     }
 
     /** 규정 메타데이터와 원본 파일을 등록합니다. */
