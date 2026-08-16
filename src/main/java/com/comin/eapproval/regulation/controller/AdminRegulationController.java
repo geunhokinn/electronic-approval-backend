@@ -4,6 +4,7 @@ import com.comin.eapproval.global.response.ApiResponse;
 import com.comin.eapproval.regulation.dto.request.RegulationUploadRequest;
 import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
 import com.comin.eapproval.regulation.dto.response.RegulationAdminListResponse;
+import com.comin.eapproval.regulation.dto.response.RegulationDetailResponse;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
 import com.comin.eapproval.regulation.entity.RegulationCategory;
@@ -63,6 +64,22 @@ public class AdminRegulationController {
         return ResponseEntity.ok(ApiResponse.success(
                 "규정 목록을 조회했습니다.",
                 regulationService.getAdminRegulations(page, size, title, category, status)
+        ));
+    }
+
+    /**
+     * 규정 상세 정보를 조회합니다.
+     *
+     * @param regulationId 조회할 규정 식별자
+     * @return 규정 상세 조회 응답
+     */
+    @GetMapping("/{regulationId}")
+    public ResponseEntity<ApiResponse<RegulationDetailResponse>> getRegulationDetail(
+            @PathVariable Long regulationId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "규정 상세 정보를 조회했습니다.",
+                regulationService.getRegulationDetail(regulationId)
         ));
     }
 
