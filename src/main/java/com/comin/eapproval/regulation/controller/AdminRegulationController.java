@@ -110,6 +110,29 @@ public class AdminRegulationController {
                 .body(new ByteArrayResource(regulationFile.content()));
     }
 
+    /**
+     * 규정 원본 파일을 원본 파일명으로 다운로드합니다.
+     *
+     * @param regulationId 다운로드할 규정 식별자
+     * @return 규정 원본 파일 다운로드 응답
+     */
+    @GetMapping("/{regulationId}/download")
+    public ResponseEntity<Resource> downloadRegulation(
+            @PathVariable Long regulationId
+    ) {
+        RegulationService.RegulationFile regulationFile =
+                regulationService.getRegulationFile(regulationId);
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(regulationFile.originalFilename(), StandardCharsets.UTF_8)
+                .build();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(regulationFile.contentType()))
+                .contentLength(regulationFile.content().length)
+                .header("Content-Disposition", contentDisposition.toString())
+                .body(new ByteArrayResource(regulationFile.content()));
+    }
+
     /** 규정 메타데이터와 원본 파일을 등록합니다. */
     /**
      * 관리자 규정 원본 파일 업로드 API를 제공합니다.
