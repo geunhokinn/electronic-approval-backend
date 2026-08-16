@@ -86,6 +86,33 @@ public class RegulationService {
         return RegulationDetailResponse.from(document);
     }
 
+    /**
+     * 규정 원본 파일을 미리보기용으로 조회합니다.
+     *
+     * @param regulationId 조회할 규정 식별자
+     * @return 규정 원본 파일 정보
+     * @throws BusinessException 규정이 존재하지 않는 경우
+     */
+    @Transactional(readOnly = true)
+    public RegulationFile getRegulationFile(Long regulationId) {
+        RegulationDocument document = documentRepository.findById(regulationId)
+                .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED));
+
+        return new RegulationFile(
+                storageService.download(document.getObjectKey()),
+                document.getOriginalFilename(),
+                document.getContentType()
+        );
+    }
+
+    /** 규정 원본 파일 스트리밍에 필요한 정보를 제공합니다. */
+    public record RegulationFile(
+            byte[] content,
+            String originalFilename,
+            String contentType
+    ) {
+    }
+
     /** 규정의 현재 AI 적재 상태를 조회합니다. */
     @Transactional(readOnly = true)
     public RegulationIngestionStatus getIngestionStatus(Long regulationId) {
