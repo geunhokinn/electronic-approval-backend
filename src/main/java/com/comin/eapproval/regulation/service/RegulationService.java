@@ -7,6 +7,7 @@ import com.comin.eapproval.regulation.dto.response.RegulationUploadResponse;
 import com.comin.eapproval.regulation.entity.RegulationDocument;
 import com.comin.eapproval.regulation.entity.RegulationIngestionStatus;
 import com.comin.eapproval.regulation.dto.response.RegulationAdminListResponse;
+import com.comin.eapproval.regulation.dto.response.RegulationDetailResponse;
 import com.comin.eapproval.global.response.PageResponse;
 import com.comin.eapproval.regulation.entity.RegulationCategory;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
@@ -69,6 +70,20 @@ public class RegulationService {
                 status,
                 PageRequest.of(pageNumber, pageSize)
         ).map(RegulationAdminListResponse::from));
+    }
+
+    /**
+     * 규정 식별자로 상세 정보를 조회합니다.
+     *
+     * @param regulationId 조회할 규정 식별자
+     * @return 규정 상세 조회 응답
+     * @throws BusinessException 규정이 존재하지 않는 경우
+     */
+    @Transactional(readOnly = true)
+    public RegulationDetailResponse getRegulationDetail(Long regulationId) {
+        RegulationDocument document = documentRepository.findById(regulationId)
+                .orElseThrow(() -> new BusinessException(RegulationErrorCode.REGULATION_UPLOAD_FAILED));
+        return RegulationDetailResponse.from(document);
     }
 
     /** 규정의 현재 AI 적재 상태를 조회합니다. */
