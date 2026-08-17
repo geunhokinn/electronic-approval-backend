@@ -40,6 +40,7 @@ public class ChatStreamingService {
     public Flux<ServerSentEvent<Object>> stream(Long memberId, String role, ChatStreamingRequest request) {
         ChatMessage userMessage;
         try {
+            // 유저 정보 확인
             userMessage = preparationService.saveUserMessage(memberId, request);
         } catch (BusinessException exception) {
             return Flux.just(event("error", SseEvent.of(
@@ -55,10 +56,12 @@ public class ChatStreamingService {
         }
         Long conversationId = userMessage.getConversation().getId();
         String requestId = request.getRequestId();
+        // AI 대화 메시지 생성
         ChatMessage assistantMessage = conversationService.startAssistantMessage(
                 memberId, conversationId, requestId
         );
 
+        // 시작 이벤트 생성
         SseEvent<SseStartedData> started = SseEvent.of(
                 SseEventType.STARTED,
                 conversationId,
@@ -66,9 +69,11 @@ public class ChatStreamingService {
                 new SseStartedData(userMessage.getId())
         );
 
+        // 프론트엔드에 AI 응답 생성을 시작했습니다. 이벤트 보냄.
         return Flux.concat(
                 Flux.just(event("started", started)),
                 createResponseStream(memberId, role, request, assistantMessage)
+        // Bedrock 호출이나 AI 처리 중 오류가 나면
         ).onErrorResume(error -> {
             responseService.fail(assistantMessage, "CHAT_AI_RESPONSE_FAILED");
             SseEvent<SseErrorData> failed = SseEvent.of(
@@ -78,6 +83,7 @@ public class ChatStreamingService {
                     new SseErrorData("CHAT_AI_RESPONSE_FAILED", "AI 응답을 생성하지 못했습니다.", true)
             );
             return Flux.just(event("error", failed));
+        // 사용자가 중지한 경우
         }).doOnCancel(() -> responseService.cancel(assistantMessage));
     }
 
@@ -95,25 +101,33 @@ public class ChatStreamingService {
             ChatStreamingRequest request,
             ChatMessage assistantMessage
     ) {
+        // 채팅방, 요청 정보 확인
         Long conversationId = assistantMessage.getConversation().getId();
         String requestId = request.getRequestId();
+        // Nova가 보내는 응답 조각을 임시 저장하는 목록
         List<ChatResponse> responses = new ArrayList<>();
-
+        // AI 응답 스트림 생성
         Flux<ChatResponse> responseStream = createModelStream(memberId, role, request, conversationId);
         Flux<ServerSentEvent<Object>> deltas = responseStream
+                // 응답 조각을 responses 목록에 저장
                 .doOnNext(responses::add)
+                // 응답 조각을 SSE delta 이벤트로 변환
                 .map(response -> event("delta", SseEvent.of(
                         SseEventType.DELTA,
                         conversationId,
                         requestId,
+                        // Nova의 ChatResponse를 프론트엔드가 이해할 수 있는 SSE 이벤트로 변환
                         new SseDeltaData(extractContent(response))
                 )))
+                // concatWith()는 앞의 responseStream 처리가 모두 끝난 뒤 실행
                 .concatWith(Flux.defer(() -> {
+                    // AI 최종 답변 저장
                     SseCompletedData completed = responseService.complete(
                             assistantMessage,
                             Flux.fromIterable(responses),
                             List.of()
                     );
+                    // completed 이벤트 생성 후 프론트엔드에 전달
                     return Flux.just(event("completed", SseEvent.of(
                             SseEventType.COMPLETED,
                             conversationId,
@@ -121,7 +135,8 @@ public class ChatStreamingService {
                             completed
                     )));
                 }));
-
+        
+        // generating 상태 이벤트 먼저 전송
         return Flux.concat(
                 Flux.just(event("status", SseEvent.of(
                         SseEventType.STATUS,
@@ -147,6 +162,7 @@ public class ChatStreamingService {
             ChatStreamingRequest request,
             Long conversationId
     ) {
+        // 최근 대화 조회
         List<ChatMessage> context = conversationService.getRecentMessagesForAi(memberId, conversationId);
         return generationService.stream(context, memberId, role);
     }

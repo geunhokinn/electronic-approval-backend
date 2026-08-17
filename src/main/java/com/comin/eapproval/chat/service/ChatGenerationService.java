@@ -62,26 +62,28 @@ public class ChatGenerationService {
      * @return AI 응답 스트림
      */
     public Flux<ChatResponse> stream(List<ChatMessage> messages, Long memberId, String role) {
+        // 현재 채팅방의 최근 대화 내용을 Spring AI가 이해하는 Message로 변환
         List<Message> promptMessages = messages.stream()
                 .filter(message -> message.getContent() != null
                         && !message.getContent().isBlank())
                 .map(this::toPromptMessage)
                 .toList();
 
+        // ChatClient가 내부적으로 Amazon Nova와 통신
         return chatClientBuilder
                 .build()
                 .prompt()
                 .system(SYSTEM_PROMPT)
                 .system(AI_TOOL_INSTRUCTION)
-                .messages(promptMessages)
-                .tools(
+                .messages(promptMessages) // 기존 메시지 전달을 하면서 맥락을 이해함
+                .tools( // Nova가 질문 내용을 분석해서 필요한 Tool만 선택
                         regulationToolService,
                         documentToolService,
                         approvalDetailToolService,
                         approvalToolService
                 )
-                .toolContext(toolContext(memberId, role))
-                .stream()
+                .toolContext(toolContext(memberId, role)) // 사용자 정보 전달
+                .stream() // 스트리밍 모드로 호출
                 .chatResponse();
     }
 
