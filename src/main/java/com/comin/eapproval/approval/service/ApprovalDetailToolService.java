@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 /**
  * AI 결재 정보 조회 Tool 기능을 제공하는 서비스.
  */
-@Service
 @RequiredArgsConstructor
+@Deprecated
 public class ApprovalDetailToolService {
 
     private final ApprovalService approvalService;
@@ -53,7 +53,6 @@ public class ApprovalDetailToolService {
      * @param documentId 문서 식별자
      * @return Tool 결재 조회 결과
      */
-    @Tool(description = "문서 ID로 결재자와 결재 상태를 조회합니다. 사용자가 조회할 수 있는 결재만 반환합니다.")
     public AiToolResponse<ApprovalToolResponse> getApproval(
             Long documentId,
             ToolContext toolContext
