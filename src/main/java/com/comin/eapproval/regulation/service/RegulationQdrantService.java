@@ -75,11 +75,26 @@ public class RegulationQdrantService {
             int limit,
             double scoreThreshold
     ) {
-        Map<String, Object> filter = Map.of(
-                "must", List.of(
-                        Map.of("key", "active", "match", Map.of("value", true))
-                )
-        );
+        return search(vector, limit, scoreThreshold, null, null);
+    }
+
+    /** 질문에 포함된 조항·항 조건을 적용해 규정 청크를 검색합니다. */
+    public List<RegulationSearchResult> search(
+            List<Float> vector,
+            int limit,
+            double scoreThreshold,
+            String articleNumber,
+            String paragraphNumber
+    ) {
+        List<Map<String, Object>> conditions = new java.util.ArrayList<>();
+        conditions.add(Map.of("key", "active", "match", Map.of("value", true)));
+        if (articleNumber != null) {
+            conditions.add(Map.of("key", "articleNumber", "match", Map.of("value", articleNumber)));
+        }
+        if (paragraphNumber != null) {
+            conditions.add(Map.of("key", "paragraphNumber", "match", Map.of("value", paragraphNumber)));
+        }
+        Map<String, Object> filter = Map.of("must", conditions);
         String response = client().post()
                 .uri("/collections/{collection}/points/search", properties.getCollection())
                 .contentType(MediaType.APPLICATION_JSON)
