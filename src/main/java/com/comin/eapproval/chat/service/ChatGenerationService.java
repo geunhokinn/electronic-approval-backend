@@ -53,10 +53,6 @@ public class ChatGenerationService {
     private final ApprovalDetailToolService approvalDetailToolService;
     private final ApprovalToolService approvalToolService;
 
-    public Flux<ChatResponse> stream(List<ChatMessage> messages) {
-        return stream(messages, null, null);
-    }
-
     /**
      * 서버가 인증한 사용자 정보를 ToolContext로 주입하여 AI 스트림을 생성합니다.
      *
