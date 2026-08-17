@@ -1,13 +1,14 @@
 package com.comin.eapproval.approval.service;
 
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
-import com.comin.eapproval.approval.dto.request.ApprovalDetailToolRequest;
 import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
 import com.comin.eapproval.approval.dto.response.ApprovalToolResponse;
 import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
 import com.comin.eapproval.chat.dto.response.AiToolResponse;
 import com.comin.eapproval.chat.service.ChatToolContext;
+import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.approval.ApprovalErrorCode;
 import com.comin.eapproval.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ToolContext;
@@ -28,7 +29,6 @@ public class ApprovalToolService {
     private static final int MAX_RESULT_SIZE = 10;
 
     private final ApprovalRepository approvalRepository;
-    private final ApprovalService approvalService;
 
     /**
      * 현재 사용자에게 배정된 결재 대기 문서를 조회합니다.
@@ -81,11 +81,16 @@ public class ApprovalToolService {
             return AiToolResponse.failure("APPROVAL_NOT_FOUND", "해당 문서의 결재 정보를 찾을 수 없습니다.");
         }
 
-        ApprovalDetailResponse response = approvalService.getApprovalDetail(
-                memberId,
-                role,
-                new ApprovalDetailToolRequest(approvalId).getApprovalId()
-        );
+        ApprovalDetailResponse response = approvalRepository
+                .findApprovalDetailById(approvalId)
+                .orElseThrow(() -> new BusinessException(ApprovalErrorCode.APPROVAL_NOT_FOUND));
+
+        boolean isApprover = response.getApproverId().equals(memberId);
+        boolean isAdmin = role == MemberRole.ROLE_ADMIN;
+        if (!isApprover && !isAdmin) {
+            throw new BusinessException(ApprovalErrorCode.APPROVAL_ACCESS_DENIED);
+        }
+
         return AiToolResponse.success(ApprovalToolResponse.from(response));
     }
 
