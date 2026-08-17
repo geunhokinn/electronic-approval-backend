@@ -53,54 +53,6 @@ public class ChatGenerationService {
     private final ApprovalDetailToolService approvalDetailToolService;
     private final ApprovalToolService approvalToolService;
 
-    /**
-     * 최근 대화 목록을 Nova 2 Lite에 전달해 일반 응답을 생성한다.
-     *
-     * @param messages AI에 전달할 최근 대화 목록
-     * @return 생성된 AI 응답
-     */
-    public String generate(List<ChatMessage> messages) {
-        return generate(messages, null, null);
-    }
-
-    /**
-     * 서버가 인증한 사용자 정보를 ToolContext로 주입하여 AI 응답을 생성합니다.
-     *
-     * @param messages AI에 전달할 대화 메시지
-     * @param memberId 인증된 회원 ID
-     * @param role 인증된 회원 역할
-     * @return 생성된 AI 응답
-     */
-    public String generate(List<ChatMessage> messages, Long memberId, String role) {
-        List<Message> promptMessages = messages.stream()
-                .filter(message -> message.getContent() != null
-                        && !message.getContent().isBlank())
-                .map(this::toPromptMessage)
-                .toList();
-
-        return chatClientBuilder
-                .build()
-                .prompt()
-                .system(SYSTEM_PROMPT)
-                .system(AI_TOOL_INSTRUCTION)
-                .messages(promptMessages)
-                .tools(
-                        regulationToolService,
-                        documentToolService,
-                        approvalDetailToolService,
-                        approvalToolService
-                )
-                .toolContext(toolContext(memberId, role))
-                .call()
-                .content();
-    }
-
-    /**
-     * 최근 대화 맥락을 Nova 스트리밍 응답으로 생성한다.
-     *
-     * @param messages AI에 전달할 최근 대화 목록
-     * @return Nova 응답 스트림
-     */
     public Flux<ChatResponse> stream(List<ChatMessage> messages) {
         return stream(messages, null, null);
     }
