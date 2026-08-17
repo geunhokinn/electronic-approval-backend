@@ -2,11 +2,15 @@ package com.comin.eapproval.document.service;
 
 import com.comin.eapproval.chat.dto.response.AiToolResponse;
 import com.comin.eapproval.chat.service.ChatToolContext;
-import com.comin.eapproval.document.dto.request.DocumentSearchToolRequest;
 import com.comin.eapproval.document.dto.response.DocumentDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentToolDetailResponse;
 import com.comin.eapproval.document.dto.response.DocumentToolSearchResponse;
 import com.comin.eapproval.document.entity.enums.DocumentStatus;
+import com.comin.eapproval.document.repository.DocumentRepository;
+import com.comin.eapproval.approval.repository.ApprovalRepository;
+import com.comin.eapproval.global.exception.BusinessException;
+import com.comin.eapproval.global.exception.document.DocumentErrorCode;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -24,8 +28,8 @@ public class DocumentToolService {
 
     private static final int MAX_RESULT_SIZE = 10;
 
-    private final DocumentSearchToolService documentSearchToolService;
-    private final DocumentDetailToolService documentDetailToolService;
+    private final DocumentRepository documentRepository;
+    private final ApprovalRepository approvalRepository;
 
     /**
      * 로그인 사용자가 접근할 수 있는 문서를 조건으로 검색합니다.
@@ -49,11 +53,15 @@ public class DocumentToolService {
             return AiToolResponse.failure("INVALID_DOCUMENT_STATUS", "지원하지 않는 문서 상태입니다.");
         }
 
-        List<DocumentToolSearchResponse> results = documentSearchToolService.search(
-                        new DocumentSearchToolRequest(keyword, documentStatus),
+        List<DocumentToolSearchResponse> results = documentRepository
+                .searchAccessibleDocuments(
                         memberId,
-                        role
-                ).stream()
+                        role,
+                        documentStatus,
+                        keyword,
+                        org.springframework.data.domain.PageRequest.of(0, MAX_RESULT_SIZE)
+                )
+                .getContent().stream()
                 .limit(MAX_RESULT_SIZE)
                 .map(DocumentToolSearchResponse::from)
                 .toList();
@@ -77,11 +85,20 @@ public class DocumentToolService {
 
         Long memberId = ChatToolContext.memberId(toolContext);
         String role = ChatToolContext.role(toolContext).name();
-        DocumentDetailResponse response = documentDetailToolService.getDocumentDetail(
-                documentId,
-                memberId,
-                role
-        );
+        DocumentDetailResponse response = documentRepository
+                .findDocumentDetailById(documentId)
+                .orElseThrow(() -> new BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND));
+
+        MemberRole memberRole = ChatToolContext.role(toolContext);
+        boolean isWriter = response.getWriterId().equals(memberId);
+        boolean isAdmin = memberRole == MemberRole.ROLE_ADMIN;
+        boolean isDraft = response.getStatus() == DocumentStatus.DRAFT;
+        boolean isApprover = !isDraft
+                && approvalRepository.existsByDocumentIdAndApproverId(documentId, memberId);
+        if (!isWriter && !isApprover && !isAdmin) {
+            throw new BusinessException(DocumentErrorCode.DOCUMENT_ACCESS_DENIED);
+        }
+
         return AiToolResponse.success(DocumentToolDetailResponse.from(response));
     }
 
