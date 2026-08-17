@@ -1,10 +1,14 @@
 package com.comin.eapproval.approval.service;
 
 import com.comin.eapproval.approval.dto.response.ApprovalListResponse;
+import com.comin.eapproval.approval.dto.request.ApprovalDetailToolRequest;
+import com.comin.eapproval.approval.dto.response.ApprovalDetailResponse;
+import com.comin.eapproval.approval.dto.response.ApprovalToolResponse;
 import com.comin.eapproval.approval.entity.enums.ApprovalBox;
 import com.comin.eapproval.approval.repository.ApprovalRepository;
 import com.comin.eapproval.chat.dto.response.AiToolResponse;
 import com.comin.eapproval.chat.service.ChatToolContext;
+import com.comin.eapproval.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
@@ -24,6 +28,7 @@ public class ApprovalToolService {
     private static final int MAX_RESULT_SIZE = 10;
 
     private final ApprovalRepository approvalRepository;
+    private final ApprovalService approvalService;
 
     /**
      * 현재 사용자에게 배정된 결재 대기 문서를 조회합니다.
@@ -49,6 +54,39 @@ public class ApprovalToolService {
             ToolContext toolContext
     ) {
         return AiToolResponse.success(search(toolContext, ApprovalBox.COMPLETED));
+    }
+
+    /**
+     * 문서 ID로 사용자가 조회할 수 있는 결재 상세 정보를 조회합니다.
+     *
+     * @param documentId 문서 식별자
+     * @param toolContext 서버가 주입한 인증 컨텍스트
+     * @return 결재자와 결재 상태
+     */
+    @Tool(description = "문서 ID로 결재자와 결재 상태를 조회합니다. 사용자가 조회할 수 있는 결재만 반환합니다.")
+    public AiToolResponse<ApprovalToolResponse> getApproval(
+            Long documentId,
+            ToolContext toolContext
+    ) {
+        if (documentId == null) {
+            return AiToolResponse.failure("INVALID_DOCUMENT_ID", "문서 ID가 필요합니다.");
+        }
+
+        Long memberId = ChatToolContext.memberId(toolContext);
+        MemberRole role = ChatToolContext.role(toolContext);
+        Long approvalId = approvalRepository.findByDocument_Id(documentId)
+                .map(approval -> approval.getId())
+                .orElse(null);
+        if (approvalId == null) {
+            return AiToolResponse.failure("APPROVAL_NOT_FOUND", "해당 문서의 결재 정보를 찾을 수 없습니다.");
+        }
+
+        ApprovalDetailResponse response = approvalService.getApprovalDetail(
+                memberId,
+                role,
+                new ApprovalDetailToolRequest(approvalId).getApprovalId()
+        );
+        return AiToolResponse.success(ApprovalToolResponse.from(response));
     }
 
     /**
