@@ -4,8 +4,6 @@ import com.comin.eapproval.chat.dto.request.ChatStreamingRequest;
 import com.comin.eapproval.chat.dto.response.*;
 import com.comin.eapproval.chat.entity.ChatMessage;
 import com.comin.eapproval.global.exception.BusinessException;
-import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
-import com.comin.eapproval.regulation.service.RegulationSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.http.codec.ServerSentEvent;
@@ -135,7 +133,7 @@ public class ChatStreamingService {
                             completed
                     )));
                 }));
-        
+
         // generating 상태 이벤트 먼저 전송
         return Flux.concat(
                 Flux.just(event("status", SseEvent.of(
