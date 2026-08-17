@@ -24,8 +24,14 @@ public class RegulationToolService {
 
     /** 활성 규정 목록의 최대 반환 개수입니다. */
     private static final int MAX_REGULATION_LIST_SIZE = 20;
+    /** 규정 검색 결과의 최대 반환 개수입니다. */
+    private static final int MAX_SEARCH_RESULT_SIZE = 5;
+    /** 규정 검색 결과의 최소 유사도 점수입니다. */
+    private static final double SEARCH_SCORE_THRESHOLD = 0.60;
 
-    private final RegulationSearchService regulationSearchService;
+    private final RegulationEmbeddingService embeddingService;
+    private final RegulationQdrantService qdrantService;
+
     private final RegulationDocumentRepository regulationDocumentRepository;
 
     /**
@@ -45,7 +51,11 @@ public class RegulationToolService {
         }
 
         try {
-            List<RegulationSearchToolResponse> results = regulationSearchService.search(query).stream()
+            List<RegulationSearchToolResponse> results = qdrantService.search(
+                            embeddingService.embed(query),
+                            MAX_SEARCH_RESULT_SIZE,
+                            SEARCH_SCORE_THRESHOLD
+                    ).stream()
                     .map(this::toToolResponse)
                     .toList();
             return AiToolResponse.success(results);
