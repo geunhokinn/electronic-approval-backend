@@ -9,7 +9,6 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
-import com.comin.eapproval.approval.service.ApprovalDetailToolService;
 import com.comin.eapproval.approval.service.ApprovalToolService;
 import com.comin.eapproval.document.service.DocumentToolService;
 import com.comin.eapproval.regulation.service.RegulationToolService;
@@ -48,9 +47,9 @@ public class ChatGenerationService {
             """;
 
     private final ChatClient.Builder chatClientBuilder;
+    
     private final RegulationToolService regulationToolService;
     private final DocumentToolService documentToolService;
-    private final ApprovalDetailToolService approvalDetailToolService;
     private final ApprovalToolService approvalToolService;
 
     /**
@@ -79,7 +78,6 @@ public class ChatGenerationService {
                 .tools( // Nova가 질문 내용을 분석해서 필요한 Tool만 선택
                         regulationToolService,
                         documentToolService,
-                        approvalDetailToolService,
                         approvalToolService
                 )
                 .toolContext(toolContext(memberId, role)) // 사용자 정보 전달
