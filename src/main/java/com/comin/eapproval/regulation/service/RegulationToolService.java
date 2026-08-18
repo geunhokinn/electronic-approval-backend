@@ -51,14 +51,17 @@ public class RegulationToolService {
      * @return 검색 근거 또는 안전한 오류 응답
      */
     @Tool(description = """
-        사용자의 자연어 질문과 의미적으로 관련된 활성 사내 규정 청크를 검색합니다.
-        규정의 절차, 기준, 조건을 파악할 때 사용합니다.
-        특정 조항 번호의 정확한 원문이나 전체 조항 목록 조회에는 사용하지 않습니다.
-        """)
+    사용자의 질문과 의미적으로 관련된 활성 규정 청크를 검색합니다.
+    
+    규정의 절차, 기준, 조건, 요건을 자연어로 질문했을 때 사용합니다.
+    특정 조항 번호가 포함된 질문에는 사용하지 않고 getRegulationArticle을 호출합니다.
+    검색 결과에 포함된 내용만 근거로 답변하며, 결과에 없는 내용은 추정하지 않습니다.
+    """)
     public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(
             String query,
             ToolContext toolContext
     ) {
+        log.info("searchRegulations Tool 호출");
         ChatToolContext.memberId(toolContext);
         if (query == null || query.isBlank()) {
             return AiToolResponse.failure("INVALID_QUERY", "규정 검색어가 필요합니다.");
@@ -83,7 +86,14 @@ public class RegulationToolService {
      *
      * @return 활성 규정 목록 또는 안전한 오류 응답
      */
-    @Tool(description = "현재 활성화된 사내 규정 목록을 조회합니다. 등록된 규정의 종류나 이름을 물을 때 사용합니다. regulationId가 없을 때 먼저 호출 됩니다.")
+    @Tool(description = """
+    현재 활성화된 사내 규정의 목록과 각 규정의 ID, 규정명, 분류, 버전을 조회합니다.
+    
+    사용자가 등록된 규정이나 활성 규정 목록을 질문했을 때 사용합니다.
+    특정 규정의 조항 원문을 조회할 때는 반환된 regulationId를
+    getRegulationArticle 호출에 사용합니다.
+    조항의 상세 내용은 이 Tool의 결과만으로 추정하지 않습니다.
+    """)
     public AiToolResponse<List<RegulationListToolResponse>> listActiveRegulations(
             ToolContext toolContext
     ) {
@@ -110,11 +120,11 @@ public class RegulationToolService {
      * @return 조회된 규정 청크 또는 안전한 오류 응답
      */
     @Tool(description = """
-        listActiveRegulations 결과의 regulationId를 사용해 호출합니다.
-        규정 ID(regulationId), 조(articleNumber), 항(paragraphNumber)으로 사내 규정의 상세 조회를 합니다.
-        현재 활성화된 사내 규정의 특정 조항 또는 항 번호를 질문하면 반드시 호출합니다.
-        조회 결과에 없는 내용은 추정하지 않습니다.
-        """)
+    사용자가 특정 규정의 제N조 또는 제N조 제M항을 질문하면 반드시 호출합니다.
+    regulationId는 listActiveRegulations 결과의 ID를 사용합니다.
+    articleNumber는 필수이며, paragraphNumber는 항을 질문한 경우에만 전달합니다.
+    조회 결과에 없는 조항이나 항의 내용은 절대 추정하지 않습니다.
+    """)
     public AiToolResponse<List<RegulationSearchToolResponse>> getRegulationArticle(
             Long regulationId,
             String articleNumber,
