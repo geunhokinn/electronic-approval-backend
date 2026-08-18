@@ -83,7 +83,7 @@ public class RegulationToolService {
      *
      * @return 활성 규정 목록 또는 안전한 오류 응답
      */
-    @Tool(description = "현재 활성화된 사내 규정 목록을 조회합니다. 등록된 규정의 종류나 이름을 물을 때 사용합니다.")
+    @Tool(description = "현재 활성화된 사내 규정 목록을 조회합니다. 등록된 규정의 종류나 이름을 물을 때 사용합니다. regulationId가 없을 때 먼저 호출 됩니다.")
     public AiToolResponse<List<RegulationListToolResponse>> listActiveRegulations(
             ToolContext toolContext
     ) {
@@ -103,33 +103,34 @@ public class RegulationToolService {
     /**
      * 활성 규정에서 요청한 조항 또는 항의 내용을 조회합니다.
      *
-     * @param regulationName 규정명
+     * @param regulationId 규정 식별자
      * @param articleNumber 조항 번호
      * @param paragraphNumber 항 번호(선택)
      * @param toolContext AI Tool 실행 컨텍스트
      * @return 조회된 규정 청크 또는 안전한 오류 응답
      */
     @Tool(description = """
-        활성화된 규정의 조항 또는 항을 조회합니다.
-        사용자가 규정명과 제N조 또는 제N항의 내용을 물었을 때 사용합니다.
+        listActiveRegulations 결과의 regulationId를 사용해 호출합니다.
+        규정 ID(regulationId), 조(articleNumber), 항(paragraphNumber)으로 사내 규정의 상세 조회를 합니다.
+        현재 활성화된 사내 규정의 특정 조항 또는 항 번호를 질문하면 반드시 호출합니다.
         조회 결과에 없는 내용은 추정하지 않습니다.
         """)
     public AiToolResponse<List<RegulationSearchToolResponse>> getRegulationArticle(
-            String regulationName,
+            Long regulationId,
             String articleNumber,
             String paragraphNumber,
             ToolContext toolContext
     ) {
         log.info(
-                "getRegulationArticle Tool 호출 - regulationName={}, articleNumber={}, paragraphNumber={}",
-                regulationName,
+                "getRegulationArticle Tool 호출 - regulationId={}, articleNumber={}, paragraphNumber={}",
+                regulationId,
                 articleNumber,
                 paragraphNumber
         );
         ChatToolContext.memberId(toolContext);
-        if (regulationName == null || regulationName.isBlank()
+        if (regulationId == null
                 || articleNumber == null || articleNumber.isBlank()) {
-            return AiToolResponse.failure("INVALID_REGULATION_ARTICLE_QUERY", "규정명과 조항 번호가 필요합니다.");
+            return AiToolResponse.failure("INVALID_REGULATION_ARTICLE_QUERY", "규정 ID와 조항 번호가 필요합니다.");
         }
 
         String normalizedArticleNumber = normalizeNumber(articleNumber, ARTICLE_NUMBER_PATTERN, "조");
@@ -139,8 +140,8 @@ public class RegulationToolService {
         }
 
         List<RegulationSearchToolResponse> results = regulationChunkRepository
-                .findByRegulationDocument_TitleAndRegulationDocument_StatusAndArticleNumberOrderByChunkIndexAsc(
-                        regulationName.trim(),
+                .findArticleChunks(
+                        regulationId,
                         RegulationStatus.ACTIVE,
                         normalizedArticleNumber
                 )

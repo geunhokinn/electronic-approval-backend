@@ -44,10 +44,11 @@ public class ChatGenerationService {
             7. 확인되지 않은 정보는 “문서에 명시되어 있지 않습니다.”라고 답변합니다.
             8. 문서 목록 조회 후 요약을 요청받으면 Tool 응답에 포함된 정확한 documentId로 getDocument를 호출합니다.
             9. 정확한 documentId가 없으면 사용자에게 문서를 선택해 달라고 요청하고 ID를 추측하지 않습니다.
+            10. 규정명과 조항 번호가 포함된 질문은 반드시 getRegulationArticle Tool을 호출합니다.
             """;
 
     private final ChatClient.Builder chatClientBuilder;
-    
+
     private final RegulationToolService regulationToolService;
     private final DocumentToolService documentToolService;
     private final ApprovalToolService approvalToolService;
