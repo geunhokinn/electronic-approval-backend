@@ -53,6 +53,11 @@ public class ChatGenerationService {
             16. getRegulation에는 반드시 getRegulations 결과의 정확한 regulationId를 전달합니다.
             17. getRegulation 결과에 없는 조항·항의 내용은 추측하거나 생성하지 않습니다.
             18. getRegulation이 호출되지 않았거나 조회에 실패한 경우 규정 내용을 답변하지 말고 조회 실패를 안내합니다.
+            19. searchRegulations 결과를 사용할 때는 결과에 포함된 규정명·조항·항·본문만 근거로 답변합니다.
+            20. searchRegulations 결과에 없는 조항 번호, 조항 제목, 기간, 일수, 금액, 절차를 보완하거나 임의로 생성하지 않습니다.
+            21. 검색 결과의 조항 번호나 제목이 질문과 일치하지 않으면 해당 결과를 확정적인 근거로 사용하지 말고 관련 규정을 찾을 수 없다고 안내합니다.
+            22. 규정 답변에 사용할 근거가 부족하거나 검색 결과가 없으면 추측하지 말고 “관련 규정을 찾을 수 없습니다.”라고 답변합니다.
+            23. 규정·휴가·출장·구매·예산·보안 등 업무 규정과 관련된 질문은 이전 대화에 답변이 있더라도 매번 searchRegulations를 호출합니다.
     """;
 
     private final ChatClient.Builder chatClientBuilder;

@@ -41,7 +41,7 @@ public class RegulationToolService {
     /** 규정 검색 결과의 최대 반환 개수입니다. */
     private static final int MAX_SEARCH_RESULT_SIZE = 5;
     /** 규정 검색 결과의 최소 유사도 점수입니다. */
-    private static final double SEARCH_SCORE_THRESHOLD = 0.60;
+    private static final double SEARCH_SCORE_THRESHOLD = 0.50;
 
     private final RegulationEmbeddingService embeddingService;
     private final RegulationQdrantService qdrantService;
@@ -57,7 +57,6 @@ public class RegulationToolService {
      */
     @Tool(description = """
     사용자의 질문과 의미적으로 관련된 활성 규정 청크를 검색합니다.
-    
     규정의 절차, 기준, 조건, 요건을 자연어로 질문했을 때 사용합니다.
     검색 결과에 포함된 내용만 근거로 답변하며, 결과에 없는 내용은 추정하지 않습니다.
     """)
@@ -72,17 +71,40 @@ public class RegulationToolService {
         }
 
         try {
-            List<RegulationSearchToolResponse> results = qdrantService.search(
-                            embeddingService.embed(query),
-                            MAX_SEARCH_RESULT_SIZE,
-                            SEARCH_SCORE_THRESHOLD
-                    ).stream()
+            List<RegulationSearchResult> searchResults = qdrantService.search(
+                    embeddingService.embed(query),
+                    MAX_SEARCH_RESULT_SIZE,
+                    SEARCH_SCORE_THRESHOLD
+            );
+
+            log.info("searchRegulations 검색 결과 - query={}, resultCount={}",
+                    query, searchResults.size());
+            searchResults.forEach(result -> log.info(
+                    "searchRegulations 결과 - score={}, regulationId={}, regulationName={}, articleNumber={}, articleTitle={}, paragraphNumber={}, contentPreview={}",
+                    result.getScore(),
+                    result.getRegulationId(),
+                    result.getRegulationName(),
+                    result.getArticleNumber(),
+                    result.getArticleTitle(),
+                    result.getParagraphNumber(),
+                    contentPreview(result.getContent())
+            ));
+
+            List<RegulationSearchToolResponse> results = searchResults.stream()
                     .map(this::toToolResponse)
                     .toList();
             return AiToolResponse.success(results);
         } catch (IOException exception) {
             return AiToolResponse.failure("REGULATION_SEARCH_FAILED", "규정 검색을 완료하지 못했습니다.");
         }
+    }
+
+    /** 로그에 기록할 규정 본문을 제한된 길이로 반환합니다. */
+    private String contentPreview(String content) {
+        if (content == null) {
+            return null;
+        }
+        return content.length() <= 200 ? content : content.substring(0, 200) + "...";
     }
 
     /**
