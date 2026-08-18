@@ -40,7 +40,11 @@ public class RegulationToolService {
      * @param query 사용자가 입력한 규정 검색 질문
      * @return 검색 근거 또는 안전한 오류 응답
      */
-    @Tool(description = "사용자 질문과 관련된 활성 사내 규정을 검색합니다. 특정 규정의 조항이나 기준을 확인할 때 사용합니다.")
+    @Tool(description = """
+        사용자의 자연어 질문과 의미적으로 관련된 활성 사내 규정 청크를 검색합니다.
+        규정의 절차, 기준, 조건을 파악할 때 사용합니다.
+        특정 조항 번호의 정확한 원문이나 전체 조항 목록 조회에는 사용하지 않습니다.
+        """)
     public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(
             String query,
             ToolContext toolContext
