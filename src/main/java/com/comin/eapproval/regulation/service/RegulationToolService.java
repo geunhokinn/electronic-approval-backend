@@ -10,19 +10,26 @@ import com.comin.eapproval.regulation.entity.RegulationChunk;
 import com.comin.eapproval.regulation.repository.RegulationChunkRepository;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * AI가 호출할 수 있는 규정 조회 Tool을 제공합니다.
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RegulationToolService {
+
+    private static final Pattern ARTICLE_NUMBER_PATTERN = Pattern.compile("(?:제\\s*)?(\\d+)(?:\\s*조)?");
+    private static final Pattern PARAGRAPH_NUMBER_PATTERN = Pattern.compile("(?:제\\s*)?(\\d+)(?:\\s*항)?");
 
     /** 활성 규정 목록의 최대 반환 개수입니다. */
     private static final int MAX_REGULATION_LIST_SIZE = 20;
@@ -80,6 +87,7 @@ public class RegulationToolService {
     public AiToolResponse<List<RegulationListToolResponse>> listActiveRegulations(
             ToolContext toolContext
     ) {
+        log.info("listActiveRegulations Tool 호출");
         ChatToolContext.memberId(toolContext);
         List<RegulationListToolResponse> results = regulationDocumentRepository
                 .findByStatusOrderByTitleAscVersionDesc(RegulationStatus.ACTIVE)
@@ -88,6 +96,7 @@ public class RegulationToolService {
                 .map(RegulationListToolResponse::from)
                 .toList();
 
+        log.info("listActiveRegulations Tool 결과 개수={}", results.size());
         return AiToolResponse.success(results);
     }
 
@@ -111,28 +120,50 @@ public class RegulationToolService {
             String paragraphNumber,
             ToolContext toolContext
     ) {
+        log.info(
+                "getRegulationArticle Tool 호출 - regulationName={}, articleNumber={}, paragraphNumber={}",
+                regulationName,
+                articleNumber,
+                paragraphNumber
+        );
         ChatToolContext.memberId(toolContext);
         if (regulationName == null || regulationName.isBlank()
                 || articleNumber == null || articleNumber.isBlank()) {
             return AiToolResponse.failure("INVALID_REGULATION_ARTICLE_QUERY", "규정명과 조항 번호가 필요합니다.");
         }
 
+        String normalizedArticleNumber = normalizeNumber(articleNumber, ARTICLE_NUMBER_PATTERN, "조");
+        String normalizedParagraphNumber = normalizeNumber(paragraphNumber, PARAGRAPH_NUMBER_PATTERN, "항");
+        if (normalizedArticleNumber == null) {
+            return AiToolResponse.failure("INVALID_REGULATION_ARTICLE_QUERY", "조항 번호 형식이 올바르지 않습니다.");
+        }
+
         List<RegulationSearchToolResponse> results = regulationChunkRepository
                 .findByRegulationDocument_TitleAndRegulationDocument_StatusAndArticleNumberOrderByChunkIndexAsc(
                         regulationName.trim(),
                         RegulationStatus.ACTIVE,
-                        articleNumber.trim()
+                        normalizedArticleNumber
                 )
                 .stream()
-                .filter(chunk -> paragraphNumber == null || paragraphNumber.isBlank()
-                        || paragraphNumber.trim().equals(chunk.getParagraphNumber()))
+                .filter(chunk -> normalizedParagraphNumber == null
+                        || normalizedParagraphNumber.equals(chunk.getParagraphNumber()))
                 .map(this::toArticleToolResponse)
                 .toList();
 
         if (results.isEmpty()) {
+            log.info("getRegulationArticle Tool 결과 없음");
             return AiToolResponse.failure("REGULATION_ARTICLE_NOT_FOUND", "요청한 활성 규정의 조항을 찾을 수 없습니다.");
         }
+        log.info("getRegulationArticle Tool 결과 개수={}", results.size());
         return AiToolResponse.success(results);
+    }
+
+    private String normalizeNumber(String value, Pattern pattern, String suffix) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        Matcher matcher = pattern.matcher(value.trim());
+        return matcher.matches() ? "제" + matcher.group(1) + suffix : null;
     }
 
     /**
