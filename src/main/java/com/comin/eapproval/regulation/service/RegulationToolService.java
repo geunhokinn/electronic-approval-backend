@@ -99,7 +99,7 @@ public class RegulationToolService {
     public AiToolResponse<List<RegulationListToolResponse>> getRegulations(
             ToolContext toolContext
     ) {
-        log.info("listActiveRegulations Tool 호출");
+        log.info("getRegulations Tool 호출");
         ChatToolContext.memberId(toolContext);
         List<RegulationListToolResponse> results = regulationDocumentRepository
                 .findByStatusOrderByTitleAscVersionDesc(RegulationStatus.ACTIVE)
@@ -108,7 +108,7 @@ public class RegulationToolService {
                 .map(RegulationListToolResponse::from)
                 .toList();
 
-        log.info("listActiveRegulations Tool 결과 개수={}", results.size());
+        log.info("getRegulations Tool 결과 개수={}", results.size());
         return AiToolResponse.success(results);
     }
 
