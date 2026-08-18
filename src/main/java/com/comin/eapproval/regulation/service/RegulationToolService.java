@@ -6,6 +6,8 @@ import com.comin.eapproval.regulation.dto.response.RegulationListToolResponse;
 import com.comin.eapproval.regulation.dto.response.RegulationSearchResult;
 import com.comin.eapproval.regulation.dto.response.RegulationSearchToolResponse;
 import com.comin.eapproval.regulation.entity.RegulationStatus;
+import com.comin.eapproval.regulation.entity.RegulationChunk;
+import com.comin.eapproval.regulation.repository.RegulationChunkRepository;
 import com.comin.eapproval.regulation.repository.RegulationDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
@@ -33,6 +35,7 @@ public class RegulationToolService {
     private final RegulationQdrantService qdrantService;
 
     private final RegulationDocumentRepository regulationDocumentRepository;
+    private final RegulationChunkRepository regulationChunkRepository;
 
     /**
      * 사용자 질문과 관련된 활성 규정 근거를 검색합니다.
@@ -89,6 +92,50 @@ public class RegulationToolService {
     }
 
     /**
+     * 활성 규정에서 요청한 조항 또는 항의 내용을 조회합니다.
+     *
+     * @param regulationName 규정명
+     * @param articleNumber 조항 번호
+     * @param paragraphNumber 항 번호(선택)
+     * @param toolContext AI Tool 실행 컨텍스트
+     * @return 조회된 규정 청크 또는 안전한 오류 응답
+     */
+    @Tool(description = """
+        활성화된 규정의 조항 또는 항을 조회합니다.
+        사용자가 규정명과 제N조 또는 제N항의 내용을 물었을 때 사용합니다.
+        조회 결과에 없는 내용은 추정하지 않습니다.
+        """)
+    public AiToolResponse<List<RegulationSearchToolResponse>> getRegulationArticle(
+            String regulationName,
+            String articleNumber,
+            String paragraphNumber,
+            ToolContext toolContext
+    ) {
+        ChatToolContext.memberId(toolContext);
+        if (regulationName == null || regulationName.isBlank()
+                || articleNumber == null || articleNumber.isBlank()) {
+            return AiToolResponse.failure("INVALID_REGULATION_ARTICLE_QUERY", "규정명과 조항 번호가 필요합니다.");
+        }
+
+        List<RegulationSearchToolResponse> results = regulationChunkRepository
+                .findByRegulationDocument_TitleAndRegulationDocument_StatusAndArticleNumberOrderByChunkIndexAsc(
+                        regulationName.trim(),
+                        RegulationStatus.ACTIVE,
+                        articleNumber.trim()
+                )
+                .stream()
+                .filter(chunk -> paragraphNumber == null || paragraphNumber.isBlank()
+                        || paragraphNumber.trim().equals(chunk.getParagraphNumber()))
+                .map(this::toArticleToolResponse)
+                .toList();
+
+        if (results.isEmpty()) {
+            return AiToolResponse.failure("REGULATION_ARTICLE_NOT_FOUND", "요청한 활성 규정의 조항을 찾을 수 없습니다.");
+        }
+        return AiToolResponse.success(results);
+    }
+
+    /**
      * 기존 규정 검색 결과를 AI Tool 응답으로 변환합니다.
      *
      * @param result Qdrant 검색 결과
@@ -104,6 +151,19 @@ public class RegulationToolService {
                 result.getArticleTitle(),
                 result.getParagraphNumber(),
                 result.getContent()
+        );
+    }
+
+    private RegulationSearchToolResponse toArticleToolResponse(RegulationChunk chunk) {
+        return new RegulationSearchToolResponse(
+                chunk.getRegulationDocument().getId(),
+                chunk.getRegulationDocument().getTitle(),
+                chunk.getRegulationDocument().getVersion(),
+                chunk.getRegulationDocument().getEffectiveDate(),
+                chunk.getArticleNumber(),
+                chunk.getArticleTitle(),
+                chunk.getParagraphNumber(),
+                chunk.getContent()
         );
     }
 }

@@ -68,6 +68,9 @@ public class RegulationIngestionService {
             RegulationChunk chunk = RegulationChunk.create(
                     document,
                     textChunk.getChunkIndex(),
+                    textChunk.getArticleNumber(),
+                    textChunk.getArticleTitle(),
+                    textChunk.getParagraphNumber(),
                     textChunk.getContent()
             );
             chunk.updateVectorId(pointId);
