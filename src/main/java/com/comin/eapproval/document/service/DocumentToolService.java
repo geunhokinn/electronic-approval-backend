@@ -39,7 +39,7 @@ public class DocumentToolService {
      * @return 문서 검색 결과
      */
     @Tool(description = "사용자가 조회할 수 있는 문서를 제목·본문 키워드와 상태로 검색합니다. 문서 ID가 없을 때 먼저 사용합니다.")
-    public AiToolResponse<List<DocumentToolSearchResponse>> searchDocuments(
+    public AiToolResponse<List<DocumentToolSearchResponse>> getDocuments(
             @ToolParam(required = false, description = "검색할 문서 제목 또는 본문 키워드입니다. 없으면 전체 문서를 검색합니다.")
             String keyword,
             @ToolParam(required = false, description = "문서 상태입니다. 없으면 모든 상태를 검색합니다.")
