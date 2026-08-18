@@ -9,13 +9,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Markdown 규정 문서를 조항과 항 구조에 따라 검색용 청크로 분할합니다.
+ * Markdown 규정 문서를 조항과 항 헤딩 기준으로 검색용 청크로 분할합니다.
  */
 @Service
 public class RegulationChunkingService {
 
-    private static final int MAX_CHUNK_LENGTH = 1_000;
-    private static final int MAX_OVERLAP_LENGTH = 100;
     private static final Pattern ARTICLE_PATTERN = Pattern.compile("^##\\s+(.+)$", Pattern.MULTILINE);
     private static final Pattern PARAGRAPH_PATTERN = Pattern.compile("^###\\s+(.+)$", Pattern.MULTILINE);
     private static final Pattern TITLE_PATTERN = Pattern.compile("^#\\s+(.+)$", Pattern.MULTILINE);
@@ -23,7 +21,7 @@ public class RegulationChunkingService {
     private static final Pattern PARAGRAPH_NUMBER_PATTERN = Pattern.compile("^(제\\s*\\d+항)");
 
     /**
-     * Markdown 원문을 조항 우선으로 분할하고, 긴 조항은 항·문장 기준으로 재분할합니다.
+     * Markdown 원문을 조항과 항 헤딩 기준으로 분할합니다.
      *
      * @param markdown Markdown 규정 원문
      * @param category 규정 분류 코드
@@ -37,22 +35,20 @@ public class RegulationChunkingService {
 
         for (ArticleSection article : findArticles(normalizedMarkdown)) {
             for (ParagraphSection paragraph : splitArticle(article.body())) {
-                for (String content : splitLongText(paragraph.body())) {
-                    String trimmedContent = content.trim();
-                    if (trimmedContent.isEmpty()) {
-                        continue;
-                    }
-                    String prefix = buildPrefix(regulationName, category, article, paragraph);
-                    chunks.add(new RegulationTextChunk(
-                            regulationName,
-                            article.number(),
-                            article.title(),
-                            paragraph.number(),
-                            chunkIndex++,
-                            trimmedContent,
-                            prefix + "\n\n" + trimmedContent
-                    ));
+                String trimmedContent = paragraph.body().trim();
+                if (trimmedContent.isEmpty()) {
+                    continue;
                 }
+                String prefix = buildPrefix(regulationName, category, article, paragraph);
+                chunks.add(new RegulationTextChunk(
+                        regulationName,
+                        article.number(),
+                        article.title(),
+                        paragraph.number(),
+                        chunkIndex++,
+                        trimmedContent,
+                        prefix + "\n\n" + trimmedContent
+                ));
             }
         }
         return chunks;
@@ -82,9 +78,6 @@ public class RegulationChunkingService {
     }
 
     private List<ParagraphSection> splitArticle(String articleBody) {
-        if (articleBody.length() <= MAX_CHUNK_LENGTH) {
-            return List.of(new ParagraphSection(findParagraphNumber(articleBody), removeParagraphHeadings(articleBody)));
-        }
         List<ParagraphSection> paragraphs = new ArrayList<>();
         Matcher matcher = PARAGRAPH_PATTERN.matcher(articleBody);
         List<Integer> starts = new ArrayList<>();
@@ -114,38 +107,6 @@ public class RegulationChunkingService {
         return paragraphs;
     }
 
-    private List<String> splitLongText(String text) {
-        String normalizedText = text.trim();
-        if (normalizedText.length() <= MAX_CHUNK_LENGTH) {
-            return List.of(normalizedText);
-        }
-        List<String> chunks = new ArrayList<>();
-        int start = 0;
-        while (start < normalizedText.length()) {
-            int end = Math.min(start + MAX_CHUNK_LENGTH, normalizedText.length());
-            if (end < normalizedText.length()) {
-                end = findSentenceBoundary(normalizedText, start, end);
-            }
-            chunks.add(normalizedText.substring(start, end).trim());
-            if (end >= normalizedText.length()) {
-                break;
-            }
-            start = Math.max(end - MAX_OVERLAP_LENGTH, start + 1);
-        }
-        return chunks;
-    }
-
-    private int findSentenceBoundary(String text, int start, int end) {
-        for (int index = end; index > start; index--) {
-            char character = text.charAt(index - 1);
-            if (character == '.' || character == '!' || character == '?' || character == '。'
-                    || character == '！' || character == '？') {
-                return index;
-            }
-        }
-        return end;
-    }
-
     private String buildPrefix(String name, String category, ArticleSection article, ParagraphSection paragraph) {
         return "[규정명: %s]\n[분류: %s]\n[조항: %s %s]\n[항: %s]"
                 .formatted(name, category, article.number(), article.title(), paragraph.number());
@@ -154,15 +115,6 @@ public class RegulationChunkingService {
     private String findTitle(String markdown) {
         Matcher matcher = TITLE_PATTERN.matcher(markdown);
         return matcher.find() ? matcher.group(1).trim() : "미지정 규정";
-    }
-
-    private String findParagraphNumber(String text) {
-        Matcher matcher = PARAGRAPH_PATTERN.matcher(text);
-        return matcher.find() ? extractParagraphNumber(matcher.group(1).trim()) : "없음";
-    }
-
-    private String removeParagraphHeadings(String text) {
-        return text.replaceAll("(?m)^###\\s+.+(?:\\n|$)", "").trim();
     }
 
     private String extractArticleNumber(String heading) {
