@@ -30,6 +30,9 @@ public class RegulationDetailToolResponse {
     /** 조회된 조항 번호입니다. */
     private String articleNumber;
 
+    /** 조회된 조항 제목입니다. */
+    private String articleTitle;
+
     /** 조회된 항 번호입니다. */
     private String paragraphNumber;
 

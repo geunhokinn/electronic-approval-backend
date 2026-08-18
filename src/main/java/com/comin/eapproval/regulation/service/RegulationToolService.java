@@ -113,8 +113,8 @@ public class RegulationToolService {
      * @return 활성 규정 목록 또는 안전한 오류 응답
      */
     @Tool(description = """
-    현재 활성화된 사내 규정의 목록과 각 규정의 ID, 규정명, 분류, 버전을 조회합니다.
-
+    현재 활성화된 사내 규정의 목록과 각 규정의 ID, 규정명, 분류, 버전,
+    실제 포함된 조항 번호 목록과 조항 수를 조회합니다.
     사용자가 등록된 규정이나 활성 규정 목록을 질문했을 때 사용합니다.
     특정 규정의 상세 조회가 필요하면 반환된 regulationId를 getRegulation에 전달합니다.
     """)
@@ -127,7 +127,16 @@ public class RegulationToolService {
                 .findByStatusOrderByTitleAscVersionDesc(RegulationStatus.ACTIVE)
                 .stream()
                 .limit(MAX_REGULATION_LIST_SIZE)
-                .map(RegulationListToolResponse::from)
+                .map(document -> {
+                    List<String> articleNumbers = regulationChunkRepository
+                            .findByRegulationDocumentIdOrderByIdAsc(document.getId())
+                            .stream()
+                            .map(RegulationChunk::getArticleNumber)
+                            .filter(articleNumber -> articleNumber != null && !articleNumber.isBlank())
+                            .distinct()
+                            .toList();
+                    return RegulationListToolResponse.from(document, articleNumbers);
+                })
                 .toList();
 
         log.info("getRegulations Tool 결과 개수={}, regulationIds={}",
@@ -216,10 +225,15 @@ public class RegulationToolService {
                     return "[" + paragraphNum + "]\n" + chunk.getContent();
                 })
                 .collect(Collectors.joining("\n\n"));
+        String articleTitle = selected.stream()
+                .map(RegulationChunk::getArticleTitle)
+                .filter(title -> title != null && !title.isBlank())
+                .findFirst()
+                .orElse(null);
         return AiToolResponse.success(new RegulationDetailToolResponse(
                 document.getId(), document.getTitle(), document.getCategory().name(),
                 document.getVersion(), document.getEffectiveDate(), normalizedArticle,
-                normalizedParagraph, content));
+                articleTitle, normalizedParagraph, content));
     }
 
     private RegulationDocument resolveActiveRegulation(Long regulationId) {
