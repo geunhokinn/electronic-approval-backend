@@ -56,14 +56,15 @@ public class RegulationToolService {
      * @return 검색 근거 또는 안전한 오류 응답
      */
     @Tool(description = """
-    사용자의 질문과 의미적으로 관련된 활성 규정 청크를 검색합니다.
-    규정의 절차, 기준, 조건, 요건을 자연어로 질문했을 때 사용합니다.
-    검색 결과에 포함된 내용만 근거로 답변하며, 결과에 없는 내용은 추정하지 않습니다.
+    휴가, 출장, 구매, 예산, 경비, 보안 등 업무 규정의 절차·기준·조건을
+    자연어로 질문하면 관련 활성 규정 청크를 검색합니다.
+    예: "휴가 신청 절차가 뭐야?", "특별휴가 증빙자료가 필요해?"
+    특정 조항·항 조회는 getRegulation을 사용합니다.
+    검색 결과에 없는 내용은 생성하지 않습니다.
     """)
-        public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(
-            String query,
-            ToolContext toolContext
-    ) {
+    public AiToolResponse<List<RegulationSearchToolResponse>> searchRegulations(
+        @ToolParam(description = "검색할 규정 관련 자연어 질문입니다.") String query, ToolContext toolContext) {
+
         log.info("searchRegulations Tool 호출");
         ChatToolContext.memberId(toolContext);
         if (query == null || query.isBlank()) {
@@ -157,7 +158,6 @@ public class RegulationToolService {
      */
     @Tool(description = """
     활성 규정의 특정 조항 또는 항 내용을 조회합니다.
-
     반드시 먼저 getRegulations를 호출하고, 그 결과의 regulationId를 사용합니다.
     articleNumber는 반드시 전달해야 하며, paragraphNumber는 항을 지정할 때만 전달합니다.
     조회 결과에 없는 내용은 추정하지 않습니다.
