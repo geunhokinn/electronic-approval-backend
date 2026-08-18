@@ -67,7 +67,6 @@ public class RegulationIngestionService {
             String pointId = UUID.randomUUID().toString();
             RegulationChunk chunk = RegulationChunk.create(
                     document,
-                    textChunk.getChunkIndex(),
                     textChunk.getArticleNumber(),
                     textChunk.getArticleTitle(),
                     textChunk.getParagraphNumber(),
@@ -88,7 +87,6 @@ public class RegulationIngestionService {
                             Map.entry("articleNumber", textChunk.getArticleNumber()),
                             Map.entry("articleTitle", textChunk.getArticleTitle()),
                             Map.entry("paragraphNumber", textChunk.getParagraphNumber()),
-                            Map.entry("chunkIndex", textChunk.getChunkIndex()),
                             Map.entry("content", textChunk.getContent())
                     )
             );

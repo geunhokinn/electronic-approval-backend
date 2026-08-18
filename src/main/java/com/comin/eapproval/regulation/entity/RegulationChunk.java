@@ -24,14 +24,6 @@ public class RegulationChunk {
     @JoinColumn(name = "regulation_document_id", nullable = false)
     private RegulationDocument regulationDocument;
 
-    /** 규정 문서 내 청크 순서입니다. */
-    @Column(nullable = false)
-    private int chunkIndex;
-
-    /** 기존 섹션 제목 필드입니다. 현재 조항 제목과 값이 중복될 수 있습니다. */
-    @Column(length = 200)
-    private String sectionTitle;
-
     /** 청크가 속한 조항 번호입니다. */
     @Column(nullable = false, length = 50)
     private String articleNumber;
@@ -53,15 +45,13 @@ public class RegulationChunk {
     private String vectorId;
 
     @Builder
-    private RegulationChunk(RegulationDocument regulationDocument, int chunkIndex,
+    private RegulationChunk(RegulationDocument regulationDocument,
                             String articleNumber, String articleTitle, String paragraphNumber,
                             String content) {
         this.regulationDocument = regulationDocument;
-        this.chunkIndex = chunkIndex;
         this.articleNumber = articleNumber;
         this.articleTitle = articleTitle;
         this.paragraphNumber = paragraphNumber;
-        this.sectionTitle = articleTitle;
         this.content = content;
     }
 
@@ -69,16 +59,14 @@ public class RegulationChunk {
      * 규정 청크를 생성합니다.
      *
      * @param document 원본 규정
-     * @param chunkIndex 청크 순서
      * @param content 청크 내용
      * @return 생성된 규정 청크
      */
-    public static RegulationChunk create(RegulationDocument document, int chunkIndex,
+    public static RegulationChunk create(RegulationDocument document,
                                          String articleNumber, String articleTitle,
                                          String paragraphNumber, String content) {
         return RegulationChunk.builder()
                 .regulationDocument(document)
-                .chunkIndex(chunkIndex)
                 .articleNumber(articleNumber)
                 .articleTitle(articleTitle)
                 .paragraphNumber(paragraphNumber)

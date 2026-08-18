@@ -31,8 +31,6 @@ public class RegulationChunkingService {
         String normalizedMarkdown = normalize(markdown);
         String regulationName = findTitle(normalizedMarkdown);
         List<RegulationTextChunk> chunks = new ArrayList<>();
-        int chunkIndex = 0;
-
         for (ArticleSection article : findArticles(normalizedMarkdown)) {
             for (ParagraphSection paragraph : splitArticle(article.body())) {
                 String trimmedContent = paragraph.body().trim();
@@ -45,7 +43,6 @@ public class RegulationChunkingService {
                         article.number(),
                         article.title(),
                         paragraph.number(),
-                        chunkIndex++,
                         trimmedContent,
                         prefix + "\n\n" + trimmedContent
                 ));

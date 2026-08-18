@@ -31,7 +31,7 @@ public class RegulationChunkRepositoryImpl implements RegulationChunkRepositoryC
                         regulationDocument.status.eq(status),
                         regulationChunk.articleNumber.eq(articleNumber)
                 )
-                .orderBy(regulationChunk.chunkIndex.asc())
+                .orderBy(regulationChunk.id.asc())
                 .fetch();
     }
 }

@@ -22,9 +22,6 @@ public class RegulationTextChunk {
     /** 항 번호입니다. */
     private String paragraphNumber;
 
-    /** 규정 문서 내 청크 순번입니다. */
-    private int chunkIndex;
-
     /** MariaDB와 Qdrant payload에 저장할 청크 본문입니다. */
     private String content;
 
