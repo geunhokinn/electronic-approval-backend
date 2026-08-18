@@ -19,9 +19,6 @@ public class RegulationListToolResponse {
     /** 규정명입니다. */
     private String regulationName;
 
-    /** 규정 분류입니다. */
-    private String category;
-
     /** 규정 버전입니다. */
     private String version;
 
@@ -39,7 +36,6 @@ public class RegulationListToolResponse {
                 document.getId(),
                 document.getTitle(),
                 document.getCategory().name(),
-                document.getVersion(),
                 document.getEffectiveDate()
         );
     }
