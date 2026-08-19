@@ -48,9 +48,6 @@ public class ChatMessage extends BaseEntity {
     /** 메시지 처리 상태입니다. */
     private ChatMessageStatus status;
 
-    /** AI 응답 실패 시 저장하는 오류 코드입니다. */
-    private String errorCode;
-
     /** AI 응답 처리가 완료·실패·취소된 시각입니다. */
     private LocalDateTime completedAt;
 
@@ -117,9 +114,8 @@ public class ChatMessage extends BaseEntity {
     }
 
     /** AI 응답 처리를 실패 상태로 변경한다. */
-    public void fail(String errorCode) {
+    public void fail() {
         this.status = ChatMessageStatus.FAILED;
-        this.errorCode = errorCode;
         this.completedAt = LocalDateTime.now();
     }
 

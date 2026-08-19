@@ -73,7 +73,7 @@ public class ChatStreamingService {
                 createResponseStream(memberId, role, request, assistantMessage)
         // Bedrock 호출이나 AI 처리 중 오류가 나면
         ).onErrorResume(error -> {
-            responseService.fail(assistantMessage, "CHAT_AI_RESPONSE_FAILED");
+            responseService.fail(assistantMessage);
             SseEvent<SseErrorData> failed = SseEvent.of(
                     SseEventType.ERROR,
                     conversationId,

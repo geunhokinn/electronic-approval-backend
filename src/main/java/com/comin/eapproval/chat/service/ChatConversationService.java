@@ -243,10 +243,10 @@ public class ChatConversationService {
 
     /** AI 응답을 실패 상태로 변경한다. */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void failAssistantMessage(Long messageId, String errorCode) {
+    public void failAssistantMessage(Long messageId) {
         ChatMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
-        message.fail(errorCode);
+        message.fail();
     }
 
     /** 사용자가 중지한 AI 응답을 취소 상태로 변경한다. */
