@@ -39,9 +39,6 @@ public class ChatConversation extends BaseEntity {
 
     private LocalDateTime deletedAt;
 
-    @Version
-    private Long version;
-
     private ChatConversation(Member member, String title) {
         this.member = member;
         this.title = title;
