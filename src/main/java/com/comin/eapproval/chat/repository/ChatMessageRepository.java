@@ -29,6 +29,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             ChatMessageRole role
     );
 
+    /** 대화방의 마지막 메시지를 순번 기준으로 조회한다. */
+    Optional<ChatMessage> findTopByConversationIdOrderBySequenceDesc(
+            Long conversationId
+    );
+
     /** 대화방에 처리 중인 AI 응답이 존재하는지 확인한다. */
     boolean existsByConversationIdAndRoleAndStatus(
             Long conversationId,

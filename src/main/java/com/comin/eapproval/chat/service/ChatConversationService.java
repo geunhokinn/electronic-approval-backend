@@ -60,12 +60,11 @@ public class ChatConversationService {
         ChatConversation conversation = ChatConversation.create(member, request.getMessage());
         conversationRepository.save(conversation);
 
-        int sequence = conversation.nextMessageSequence();
         messageRepository.save(ChatMessage.userMessage(
                 conversation,
                 request.getRequestId(),
                 request.getMessage().trim(),
-                sequence
+                1
         ));
         conversation.updateLastMessageAt(LocalDateTime.now());
 
@@ -105,7 +104,7 @@ public class ChatConversationService {
                 conversation,
                 request.getRequestId(),
                 request.getMessage().trim(),
-                conversation.nextMessageSequence()
+                nextMessageSequence(conversation.getId())
         ));
         conversation.updateLastMessageAt(LocalDateTime.now());
 
@@ -222,12 +221,20 @@ public class ChatConversationService {
         ChatMessage message = ChatMessage.assistantMessage(
                 conversation,
                 requestId,
-                conversation.nextMessageSequence()
+                nextMessageSequence(conversationId)
         );
         message.startProcessing();
         messageRepository.save(message);
         conversation.updateLastMessageAt(LocalDateTime.now());
         return message;
+    }
+
+    /** 대화방의 마지막 메시지 다음 순번을 계산한다. */
+    private int nextMessageSequence(Long conversationId) {
+        return messageRepository
+                .findTopByConversationIdOrderBySequenceDesc(conversationId)
+                .map(message -> message.getSequence() + 1)
+                .orElse(1);
     }
 
     /** AI 응답 전체 내용을 저장하고 완료 상태로 변경한다. */

@@ -36,10 +36,6 @@ public class ChatConversation extends BaseEntity {
     /** 대화방 상태입니다. */
     private ChatConversationStatus status;
 
-    @Column(nullable = false)
-    /** 대화방에 저장된 마지막 메시지의 순번입니다. */
-    private int lastMessageSequence;
-
     /** 마지막 메시지가 저장된 시각입니다. */
     private LocalDateTime lastMessageAt;
 
@@ -58,10 +54,6 @@ public class ChatConversation extends BaseEntity {
             title = title.substring(0, 10);
         }
         return new ChatConversation(member, title);
-    }
-
-    public int nextMessageSequence() {
-        return ++lastMessageSequence;
     }
 
     public void updateLastMessageAt(LocalDateTime lastMessageAt) {
