@@ -48,18 +48,6 @@ public class ChatMessage extends BaseEntity {
     /** 메시지 처리 상태입니다. */
     private ChatMessageStatus status;
 
-    /** 응답 생성에 사용한 AI 모델명입니다. */
-    private String model;
-
-    /** AI 요청에 사용된 입력 토큰 수입니다. */
-    private Integer promptTokens;
-
-    /** AI 응답으로 생성된 출력 토큰 수입니다. */
-    private Integer completionTokens;
-
-    /** 입력 토큰과 출력 토큰을 합산한 전체 토큰 수입니다. */
-    private Integer totalTokens;
-
     /** AI 응답 실패 시 저장하는 오류 코드입니다. */
     private String errorCode;
 
@@ -121,17 +109,9 @@ public class ChatMessage extends BaseEntity {
      * AI 응답을 완료하고 전체 응답과 사용량을 저장한다.
      */
     public void complete(
-            String content,
-            String model,
-            Integer promptTokens,
-            Integer completionTokens,
-            Integer totalTokens
+            String content
     ) {
         this.content = content;
-        this.model = model;
-        this.promptTokens = promptTokens;
-        this.completionTokens = completionTokens;
-        this.totalTokens = totalTokens;
         this.status = ChatMessageStatus.COMPLETED;
         this.completedAt = LocalDateTime.now();
     }

@@ -230,28 +230,15 @@ public class ChatConversationService {
         return message;
     }
 
-    /**
-     * AI 응답 전체 내용과 모델 사용량을 저장한다.
-     *
-     * @param messageId AI 응답 메시지 ID
-     * @param content 전체 응답 내용
-     * @param model 사용 모델명
-     * @param promptTokens 입력 토큰 수
-     * @param completionTokens 출력 토큰 수
-     * @param totalTokens 전체 토큰 수
-     */
+    /** AI 응답 전체 내용을 저장하고 완료 상태로 변경한다. */
     @Transactional
     public void completeAssistantMessage(
             Long messageId,
-            String content,
-            String model,
-            Integer promptTokens,
-            Integer completionTokens,
-            Integer totalTokens
+            String content
     ) {
         ChatMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new BusinessException(ChatErrorCode.CHAT_CONVERSATION_NOT_FOUND));
-        message.complete(content, model, promptTokens, completionTokens, totalTokens);
+        message.complete(content);
     }
 
     /** AI 응답을 실패 상태로 변경한다. */

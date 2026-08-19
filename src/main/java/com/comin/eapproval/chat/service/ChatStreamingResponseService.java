@@ -18,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatStreamingResponseService {
 
-    private static final String MODEL = "global.amazon.nova-2-lite-v1:0";
-
     private final ChatConversationService conversationService;
 
     /** 스트리밍 실패 시 ASSISTANT 메시지를 실패 상태로 기록한다. */
@@ -50,11 +48,7 @@ public class ChatStreamingResponseService {
             String fallbackContent = "관련 규정을 찾지 못했습니다.";
             conversationService.completeAssistantMessage(
                     assistantMessage.getId(),
-                    fallbackContent,
-                    MODEL,
-                    null,
-                    null,
-                    null
+                    fallbackContent
             );
             return new SseCompletedData(
                     assistantMessage.getId(),
@@ -73,11 +67,7 @@ public class ChatStreamingResponseService {
 
         conversationService.completeAssistantMessage(
                 assistantMessage.getId(),
-                appendSources(content, sources),
-                MODEL,
-                usage == null ? null : usage.getPromptTokens(),
-                usage == null ? null : usage.getCompletionTokens(),
-                usage == null ? null : usage.getTotalTokens()
+                appendSources(content, sources)
         );
 
         return new SseCompletedData(
