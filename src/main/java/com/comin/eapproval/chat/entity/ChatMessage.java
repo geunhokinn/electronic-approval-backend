@@ -18,34 +18,52 @@ public class ChatMessage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    /** 메시지 식별자입니다. */
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id", nullable = false)
+    /** 메시지가 속한 대화방입니다. */
     private ChatConversation conversation;
 
     @Column(nullable = false, length = 36)
+    /** 하나의 AI 요청을 식별하는 요청 ID입니다. */
     private String requestId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    /** 메시지 작성 주체입니다. */
     private ChatMessageRole role;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    /** 사용자 질문 또는 AI 응답 본문입니다. */
     private String content;
 
     @Column(nullable = false)
+    /** 대화방 내 메시지 순번입니다. */
     private int sequence;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    /** 메시지 처리 상태입니다. */
     private ChatMessageStatus status;
 
+    /** 응답 생성에 사용한 AI 모델명입니다. */
     private String model;
+
+    /** AI 요청에 사용된 입력 토큰 수입니다. */
     private Integer promptTokens;
+
+    /** AI 응답으로 생성된 출력 토큰 수입니다. */
     private Integer completionTokens;
+
+    /** 입력 토큰과 출력 토큰을 합산한 전체 토큰 수입니다. */
     private Integer totalTokens;
+
+    /** AI 응답 실패 시 저장하는 오류 코드입니다. */
     private String errorCode;
+
+    /** AI 응답 처리가 완료·실패·취소된 시각입니다. */
     private LocalDateTime completedAt;
 
     private ChatMessage(

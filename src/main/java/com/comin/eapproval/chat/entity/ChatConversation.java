@@ -19,24 +19,31 @@ public class ChatConversation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    /** 대화방 식별자입니다. */
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    /** 대화방을 생성한 회원입니다. */
     private Member member;
 
     @Column(nullable = false, length = 10)
+    /** 첫 메시지를 기반으로 생성한 대화방 제목입니다. */
     private String title;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    /** 대화방 상태입니다. */
     private ChatConversationStatus status;
 
     @Column(nullable = false)
+    /** 대화방에 저장된 마지막 메시지의 순번입니다. */
     private int lastMessageSequence;
 
+    /** 마지막 메시지가 저장된 시각입니다. */
     private LocalDateTime lastMessageAt;
 
+    /** 대화방이 논리 삭제된 시각입니다. */
     private LocalDateTime deletedAt;
 
     private ChatConversation(Member member, String title) {
