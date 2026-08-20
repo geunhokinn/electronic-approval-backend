@@ -4,6 +4,10 @@ import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
 import com.comin.eapproval.document.entity.Document;
 import com.comin.eapproval.document.repository.DocumentRepository;
+import com.comin.eapproval.notice.entity.Notice;
+import com.comin.eapproval.notice.entity.NoticeCategory;
+import com.comin.eapproval.notice.entity.NoticeType;
+import com.comin.eapproval.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -40,6 +44,7 @@ public class AdminInitializer implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
     private final DocumentRepository documentRepository;
+    private final NoticeRepository noticeRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -62,6 +67,7 @@ public class AdminInitializer implements CommandLineRunner {
                 )));
 
         createSampleDocuments(admin);
+        createSampleNotices(admin);
     }
 
     /**
@@ -81,6 +87,29 @@ public class AdminInitializer implements CommandLineRunner {
                     "테스트 내용" + index,
                     admin,
                     null
+            ));
+        }
+    }
+
+    /**
+     * 관리자 계정으로 시연용 공지사항 5건을 생성한다.
+     * 첫 번째 공지사항만 중요 공지로 생성한다.
+     *
+     * @param admin 공지사항 작성자로 사용할 관리자
+     */
+    private void createSampleNotices(Member admin) {
+        for (int index = 1; index <= 5; index++) {
+            String title = "테스트 공지" + index;
+            if (noticeRepository.existsByAuthorIdAndTitleAndDeletedAtIsNull(admin.getId(), title)) {
+                continue;
+            }
+
+            noticeRepository.save(Notice.create(
+                    title,
+                    "테스트 공지 내용" + index,
+                    index == 1 ? NoticeType.IMPORTANT : NoticeType.NORMAL,
+                    NoticeCategory.SYSTEM,
+                    admin
             ));
         }
     }

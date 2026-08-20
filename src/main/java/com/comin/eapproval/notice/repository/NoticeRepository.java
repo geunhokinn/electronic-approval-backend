@@ -11,6 +11,15 @@ import java.util.Optional;
 public interface NoticeRepository extends JpaRepository<Notice, Long>, NoticeRepositoryCustom {
 
     /**
+     * 작성자와 제목이 같은 삭제되지 않은 공지사항이 존재하는지 확인한다.
+     *
+     * @param authorId 작성자 ID
+     * @param title 공지사항 제목
+     * @return 공지사항 존재 여부
+     */
+    boolean existsByAuthorIdAndTitleAndDeletedAtIsNull(Long authorId, String title);
+
+    /**
      * 삭제되지 않은 공지사항을 ID로 조회한다.
      *
      * @param noticeId 공지사항 ID
