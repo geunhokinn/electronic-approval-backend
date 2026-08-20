@@ -9,6 +9,7 @@ import com.comin.eapproval.notice.entity.NoticeCategory;
 import com.comin.eapproval.notice.entity.NoticeType;
 import com.comin.eapproval.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * 환경변수에 설정된 관리자 계정이 존재하지 않는 경우에만 생성한다.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AdminInitializer implements CommandLineRunner {
@@ -68,6 +70,8 @@ public class AdminInitializer implements CommandLineRunner {
 
         createSampleDocuments(admin);
         createSampleNotices(admin);
+
+        log.info("최종 발표 전 운영 배포 테스트");
     }
 
     /**
