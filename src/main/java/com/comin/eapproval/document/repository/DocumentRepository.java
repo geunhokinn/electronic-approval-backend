@@ -27,4 +27,13 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, Docum
     boolean existsByPreviousDocumentIdAndDeletedAtIsNull(
             Long previousDocumentId
     );
+
+    /**
+     * 작성자와 제목이 같은 삭제되지 않은 문서가 존재하는지 확인한다.
+     *
+     * @param writerId 작성자 ID
+     * @param title 문서 제목
+     * @return 문서 존재 여부
+     */
+    boolean existsByWriterIdAndTitleAndDeletedAtIsNull(Long writerId, String title);
 }

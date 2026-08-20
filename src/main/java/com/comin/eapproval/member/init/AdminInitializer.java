@@ -2,6 +2,8 @@ package com.comin.eapproval.member.init;
 
 import com.comin.eapproval.member.entity.Member;
 import com.comin.eapproval.member.repository.MemberRepository;
+import com.comin.eapproval.document.entity.Document;
+import com.comin.eapproval.document.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -37,6 +39,7 @@ public class AdminInitializer implements CommandLineRunner {
     private String position;
 
     private final MemberRepository memberRepository;
+    private final DocumentRepository documentRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -48,19 +51,37 @@ public class AdminInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
 
-        if (memberRepository.existsByUsername(username)) {
-            return;
+        Member admin = memberRepository.findByUsername(username)
+                .orElseGet(() -> memberRepository.save(Member.createAdmin(
+                        username,
+                        passwordEncoder.encode(password),
+                        name,
+                        headquarters,
+                        team,
+                        position
+                )));
+
+        createSampleDocuments(admin);
+    }
+
+    /**
+     * 관리자 계정으로 시연용 문서 17건을 생성한다.
+     *
+     * @param admin 문서 작성자로 사용할 관리자
+     */
+    private void createSampleDocuments(Member admin) {
+        for (int index = 1; index <= 17; index++) {
+            String title = "테스트 제목" + index;
+            if (documentRepository.existsByWriterIdAndTitleAndDeletedAtIsNull(admin.getId(), title)) {
+                continue;
+            }
+
+            documentRepository.save(Document.createDraft(
+                    title,
+                    "테스트 내용" + index,
+                    admin,
+                    null
+            ));
         }
-
-        Member admin = Member.createAdmin(
-                username,
-                passwordEncoder.encode(password),
-                name,
-                headquarters,
-                team,
-                position
-        );
-
-        memberRepository.save(admin);
     }
 }
